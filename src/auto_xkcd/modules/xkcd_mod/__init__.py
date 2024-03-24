@@ -12,3 +12,4 @@ from .domain import (
     XKCDSentComicOut,
     XKCDSentComicRepository,
 )
+from .requests_prefab import make_req, current_comic_req, comic_num_req

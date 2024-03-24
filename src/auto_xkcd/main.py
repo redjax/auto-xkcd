@@ -17,6 +17,7 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
+
 def _current(save_serial: bool = True) -> dict:
     try:
         current_comic_res: httpx.Response = xkcd.request_current_comic()
@@ -31,7 +32,7 @@ def _current(save_serial: bool = True) -> dict:
         raise msg
 
     try:
-        current_comic_dict: dict = xkcd.current.parse_current_comic_response(
+        current_comic_dict: dict = xkcd.helpers.parse_comic_response(
             res=current_comic_res
         )
         comic_hash: str = xkcd.helpers.comic_num_hash(
@@ -55,7 +56,9 @@ def _current(save_serial: bool = True) -> dict:
 
         try:
             log.debug(f"Serialized filename: {serial_filename}")
-            xkcd.serialize_response(res=current_comic_res, filename=serial_filename)
+            xkcd.helpers.serialize_response(
+                res=current_comic_res, filename=serial_filename
+            )
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception serializing comic response. Details: {exc}"
@@ -71,67 +74,6 @@ def max_comic_num() -> int:
         log.info(f"Highest comic number recorded: {current_comic_num}")
 
     return current_comic_num
-
-
-def _random_comic(save_serial: bool = True):
-    highest_comic_num = max_comic_num()
-    rand_comic_num = random.randint(0, highest_comic_num - 1)
-
-    with request_client.CACHE_TRANSPORT as transport:
-        comic_url = (
-            f"{xkcd_mod.XKCD_URL_BASE}/{rand_comic_num}/{xkcd_mod.XKCD_URL_POSTFIX}"
-        )
-        log.debug(f"Comic URL: {comic_url}")
-
-        req: httpx.Request = httpx.Request(
-            method="GET", url=comic_url, headers={"Content-Type": "application/json"}
-        )
-
-        try:
-            res: httpx.Response = request_client.simple_get(
-                request=req, transport=transport
-            )
-            log.info(
-                f"Comic #{rand_comic_num} response: [{res.status_code}: {res.reason_phrase}]"
-            )
-            url_hash: str = xkcd.helpers.url_hash(url=res.url)
-            log.debug(f"URL hash: {url_hash}")
-
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception getting comic #{rand_comic_num}. Details: {exc}"
-            )
-            log.error(msg)
-
-    try:
-        comic_dict: dict = xkcd.current.parse_current_comic_response(res=res)
-        comic_hash: str = xkcd.helpers.comic_num_hash(comic_num=comic_dict["num"])
-        log.debug(f"Comic num [{comic_dict['num']}] hash: {comic_hash}")
-
-        ## Append hashes to response dict
-        comic_dict["url_hash"] = url_hash
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception parsing current XKCD comic response. Details: {exc}"
-        )
-        log.error(msg)
-
-        raise msg
-
-    if save_serial:
-        serial_filename: str = str(comic_dict["num"]) + ".msgpack"
-
-        try:
-            log.debug(f"Serialized filename: {serial_filename}")
-            xkcd.serialize_response(res=res, filename=serial_filename)
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception serializing comic response. Details: {exc}"
-            )
-            log.error(msg)
-
-    return comic_dict
 
 
 def main():
@@ -150,7 +92,7 @@ def main():
 
         comic_nums.add_comic_num_data(data.model_dump())
 
-    random_comic_res: dict = _random_comic()
+    random_comic_res: dict = xkcd.get_random_comic()
     log.debug(f"Random comic response: {random_comic_res}")
 
     random_comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic().model_validate(
