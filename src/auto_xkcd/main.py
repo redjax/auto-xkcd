@@ -11,6 +11,13 @@ from core.paths import ENSURE_DIRS, SERIALIZE_DIR
 import httpx
 from loguru import logger as log
 from modules import xkcd_mod
+from pipelines import (
+    pipeline_current_comic,
+    pipeline_random_comic,
+    pipeline_specific_comic,
+    pipeline_multiple_comics,
+)
+
 import msgpack
 from packages import xkcd
 from red_utils.ext.loguru_utils import init_logger, sinks
@@ -18,113 +25,27 @@ from red_utils.std import path_utils
 from utils import serialize_utils
 
 
-def _current(save_serial: bool = True) -> dict:
-    try:
-        current_comic_res: httpx.Response = xkcd.request_current_comic()
-        url_hash: str = xkcd.helpers.url_hash(url=current_comic_res.url)
-        log.debug(f"URL hash: {url_hash}")
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception getting current XKCD comic. Details: {exc}"
-        )
-
-        raise msg
-
-    try:
-        current_comic_dict: dict = xkcd.helpers.parse_comic_response(
-            res=current_comic_res
-        )
-        comic_hash: str = xkcd.helpers.comic_num_hash(
-            comic_num=current_comic_dict["num"]
-        )
-        log.debug(f"Comic num [{current_comic_dict['num']}] hash: {comic_hash}")
-
-        ## Append hashes to response dict
-        current_comic_dict["url_hash"] = url_hash
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception parsing current XKCD comic response. Details: {exc}"
-        )
-        log.error(msg)
-
-        raise msg
-
-    if save_serial:
-        serial_filename: str = str(current_comic_dict["num"]) + ".msgpack"
-
-        try:
-            log.debug(f"Serialized filename: {serial_filename}")
-            xkcd.helpers.serialize_response(
-                res=current_comic_res, filename=serial_filename
-            )
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception serializing comic response. Details: {exc}"
-            )
-            log.error(msg)
-
-    return current_comic_dict
-
-
-def max_comic_num() -> int:
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        current_comic_num = comic_nums.highest()
-        log.info(f"Highest comic number recorded: {current_comic_num}")
-
-    return current_comic_num
-
-
 def main():
-    current_comic_res: dict = _current()
-    log.debug(f"Current comic response: {current_comic_res}")
+    SPECIFIC_COMIC_NUM: int = 42
+    MULTI_REQUEST_COMIC_NUMS: list[int] = [1, 15, 35, 71, 84]
 
-    current_comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic().model_validate(
-        current_comic_res
+    current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
+    log.info(f"Current comic: {current_comic_res}")
+
+    random_comic_res: xkcd_mod.XKCDComic = pipeline_random_comic()
+    log.info(f"Random comic res: {random_comic_res}")
+
+    specific_comic: xkcd_mod.XKCDComic = pipeline_specific_comic(
+        comic_num=SPECIFIC_COMIC_NUM
     )
-    log.info(f"Current comic: {current_comic}")
+    log.info(f"Comic #{SPECIFIC_COMIC_NUM}: {specific_comic}")
 
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        data = xkcd_mod.ComicNumCSVData(
-            comic_num=current_comic.comic_num, img_saved=False
-        )
-
-        comic_nums.add_comic_num_data(data.model_dump())
-
-    random_comic_res: dict = xkcd.get_random_comic()
-    log.debug(f"Random comic response: {random_comic_res}")
-
-    random_comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic().model_validate(
-        random_comic_res
+    multiple_comics: list[xkcd_mod.XKCDComic] = pipeline_multiple_comics(
+        comic_nums_list=MULTI_REQUEST_COMIC_NUMS
     )
-    log.info(f"Random comic: {random_comic}")
-
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        random_comic_data = xkcd_mod.ComicNumCSVData(
-            comic_num=random_comic.comic_num, img_saved=False
-        )
-        comic_nums.add_comic_num_data(random_comic_data.model_dump())
-
-    comic_42: dict = xkcd.get_comic(comic_num=42)
-    log.debug(f"Comic #42 response: {comic_42}")
-
-    multiple_comic_dicts: list[dict] = xkcd.get_multiple_comics(
-        comic_nums_list=[1, 25, 64, 71, 82, 326]
-    )
-
-    multiple_comics: list[xkcd_mod.XKCDComic] = []
-
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        for c in multiple_comic_dicts:
-            _comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(c)
-            log.debug(f"Multi-comic response: {_comic}")
-            multiple_comics.append(_comic)
-
-            comic_data: xkcd_mod.ComicNumCSVData = xkcd_mod.ComicNumCSVData(
-                comic_num=_comic.comic_num, img_saved=False
-            )
-            comic_nums.add_comic_num_data(comic_data.model_dump())
+    log.debug(f"Printing [{len(multiple_comics)}] comic(s) from multi-comic request")
+    for c in multiple_comics:
+        log.debug(f"Comic #{c.comic_num}: {c}")
 
 
 if __name__ == "__main__":
@@ -133,8 +54,6 @@ if __name__ == "__main__":
     init_logger(sinks=[sinks.LoguruSinkStdOut(level=settings.log_level).as_dict()])
 
     log.info(f"Start auto-xkcd")
-    log.debug(f"Settings: {settings}")
-    log.debug(f"DB settings: {db_settings}")
 
     path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
 

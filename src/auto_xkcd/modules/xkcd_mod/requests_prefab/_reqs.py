@@ -86,7 +86,7 @@ def comic_num_req(comic_num: t.Union[int, str] = None) -> httpx.Request:
 
     _url: str = f"{XKCD_URL_BASE}/{comic_num}/{XKCD_URL_POSTFIX}"
 
-    log.debug(f"Requesting URL for comic #{comic_num}: {_url}")
+    # log.debug(f"Requesting URL for comic #{comic_num}: {_url}")
     try:
         req: httpx.Request = make_req(url=_url)
 

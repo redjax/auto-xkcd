@@ -14,15 +14,18 @@ from packages.xkcd.helpers import (
 
 from loguru import logger as log
 import httpx
+import hishel
 
 
-def get_random_comic(save_serial: bool = True) -> dict:
+def get_random_comic(
+    transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
+) -> httpx.Response:
     with ComicNumsController() as comic_nums:
         highest_comic_num = comic_nums.highest()
 
     rand_comic_num = random.randint(0, highest_comic_num - 1)
 
-    with request_client.CACHE_TRANSPORT as transport:
+    with transport as transport:
         req: httpx.Request = xkcd_mod.comic_num_req(comic_num=rand_comic_num)
 
         try:
@@ -41,32 +44,4 @@ def get_random_comic(save_serial: bool = True) -> dict:
             )
             log.error(msg)
 
-    try:
-        comic_dict: dict = parse_comic_response(res=res)
-        comic_hash: str = comic_num_hash(comic_num=comic_dict["num"])
-        log.debug(f"Comic num [{comic_dict['num']}] hash: {comic_hash}")
-
-        ## Append hashes to response dict
-        comic_dict["url_hash"] = url_hash
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception parsing current XKCD comic response. Details: {exc}"
-        )
-        log.error(msg)
-
-        raise msg
-
-    if save_serial:
-        serial_filename: str = str(comic_dict["num"]) + ".msgpack"
-
-        try:
-            log.debug(f"Serialized filename: {serial_filename}")
-            serialize_response(res=res, filename=serial_filename)
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception serializing comic response. Details: {exc}"
-            )
-            log.error(msg)
-
-    return comic_dict
+    return res

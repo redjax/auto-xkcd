@@ -7,6 +7,7 @@ from core.paths import SERIALIZE_DIR
 from loguru import logger as log
 import msgpack
 
+
 def serialize_dict(
     data: dict = None, output_dir: t.Union[str, Path] = None, filename: str = None
 ):
@@ -39,7 +40,7 @@ def serialize_dict(
 
     try:
         packed = msgpack.packb(data)
-        log.debug(f"Serialized: {packed}")
+        log.debug(f"Serialized objec type: {type(packed)}")
     except Exception as exc:
         msg = Exception(f"Unhandled exception serializing input. Details: {exc}")
         log.error(msg)
