@@ -1,6 +1,7 @@
-from red_utils.std import hash_utils
-import httpx
+from __future__ import annotations
 
+import httpx
+from red_utils.std import hash_utils
 
 def url_hash(url: str | httpx.URL = None) -> str:
     assert url, ValueError("Missing a URL to hash")

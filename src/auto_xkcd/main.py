@@ -1,24 +1,21 @@
 from __future__ import annotations
 
-import typing as t
 from pathlib import Path
 import random
+import typing as t
 
+from core import database, request_client
 from core.config import db_settings, settings
 from core.dependencies import get_db
 from core.paths import ENSURE_DIRS, SERIALIZE_DIR
-from core import database, request_client
-from modules import xkcd_mod
-from utils import serialize_utils
-
+import httpx
 from loguru import logger as log
+from modules import xkcd_mod
+import msgpack
 from packages import xkcd
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
-import httpx
-
-import msgpack
-
+from utils import serialize_utils
 
 def _current(save_serial: bool = True) -> dict:
     try:

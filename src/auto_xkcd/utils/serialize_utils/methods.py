@@ -1,11 +1,11 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
+
 from core.paths import SERIALIZE_DIR
-
-import msgpack
-
 from loguru import logger as log
-
+import msgpack
 
 def serialize_dict(
     data: dict = None, output_dir: t.Union[str, Path] = None, filename: str = None

@@ -1,12 +1,12 @@
-import typing as t
+from __future__ import annotations
 
 from pathlib import Path
+import typing as t
 
 from .constants import COMIC_NUMS_CSV
 
-import pandas as pd
 from loguru import logger as log
-
+import pandas as pd
 
 class ComicNumsController:
     def __init__(self, filename: t.Union[str, Path] | None = COMIC_NUMS_CSV):
