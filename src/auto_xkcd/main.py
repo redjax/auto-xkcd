@@ -109,6 +109,23 @@ def main():
     comic_42: dict = xkcd.get_comic(comic_num=42)
     log.debug(f"Comic #42 response: {comic_42}")
 
+    multiple_comic_dicts: list[dict] = xkcd.get_multiple_comics(
+        comic_nums_list=[1, 25, 64, 71, 82, 326]
+    )
+
+    multiple_comics: list[xkcd_mod.XKCDComic] = []
+
+    with xkcd.helpers.ComicNumsController() as comic_nums:
+        for c in multiple_comic_dicts:
+            _comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(c)
+            log.debug(f"Multi-comic response: {_comic}")
+            multiple_comics.append(_comic)
+
+            comic_data: xkcd_mod.ComicNumCSVData = xkcd_mod.ComicNumCSVData(
+                comic_num=_comic.comic_num, img_saved=False
+            )
+            comic_nums.add_comic_num_data(comic_data.model_dump())
+
 
 if __name__ == "__main__":
     settings.log_level = "DEBUG"

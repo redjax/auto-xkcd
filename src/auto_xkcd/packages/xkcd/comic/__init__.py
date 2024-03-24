@@ -1,1 +1,1 @@
-from .methods import get_comic
+from .methods import get_comic, get_multiple_comics
