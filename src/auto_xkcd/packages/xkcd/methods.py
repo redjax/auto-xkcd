@@ -1,10 +1,10 @@
-from core import request_client
-from utils import serialize_utils
+from __future__ import annotations
 
+from core import request_client
+import httpx
 from loguru import logger as log
 from red_utils.std import hash_utils
-import httpx
-
+from utils import serialize_utils
 
 def serialize_response(res: httpx.Response = None, filename: str = None):
     assert filename, ValueError("Mising a filename")

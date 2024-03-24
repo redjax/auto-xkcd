@@ -7,10 +7,8 @@ import hishel
 import httpx
 from loguru import logger as log
 from modules import xkcd_mod
-from utils import serialize_utils
-
 from red_utils.std import hash_utils
-
+from utils import serialize_utils
 
 def build_request(
     method: str = "GET",
