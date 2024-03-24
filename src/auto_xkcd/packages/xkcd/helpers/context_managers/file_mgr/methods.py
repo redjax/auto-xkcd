@@ -8,6 +8,7 @@ from .constants import COMIC_NUMS_CSV
 from loguru import logger as log
 import pandas as pd
 
+
 class ComicNumsController:
     def __init__(self, filename: t.Union[str, Path] | None = COMIC_NUMS_CSV):
         if filename is None:
@@ -142,6 +143,19 @@ class ComicNumsController:
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception sorting DataFrame by column '{sort_col}'. Details: {exc}"
+            )
+            log.error(msg)
+
+            raise msg
+
+    def as_list(self) -> list[int]:
+        try:
+            comic_nums: list[int] = self.df["comic_num"].to_list()
+
+            return comic_nums
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception creating list of comic nums. Details: {exc}"
             )
             log.error(msg)
 

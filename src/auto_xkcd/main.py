@@ -106,6 +106,9 @@ def main():
         )
         comic_nums.add_comic_num_data(random_comic_data.model_dump())
 
+    comic_42: dict = xkcd.get_comic(comic_num=42)
+    log.debug(f"Comic #42 response: {comic_42}")
+
 
 if __name__ == "__main__":
     settings.log_level = "DEBUG"

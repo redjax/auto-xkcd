@@ -1,6 +1,5 @@
 import typing as t
 from pathlib import Path
-import random
 
 from core import request_client
 from modules import xkcd_mod
@@ -16,30 +15,38 @@ from loguru import logger as log
 import httpx
 
 
-def get_random_comic(save_serial: bool = True) -> dict:
-    with ComicNumsController() as comic_nums:
-        highest_comic_num = comic_nums.highest()
+def get_comic(comic_num: t.Union[str, int] = None, save_serial: bool = True) -> dict:
+    assert comic_num, ValueError("Missing a comic_num")
+    assert isinstance(comic_num, str) or isinstance(comic_num, int), TypeError(
+        f"comic_num must be of type str or dict. Got type: ({type(comic_num)})"
+    )
 
-    rand_comic_num = random.randint(0, highest_comic_num - 1)
+    with ComicNumsController() as comic_nums_controller:
+        comic_nums = comic_nums_controller.as_list()
+
+    if comic_num in comic_nums:
+        log.warning(f"Comic #{comic_num} has already been requested.")
+
+    comic_req: httpx.Request = xkcd_mod.comic_num_req(comic_num=comic_num)
 
     with request_client.CACHE_TRANSPORT as transport:
-        req: httpx.Request = xkcd_mod.comic_num_req(comic_num=rand_comic_num)
-
         try:
             res: httpx.Response = request_client.simple_get(
-                request=req, transport=transport
+                request=comic_req, transport=transport
             )
             log.info(
-                f"Comic #{rand_comic_num} response: [{res.status_code}: {res.reason_phrase}]"
+                f"Comic #{comic_num} response: [{res.status_code}: {res.reason_phrase}]"
             )
             _url_hash: str = url_hash(url=res.url)
             log.debug(f"URL hash: {_url_hash}")
 
         except Exception as exc:
             msg = Exception(
-                f"Unhandled exception getting comic #{rand_comic_num}. Details: {exc}"
+                f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
             )
             log.error(msg)
+
+            raise msg
 
     try:
         comic_dict: dict = parse_comic_response(res=res)
