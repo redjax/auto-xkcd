@@ -7,6 +7,7 @@ import hishel
 import httpx
 from loguru import logger as log
 
+
 def simple_get(
     request: t.Union[str, httpx.Request] = None,
     method: str | None = "GET",
@@ -41,14 +42,46 @@ def decode_res_content(res: httpx.Response = None):
         f"res must be of type httpx.Response. Got type: ({type(res)})"
     )
 
+    _content: bytes = res.content
+    assert _content, ValueError("Response content is empty")
+    assert isinstance(_content, bytes), TypeError(
+        f"Expected response.content to be a bytestring. Got type: ({type(_content)})"
+    )
+
     try:
         _decode = res.content.decode("utf-8")
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception decoding response content. Details: {exc}"
+            f"[Attempt 1/2] Unhandled exception decoding response content. Details: {exc}"
         )
+        log.warning(msg)
 
-        raise msg
+        if not res.encoding == "utf-8":
+            log.warning(
+                f"Retrying response content decode with encoding '{res.encoding}'"
+            )
+            try:
+                _decode = res.content.decode(res.encoding)
+            except Exception as exc:
+                inner_msg = Exception(
+                    f"[Attempt 2/2] Unhandled exception decoding response content. Details: {exc}"
+                )
+                log.error(inner_msg)
+
+                raise inner_msg
+
+        else:
+            log.warning(
+                f"Detected UTF-8 encoding, but decoding as UTF-8 failed. Retrying with encoding ISO-8859-1."
+            )
+            try:
+                _decode = res.content.decode("ISO-8859-1")
+            except Exception as exc:
+                msg = Exception(
+                    f"Failure attempting to decode content as UTF-8 and ISO-8859-1. Details: {exc}"
+                )
+
+                raise msg
 
     try:
         _json = json.loads(_decode)

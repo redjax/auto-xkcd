@@ -29,23 +29,23 @@ def main():
     SPECIFIC_COMIC_NUM: int = 42
     MULTI_REQUEST_COMIC_NUMS: list[int] = [1, 15, 35, 71, 84]
 
-    current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
-    log.info(f"Current comic: {current_comic_res}")
+    # current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
+    # log.info(f"Current comic: {current_comic_res}")
 
     random_comic_res: xkcd_mod.XKCDComic = pipeline_random_comic()
     log.info(f"Random comic res: {random_comic_res}")
 
-    specific_comic: xkcd_mod.XKCDComic = pipeline_specific_comic(
-        comic_num=SPECIFIC_COMIC_NUM
-    )
-    log.info(f"Comic #{SPECIFIC_COMIC_NUM}: {specific_comic}")
+    # specific_comic: xkcd_mod.XKCDComic = pipeline_specific_comic(
+    #     comic_num=SPECIFIC_COMIC_NUM
+    # )
+    # log.info(f"Comic #{SPECIFIC_COMIC_NUM}: {specific_comic}")
 
-    multiple_comics: list[xkcd_mod.XKCDComic] = pipeline_multiple_comics(
-        comic_nums_list=MULTI_REQUEST_COMIC_NUMS
-    )
-    log.debug(f"Printing [{len(multiple_comics)}] comic(s) from multi-comic request")
-    for c in multiple_comics:
-        log.debug(f"Comic #{c.comic_num}: {c}")
+    # multiple_comics: list[xkcd_mod.XKCDComic] = pipeline_multiple_comics(
+    #     comic_nums_list=MULTI_REQUEST_COMIC_NUMS
+    # )
+    # log.debug(f"Printing [{len(multiple_comics)}] comic(s) from multi-comic request")
+    # for c in multiple_comics:
+    #     log.debug(f"Comic #{c.comic_num}: {c}")
 
 
 if __name__ == "__main__":

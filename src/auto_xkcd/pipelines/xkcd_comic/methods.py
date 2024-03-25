@@ -1,13 +1,90 @@
 import typing as t
+from pathlib import Path
 
 from packages import xkcd
 from modules import xkcd_mod
-from core import request_client
+from core import request_client, COMIC_IMG_DIR
 
 import httpx
 import hishel
 from loguru import logger as log
 from red_utils.std import hash_utils
+
+
+def save_img_update_csv(
+    comic_res: httpx.Response = None,
+    comic: xkcd_mod.XKCDComic = None,
+    output_dir: t.Union[str, Path] = COMIC_IMG_DIR,
+):
+    assert comic_res, ValueError("Missing httpx.Response object")
+    assert isinstance(comic_res, httpx.Response), TypeError(
+        f"Expected comic_res to be of type httpx.Response. Got type: ({type(comic_res)})"
+    )
+
+    assert comic, ValueError("Missing xkcd_mod.XKCDComic object")
+    assert isinstance(comic, xkcd_mod.XKCDComic), TypeError(
+        f"comic must be of type xkcd_mox.XKCDComic. Got type: ({type(comic)})"
+    )
+
+    assert output_dir, ValueError("Missing image file output directory")
+    assert isinstance(output_dir, str) or isinstance(output_dir, Path), TypeError(
+        f"output_dir must be a str or Path. Got type: ({type(output_dir)})"
+    )
+    if isinstance(output_dir, Path):
+        if "~" in f"{output_dir}":
+            output_dir: Path = output_dir.expanduser()
+    elif isinstance(output_dir, str):
+        if "~" in output_dir:
+            output_dir: Path = Path(output_dir).expanduser()
+        else:
+            output_dir: Path = Path(output_dir)
+
+    filename: str = f"{comic.comic_num}.png"
+
+    if Path(f"{output_dir}/{filename}").exists():
+        log.warning(
+            f"Image file already exists at '{output_dir}/{filename}'. Skipping save & updating CSV file."
+        )
+
+        try:
+            with xkcd.helpers.ComicNumsController() as comic_nums:
+                data = xkcd_mod.ComicNumCSVData(
+                    comic_num=comic.comic_num, img_saved=True
+                )
+
+                comic_nums.add_comic_num_data(data.model_dump())
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception updating existing comic image's data in CSV file. Details: {exc}"
+            )
+            log.error(msg)
+    else:
+        log.debug(f"Saving image to path '{output_dir}/{filename}")
+        try:
+            xkcd.save_img(
+                comic=comic_res,
+                output_dir=output_dir,
+                output_filename=filename,
+            )
+
+            try:
+                with xkcd.helpers.ComicNumsController() as comic_nums:
+                    data = xkcd_mod.ComicNumCSVData(
+                        comic_num=comic.comic_num, img_saved=True
+                    )
+
+                    comic_nums.add_comic_num_data(data.model_dump())
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception updating CSV file. Details: {exc}"
+                )
+                log.error(msg)
+
+        except Exception as exc:
+            msg = Exception(f"Unhandled exception saving image. Details: {exc}")
+            log.error(msg)
+
+            raise msg
 
 
 def pipeline_current_comic(
@@ -76,12 +153,21 @@ def pipeline_current_comic(
         )
         pass
 
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        data = xkcd_mod.ComicNumCSVData(
-            comic_num=current_comic.comic_num, img_saved=False
+    try:
+        save_img_update_csv(comic_res=current_comic_res, comic=current_comic)
+        log.success(f"Image for comic #{current_comic.comic_num} saved.")
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving comic #{current_comic.comic_num} image. Details: {exc}"
         )
+        log.error(msg)
 
-        comic_nums.add_comic_num_data(data.model_dump())
+        with xkcd.helpers.ComicNumsController() as comic_nums:
+            data = xkcd_mod.ComicNumCSVData(
+                comic_num=current_comic.comic_num, img_saved=False
+            )
+
+            comic_nums.add_comic_num_data(data.model_dump())
 
     log.info("<< End current comic pipeline")
 
@@ -125,12 +211,6 @@ def pipeline_random_comic(
     )
     # log.debug(f"Random comic: {random_comic}")
 
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        random_comic_data = xkcd_mod.ComicNumCSVData(
-            comic_num=random_comic.comic_num, img_saved=False
-        )
-        comic_nums.add_comic_num_data(random_comic_data.model_dump())
-
     if save_serial:
         serial_filename: str = str(random_comic_dict["num"]) + ".msgpack"
 
@@ -151,12 +231,21 @@ def pipeline_random_comic(
         )
         pass
 
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        data = xkcd_mod.ComicNumCSVData(
-            comic_num=random_comic.comic_num, img_saved=False
+    try:
+        save_img_update_csv(comic_res=random_comic_res, comic=random_comic)
+        log.success(f"Image for comic #{random_comic.comic_num} saved.")
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving comic #{random_comic.comic_num} image. Details: {exc}"
         )
+        log.error(msg)
 
-        comic_nums.add_comic_num_data(data.model_dump())
+        with xkcd.helpers.ComicNumsController() as comic_nums:
+            data = xkcd_mod.ComicNumCSVData(
+                comic_num=random_comic.comic_num, img_saved=False
+            )
+
+            comic_nums.add_comic_num_data(data.model_dump())
 
     log.info("<< End random comic pipeline")
 
@@ -228,10 +317,19 @@ def pipeline_specific_comic(
         )
         pass
 
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        data = xkcd_mod.ComicNumCSVData(comic_num=comic.comic_num, img_saved=False)
+    try:
+        save_img_update_csv(comic_res=comic_res, comic=comic)
+        log.success(f"Image for comic #{comic.comic_num} saved.")
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving comic #{comic.comic_num} image. Details: {exc}"
+        )
+        log.error(msg)
 
-        comic_nums.add_comic_num_data(data.model_dump())
+        with xkcd.helpers.ComicNumsController() as comic_nums:
+            data = xkcd_mod.ComicNumCSVData(comic_num=comic.comic_num, img_saved=False)
+
+            comic_nums.add_comic_num_data(data.model_dump())
 
     log.info("<< End specific comic pipeline")
 
@@ -269,6 +367,20 @@ def pipeline_multiple_comics(
         c: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(p)
         multiple_comics.append(c)
 
+        try:
+            save_img_update_csv(comic_res=r, comic=c)
+            log.success(f"Image for comic #{c.comic_num} saved.")
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception saving comic #{c.comic_num} image. Details: {exc}"
+            )
+            log.error(msg)
+
+            with xkcd.helpers.ComicNumsController() as comic_nums:
+                data = xkcd_mod.ComicNumCSVData(comic_num=c.comic_num, img_saved=False)
+
+                comic_nums.add_comic_num_data(data.model_dump())
+
     if save_serial:
         for c in multiple_comics:
             serial_filename: str = str(c.comic_num) + ".msgpack"
@@ -287,14 +399,6 @@ def pipeline_multiple_comics(
             f"save_to_db=True, but method is not yet implemented. Skipping save to database."
         )
         pass
-
-    with xkcd.helpers.ComicNumsController() as comic_nums:
-        for c in multiple_comics:
-
-            comic_data: xkcd_mod.ComicNumCSVData = xkcd_mod.ComicNumCSVData(
-                comic_num=c.comic_num, img_saved=False
-            )
-            comic_nums.add_comic_num_data(comic_data.model_dump())
 
     log.info("<< End multi-comic pipeline")
 

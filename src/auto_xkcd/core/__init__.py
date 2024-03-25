@@ -9,4 +9,12 @@ from .config import (
     telegram_settings,
 )
 from .dependencies import get_db
-from .paths import BACKUP_DIR, CACHE_DIR, DATA_DIR, ENSURE_DIRS, PQ_DIR, SERIALIZE_DIR
+from .paths import (
+    BACKUP_DIR,
+    CACHE_DIR,
+    DATA_DIR,
+    ENSURE_DIRS,
+    PQ_DIR,
+    SERIALIZE_DIR,
+    COMIC_IMG_DIR,
+)

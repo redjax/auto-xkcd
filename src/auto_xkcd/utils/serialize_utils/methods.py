@@ -48,8 +48,7 @@ def serialize_dict(
         raise msg
 
     if output_path.exists():
-        log.warning(f"Output path exists, skipping: {output_path}")
-
+        # log.warning(f"Output path exists, skipping: {output_path}")
         return
 
     try:

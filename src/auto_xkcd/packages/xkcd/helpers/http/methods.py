@@ -7,6 +7,11 @@ from red_utils.std import hash_utils
 
 
 def parse_comic_response(res: httpx.Response = None) -> dict:
+    assert res, ValueError("Missing httpx.Response object")
+    assert isinstance(res, httpx.Response), TypeError(
+        f"res should be of type httpx.Response. Got type: ({type(res)})"
+    )
+
     try:
         content: dict = request_client.decode_res_content(res=res)
 
@@ -35,3 +40,14 @@ def serialize_response(res: httpx.Response = None, filename: str = None):
         log.error(msg)
 
         return False
+
+
+def extract_img_bytes(res: httpx.Response = None) -> bytes:
+    assert res, ValueError("Missing httpx.Response object")
+    assert isinstance(res, httpx.Response), TypeError(
+        f"Expected res to be of type httpx.Response. Got type: ({type(res)})"
+    )
+
+    img_bytes: bytes = res.content
+
+    return img_bytes
