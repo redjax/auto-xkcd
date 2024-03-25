@@ -50,18 +50,15 @@ def save_img_update_csv(
             f"Image file already exists at '{output_dir}/{filename}'. Skipping save & updating CSV file."
         )
 
-        try:
-            with xkcd.helpers.ComicNumsController() as comic_nums:
-                data = xkcd_mod.ComicNumCSVData(
-                    comic_num=comic.comic_num, img_saved=True
-                )
-
+        with xkcd.helpers.ComicNumsController() as comic_nums:
+            data = xkcd_mod.ComicNumCSVData(comic_num=comic.comic_num, img_saved=True)
+            try:
                 comic_nums.add_comic_num_data(data.model_dump())
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception updating existing comic image's data in CSV file. Details: {exc}"
-            )
-            log.error(msg)
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception updating existing comic image's data in CSV file. Details: {exc}"
+                )
+                log.error(msg)
     else:
         log.debug(f"Saving image to path '{output_dir}/{filename}")
         try:
@@ -432,12 +429,16 @@ def pipeline_retrieve_missing_imgs(
     log.info(">> Start retrieve missing comic imgs pipeline")
 
     with xkcd.helpers.ComicNumsController() as cnums_controller:
-        missing_df: pd.DataFrame = cnums_controller.df[
+        missing_df: pd.DataFrame = cnums_controller.df.loc[
             cnums_controller.df["img_saved"] == False
         ]
         log.debug(f"Downloading [{missing_df.shape[0]}] missing image(s)")
 
-        missing_comic_nums: list[int] = cnums_controller.df["comic_num"].to_list()
+        missing_comic_nums: list[int] = missing_df["comic_num"].to_list()
+        if missing_comic_nums:
+            log.debug(
+                f"Missing comic nums [{len(missing_comic_nums)}]: {missing_comic_nums}"
+            )
 
     for comic_num in missing_comic_nums:
         try:

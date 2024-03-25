@@ -43,33 +43,34 @@ class ComicNumsController:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.df_drop_duplicates()
-        # self.df = self.df.dropna()
+        if isinstance(self.df, pd.DataFrame):
+            self.df_drop_duplicates()
+            # self.df = self.df.dropna()
 
-        ## Sort column after all other cleaning
-        self.sort_by_comic_num()
+            ## Sort column after all other cleaning
+            self.sort_by_comic_num()
 
-        try:
-            self.df["comic_num"] = self.df["comic_num"].astype(int)
-        except Exception as exc:
-            msg = Exception(
-                f"{self.logstr} Unhandled exception converting comic_num column to int. Details: {exc}"
-            )
-            log.error(msg)
+            try:
+                self.df["comic_num"] = self.df["comic_num"].astype(int)
+            except Exception as exc:
+                msg = Exception(
+                    f"{self.logstr} Unhandled exception converting comic_num column to int. Details: {exc}"
+                )
+                log.error(msg)
 
-            raise msg
+                raise msg
 
-        try:
-            self.df.to_csv(self.filename, index=False, lineterminator=f"\n")
-        except Exception as exc:
-            msg = Exception(
-                f"{self.logstr} Unhandled exception saving DataFrame to file '{self.filename}'. Details: {exc}."
-            )
-            log.error(
-                f"{self.logstr} exception:\n\texc_type: {exc_type}\n\texc_value: {exc_value}\n\ttraceback: {traceback}"
-            )
+            try:
+                self.df.to_csv(self.filename, index=False, lineterminator=f"\n")
+            except Exception as exc:
+                msg = Exception(
+                    f"{self.logstr} Unhandled exception saving DataFrame to file '{self.filename}'. Details: {exc}."
+                )
+                log.error(
+                    f"{self.logstr} exception:\n\texc_type: {exc_type}\n\texc_value: {exc_value}\n\ttraceback: {traceback}"
+                )
 
-            raise msg
+                raise msg
 
     def add_comic_num_data(self, data: dict = None):
         assert data, ValueError(f"{self.logstr} Missing comic num data dict.")
@@ -89,55 +90,11 @@ class ComicNumsController:
 
         _num = data["comic_num"]
 
-        if not self.df.empty:
-
-            if _num in self.df["comic_num"].to_list():
-                log.debug(
-                    f"{self.logstr} Found comic #{_num} in CSV file. Updating value(s)"
-                )
-
-                row = self.df[self.df["comic_num"] == _num]
-                log.debug(
-                    f"{self.logstr} Comic #{_num} existing row ({type(row)}):\n{row}"
-                )
-
-                img_saved: bool = True if row["img_saved"].iloc[0] else False
-                log.debug(f"{self.logstr} img_saved ({type(img_saved)}): {img_saved}")
-
-                if img_saved == False and data["img_saved"] == True:
-                    ## Values do not match, update
-
-                    log.debug(
-                        f"{self.logstr} Comic #{_num} new & existing img_saved values do not match. Old: {img_saved}, New: {data['img_saved']}."
-                    )
-
-                    # self.df[self.df["comic_num"] == _num] = new_row
-                    _df = pd.concat([self.df, new_row])
-                    self.df = _df
-
-                    log.debug(self.df[self.df["comic_num"] == _num])
-
-                    input("PAUSE")
-
-                    return
-
-                else:
-                    ## Values match, no update
-                    return
-            else:
-                log.debug(f"{self.logstr} Saving comic #{_num} to CSV file")
-
-                try:
-                    self.df = pd.concat([self.df, new_row], ignore_index=True)
-                except Exception as exc:
-                    msg = Exception(
-                        f"{self.logstr} Unhandled exception adding new data row to DataFrame. Details: {exc}"
-                    )
-
-                    raise msg
-
-        else:
-
+        assert isinstance(self.df, pd.DataFrame), TypeError(
+            f"self.df should be type pd.DataFrame. Got type: ({type(self.df)})"
+        )
+        if self.df.empty:
+            ## self.df is empty, concatenate with new row data
             try:
                 self.df = pd.concat([self.df, new_row], ignore_index=True)
             except Exception as exc:
@@ -146,6 +103,40 @@ class ComicNumsController:
                 )
 
                 raise msg
+        else:
+            ## DataFrame has contents, search & update row
+            if _num in self.df["comic_num"].to_list():
+                log.debug(
+                    f"{self.logstr} Found comic #{_num} in CSV file. Updating value(s)"
+                )
+
+                try:
+                    row: pd.DataFrame = self.df.loc[self.df["comic_num"] == _num]
+                    log.debug(
+                        f"{self.logstr} Comic #{_num} existing row ({type(row)}):\n{row}"
+                    )
+                except Exception as exc:
+                    msg = Exception(
+                        f"Unhandled exception extracting row matching comic_num: [{_num}]. Details: {exc}"
+                    )
+                    log.error(msg)
+
+                    raise msg
+
+                row = new_row
+                log.debug(f"Updated row:\n{row}")
+                try:
+                    new_df = self.df.update(row, overwrite=True)
+                    log.debug(f"New dataframe:\n{new_df}")
+                    self.df = new_df
+                    log.success(f"Updated comic #{_num} data.")
+                except Exception as exc:
+                    msg = Exception(f"Unhandled exception updating row. Details: {exc}")
+                    log.error(msg)
+
+                    raise msg
+
+        return
 
     def highest(self) -> int | None:
         if self.df.empty:
@@ -156,12 +147,15 @@ class ComicNumsController:
         return self.df["comic_num"].max()
 
     def df_drop_duplicates(self, subset: list[str] = ["comic_num"]):
+        assert isinstance(self.df, pd.DataFrame), TypeError(
+            f"self.df should be a DataFrame. Got type: ({type(self.df)})"
+        )
         if self.df.empty:
             log.warning(f"DataFrame is empty, skipping duplicates drop.")
             return
 
         try:
-            self.df = self.df.drop_duplicates(subset=["comic_num"])
+            self.df = self.df.drop_duplicates(subset=subset)
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception dropping duplicates from DataFrame. Details: {exc}"
