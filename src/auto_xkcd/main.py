@@ -16,6 +16,7 @@ from pipelines import (
     pipeline_random_comic,
     pipeline_specific_comic,
     pipeline_multiple_comics,
+    pipeline_retrieve_missing_imgs,
 )
 
 import msgpack
@@ -32,8 +33,8 @@ def main():
     # current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
     # log.info(f"Current comic: {current_comic_res}")
 
-    random_comic_res: xkcd_mod.XKCDComic = pipeline_random_comic()
-    log.info(f"Random comic res: {random_comic_res}")
+    # random_comic_res: xkcd_mod.XKCDComic = pipeline_random_comic()
+    # log.info(f"Random comic res: {random_comic_res}")
 
     # specific_comic: xkcd_mod.XKCDComic = pipeline_specific_comic(
     #     comic_num=SPECIFIC_COMIC_NUM
@@ -46,6 +47,8 @@ def main():
     # log.debug(f"Printing [{len(multiple_comics)}] comic(s) from multi-comic request")
     # for c in multiple_comics:
     #     log.debug(f"Comic #{c.comic_num}: {c}")
+
+    retrieved_imgs = pipeline_retrieve_missing_imgs()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import typing as t
 from pathlib import Path
+import time
 
 from core import request_client
 from modules import xkcd_mod
@@ -59,10 +60,16 @@ def get_comic(
 def get_multiple_comics(
     comic_nums_list: list[t.Union[int, str]] = None,
     transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
+    sleep_duration: int = 5,
 ) -> list[httpx.Response]:
     assert comic_nums_list, ValueError("Missing list of comic_nums to request")
     assert isinstance(comic_nums_list, list), TypeError(
         f"comic_nums_list must be of type list. Got type: ({type(comic_nums_list)})"
+    )
+
+    assert sleep_duration, ValueError("Missing a sleep_duration integer value")
+    assert isinstance(sleep_duration, int), TypeError(
+        f"sleep_duration must be a non-zero positive integer. Got type: ({type(sleep_duration)})"
     )
 
     if not transport:
@@ -104,5 +111,11 @@ def get_multiple_comics(
                 log.error(msg)
 
                 raise msg
+
+            if comic_num not in comic_nums:
+                log.info(f"Pause for [{sleep_duration}] second(s) between requests...")
+                time.sleep(sleep_duration)
+            else:
+                continue
 
         return comic_responses

@@ -33,7 +33,7 @@ class ComicNumsController:
     def __enter__(self):
         if self.filename.exists():
             try:
-                self.df = pd.read_csv(self.filename)
+                self.df = pd.read_csv(self.filename, lineterminator="\n")
             except Exception as exc:
                 msg = Exception(
                     f"{self.logstr} Unhandled exception loading CSV contents into DataFrame. Details: {exc}"
@@ -44,7 +44,7 @@ class ComicNumsController:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.df_drop_duplicates()
-        self.df = self.df.dropna()
+        # self.df = self.df.dropna()
 
         ## Sort column after all other cleaning
         self.sort_by_comic_num()

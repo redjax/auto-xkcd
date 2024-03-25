@@ -1,14 +1,18 @@
 import typing as t
 from pathlib import Path
+import time
 
 from packages import xkcd
 from modules import xkcd_mod
 from core import request_client, COMIC_IMG_DIR
+from pipelines import helpers
 
 import httpx
 import hishel
 from loguru import logger as log
 from red_utils.std import hash_utils
+
+import pandas as pd
 
 
 def save_img_update_csv(
@@ -94,6 +98,7 @@ def pipeline_current_comic(
 ) -> xkcd_mod.XKCDComic:
     if not transport:
         transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT
+
     try:
         current_comic_res: httpx.Response = xkcd.request_current_comic()
         url_hash: str = xkcd.helpers.url_hash(url=current_comic_res.url)
@@ -341,6 +346,7 @@ def pipeline_multiple_comics(
     transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
     save_serial: bool = True,
     save_to_db: bool = False,
+    request_sleep: int = 5,
 ) -> list[xkcd_mod.XKCDComic]:
     assert comic_nums_list, ValueError("Missing list of comic_nums to request")
     assert isinstance(comic_nums_list, list), TypeError(
@@ -350,6 +356,9 @@ def pipeline_multiple_comics(
         assert isinstance(i, str) or isinstance(i, int), TypeError(
             f"Each value in comic_nums_list must be an integer or string. Got type: ({type(i)}) for value '{i}'."
         )
+
+    if not transport:
+        transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT
 
     log.info(">> Start multi-comic pipeline")
 
@@ -381,6 +390,12 @@ def pipeline_multiple_comics(
 
                 comic_nums.add_comic_num_data(data.model_dump())
 
+                if c.comic_num not in comic_nums.as_list():
+                    helpers.time.pause(
+                        duration=request_sleep,
+                        pause_msg=f"Sleeping for {request_sleep} second(s)...",
+                    )
+
     if save_serial:
         for c in multiple_comics:
             serial_filename: str = str(c.comic_num) + ".msgpack"
@@ -403,3 +418,104 @@ def pipeline_multiple_comics(
     log.info("<< End multi-comic pipeline")
 
     return multiple_comics
+
+
+def pipeline_retrieve_missing_imgs(
+    transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
+    save_serial: bool = True,
+    save_to_db: bool = False,
+    request_sleep: int = 5,
+):
+    if not transport:
+        transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT
+
+    log.info(">> Start retrieve missing comic imgs pipeline")
+
+    with xkcd.helpers.ComicNumsController() as cnums_controller:
+        missing_df: pd.DataFrame = cnums_controller.df[
+            cnums_controller.df["img_saved"] == False
+        ]
+        log.debug(f"Downloading [{missing_df.shape[0]}] missing image(s)")
+
+        missing_comic_nums: list[int] = cnums_controller.df["comic_num"].to_list()
+
+    for comic_num in missing_comic_nums:
+        try:
+            missing_comic_res: httpx.Response = xkcd.get_comic(comic_num=comic_num)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception requesting missing comic #{comic_num} data."
+            )
+            log.error(msg)
+
+        try:
+            missing_comic_dict: dict = xkcd.helpers.parse_comic_response(
+                res=missing_comic_res
+            )
+            missing_comic_num_hash: str = xkcd.helpers.comic_num_hash(
+                comic_num=missing_comic_dict["num"]
+            )
+            log.debug(
+                f"Missing comic num [{missing_comic_dict['num']}] hash: {missing_comic_num_hash}"
+            )
+
+            ## Append hashes to response dict
+            missing_comic_dict["url_hash"] = hash_utils.get_hash_from_str(
+                input_str=missing_comic_res.url
+            )
+            log.debug(f"URL hash: {missing_comic_dict['url_hash']}")
+
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception parsing missing XKCD comic response. Details: {exc}"
+            )
+            log.error(msg)
+
+            raise msg
+
+        comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(
+            missing_comic_dict
+        )
+
+        if save_serial:
+            serial_filename: str = str(missing_comic_dict["num"]) + ".msgpack"
+
+            try:
+                log.debug(f"Serialized filename: {serial_filename}")
+                xkcd.helpers.serialize_response(
+                    res=missing_comic_res, filename=serial_filename
+                )
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception serializing missing comic response. Details: {exc}"
+                )
+                log.error(msg)
+
+        if save_to_db:
+            log.warning(
+                f"save_to_db=True, but method is not yet implemented. Skipping save to database."
+            )
+            pass
+
+        try:
+            save_img_update_csv(comic_res=missing_comic_res, comic=comic)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception saving missing image for comic #{comic.comic_num}. Details: {exc}"
+            )
+            log.error(msg)
+
+            with xkcd.helpers.ComicNumsController() as comic_nums:
+                data = xkcd_mod.ComicNumCSVData(
+                    comic_num=comic.comic_num, img_saved=False
+                )
+
+                comic_nums.add_comic_num_data(data.model_dump())
+
+                if comic.comic_num not in comic_nums.as_list():
+                    helpers.time.pause(
+                        duration=request_sleep,
+                        pause_msg=f"Sleeping for {request_sleep} second(s)...",
+                    )
+
+    log.info("<< End retrieve missing comic imgs pipeline")
