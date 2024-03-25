@@ -104,14 +104,20 @@ class ComicNumsController:
                 img_saved: bool = True if row["img_saved"].iloc[0] else False
                 log.debug(f"{self.logstr} img_saved ({type(img_saved)}): {img_saved}")
 
-                if not img_saved == data["img_saved"]:
+                if img_saved == False and data["img_saved"] == True:
                     ## Values do not match, update
 
                     log.debug(
                         f"{self.logstr} Comic #{_num} new & existing img_saved values do not match. Old: {img_saved}, New: {data['img_saved']}."
                     )
 
-                    self.df[self.df["comic_num"] == _num] = new_row
+                    # self.df[self.df["comic_num"] == _num] = new_row
+                    _df = pd.concat([self.df, new_row])
+                    self.df = _df
+
+                    log.debug(self.df[self.df["comic_num"] == _num])
+
+                    input("PAUSE")
 
                     return
 
