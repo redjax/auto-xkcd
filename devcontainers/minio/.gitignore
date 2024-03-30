@@ -1,5 +1,6 @@
-.env
-./data
-./data/minio
-
 !**/.gitkeep
+!.gitkeep
+
+.env
+data/
+data/minio/

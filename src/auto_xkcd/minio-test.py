@@ -39,6 +39,9 @@ if __name__ == "__main__":
     dst_file = "testfile.txt"
 
     with get_minio_client() as minio_client:
+        _buckets = minio_client.list_buckets()
+        log.debug(f"Buckets: {_buckets}")
+
         ## Create bucket if it doesn't exist
         found = minio_client.bucket_exists(bucket)
         if not found:
