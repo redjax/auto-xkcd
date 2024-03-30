@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import typing as t
+from pathlib import Path
 
-from pydantic import Field, ValidationError, field_validator
+from pydantic import Field, ValidationError, field_validator, computed_field
 from pydantic_settings import BaseSettings
 
 ## Uncomment if adding a database config
@@ -14,8 +15,26 @@ valid_db_types: list[str] = ["sqlite", "postgres", "mssql"]
 
 
 class AppSettings(BaseSettings):
+    env: str = Field(default="prod", env="ENV")
     container_env: bool = Field(default=False, env="CONTAINER_ENV")
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
+    logs_dir: t.Union[str, Path] = Field(default="logs", env="LOGS_DIR")
+
+    @field_validator("logs_dir")
+    def validate_logs_dir(cls, v) -> Path:
+        if isinstance(v, str):
+            if "~" in v:
+                return Path(v).expanduser()
+            else:
+                return Path(v)
+
+        if isinstance(v, Path):
+            if "~" in f"{v}":
+                return v.expanduser()
+            else:
+                return v
+
+        raise ValidationError
 
 
 ## Uncomment if you're configuring a database for the app
@@ -91,13 +110,20 @@ class DBSettings(BaseSettings):
         return session_pool
 
 
+class MinioSettings(BaseSettings):
+    address: str = Field(default=None, env="MINIO_ADDRESS")
+    port: int = Field(default=9000, env="MINIO_PORT")
+    secure: bool = Field(default=True, env="MINIO_HTTPS")
+    username: str = Field(default=None, env="MINIO_USERNAME")
+    password: str = Field(default=None, env="MINIO_PASSWORD", repr=False)
+    access_key: str = Field(default=None, env="MINIO_ACCESS_KEY")
+    access_secret: str = Field(default=None, env="MINIO_ACCESS_SECRET", repr=False)
+
+    @property
+    def endpoint(self) -> str:
+        return f"{self.address}:{self.port}"
+
+
 class TelegramSettings(BaseSettings):
     bot_token: str | None = Field(default=None, env="TELEGRAM_BOT_TOKEN")
     bot_username: str | None = Field(default=None, env="TELEGRAM_BOT_USERNAME")
-
-
-settings: AppSettings = AppSettings()
-## Uncomment if you're configuring a database for the app
-db_settings: DBSettings = DBSettings()
-
-telegram_settings: TelegramSettings = TelegramSettings()

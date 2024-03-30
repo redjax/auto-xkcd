@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from .config import (
-    AppSettings,
-    DBSettings,
-    TelegramSettings,
+from .config import AppSettings, DBSettings, TelegramSettings, MinioSettings
+from .dependencies import (
     db_settings,
     settings,
     telegram_settings,
+    minio_settings,
 )
-from .dependencies import get_db
+from .dependencies import get_db, get_minio_client
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,

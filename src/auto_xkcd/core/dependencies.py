@@ -3,12 +3,48 @@ from __future__ import annotations
 from contextlib import contextmanager
 import typing as t
 
-from core import DBSettings, database, db_settings
+from core.config import AppSettings, TelegramSettings, DBSettings, MinioSettings
+from core import database
 from core.request_client import CACHE_STORAGE, CACHE_TRANSPORT
 import hishel
 import httpx
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+import minio
+
+from dynaconf import Dynaconf
+from loguru import logger as log
+
+DYNACONF_SETTINGS: Dynaconf = Dynaconf(
+    environments=True,
+    envvar_prefix="DYNACONF",
+    settings_files=["settings.toml", ".secrets.toml"],
+)
+DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf()
+DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
+    environments=True,
+    envvar_prefix="MINIO",
+    settings_files=["minio/settings.toml", "minio/.secrets.toml"],
+)
+
+settings: AppSettings = AppSettings(
+    env=DYNACONF_SETTINGS.ENV,
+    container_env=DYNACONF_SETTINGS.CONTAINER_ENV,
+    log_level=DYNACONF_SETTINGS.LOG_LEVEL,
+    logs_dir=DYNACONF_SETTINGS.LOGS_DIR,
+)
+## Uncomment if you're configuring a database for the app
+db_settings: DBSettings = DBSettings()
+telegram_settings: TelegramSettings = TelegramSettings()
+minio_settings: MinioSettings = MinioSettings(
+    address=DYNACONF_MINIO_SETTINGS.MINIO_ADDRESS,
+    port=DYNACONF_MINIO_SETTINGS.MINIO_PORT,
+    secure=DYNACONF_MINIO_SETTINGS.MINIO_HTTPS,
+    username=DYNACONF_MINIO_SETTINGS.MINIO_USERNAME,
+    password=DYNACONF_MINIO_SETTINGS.MINIO_PASSWORD,
+    access_key=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_KEY,
+    access_secret=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_SECRET,
+)
 
 DB_URI: sa.URL = db_settings.get_db_uri()
 ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)
@@ -43,3 +79,38 @@ def get_db() -> t.Generator[so.Session, t.Any, None]:
         raise msg
     finally:
         db.close()
+
+
+@contextmanager
+def get_minio_client(
+    minio_settings: MinioSettings = minio_settings,
+) -> t.Generator[minio.Minio, t.Any, None]:
+    assert minio_settings, ValueError("Missing MinioSettings object")
+    assert isinstance(minio_settings, MinioSettings), TypeError(
+        f"minio_settings must be a MinioSettings object. Got type: ({type(minio_settings)})"
+    )
+
+    try:
+        _client: minio.Minio = minio.Minio(
+            endpoint=minio_settings.endpoint,
+            secure=minio_settings.secure,
+            access_key=minio_settings.access_key,
+            secret_key=minio_settings.access_secret,
+        )
+
+        yield _client
+    except minio.ServerError as minio_srv_err:
+        msg = f"Minio ServerError occurred. Details: {minio_srv_err}"
+        log.error(msg)
+
+        raise minio_srv_err
+    except minio.S3Error as minio_s3_err:
+        msg = f"Minio S3Error occurred. Details: {minio_s3_err}"
+        log.error(msg)
+
+        raise minio_s3_err
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception yielding Minio client. Details: {exc}")
+        log.error(msg)
+
+        raise exc

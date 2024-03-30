@@ -5,8 +5,7 @@ import random
 import typing as t
 
 from core import database, request_client
-from core.config import db_settings, settings
-from core.dependencies import get_db
+from core.dependencies import get_db, db_settings, settings
 from core.paths import ENSURE_DIRS, SERIALIZE_DIR
 import httpx
 from loguru import logger as log
