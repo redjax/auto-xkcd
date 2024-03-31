@@ -17,3 +17,5 @@ from .paths import (
     SERIALIZE_DIR,
     COMIC_IMG_DIR,
 )
+
+from . import _exc

@@ -4,7 +4,7 @@ from contextlib import contextmanager
 import typing as t
 
 from core.config import AppSettings, TelegramSettings, DBSettings, MinioSettings
-from core import database
+from core import database, _exc
 from core.request_client import CACHE_STORAGE, CACHE_TRANSPORT
 import hishel
 import httpx
@@ -99,6 +99,13 @@ def get_minio_client(
         )
 
         yield _client
+    except _exc.MaxRetryError as max_retry_err:
+        msg = Exception(
+            f"Max retries exceeded attempting connection to endpoint: {minio_settings.endpoint}. Details: {max_retry_err}"
+        )
+        log.error(msg)
+
+        raise max_retry_err
     except minio.ServerError as minio_srv_err:
         msg = f"Minio ServerError occurred. Details: {minio_srv_err}"
         log.error(msg)
