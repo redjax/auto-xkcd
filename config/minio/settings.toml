@@ -1,7 +1,7 @@
 [default]
 
 minio_address = ""
-minio_port = 9001
+minio_port = 9000
 minio_username = "auto-xkcd"
 ## Set in .secrets.toml
 # minio_password = ""
@@ -12,7 +12,7 @@ minio_username = "auto-xkcd"
 [dev]
 
 minio_address = ""
-minio_port = 9001
+minio_port = 9000
 minio_username = "auto-xkcd"
 ## Set in .secrets.toml
 # minio_password = ""
@@ -23,7 +23,7 @@ minio_username = "auto-xkcd"
 [prod]
 
 minio_address = ""
-minio_port = 9001
+minio_port = 9000
 minio_username = "auto-xkcd"
 ## Set in .secrets.toml
 # minio_password = ""

@@ -19,6 +19,8 @@ INIT_COPY_FILES: list[dict[str, str]] = [
     {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
     {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
     {"src": ".env.example", "dest": ".env"},
+    {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
+    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"}
 ]
 INIT_MKDIRS: list[Path] = [Path("docker_data/.data"), Path("docker_data/.cache")]
 ## Define versions to test

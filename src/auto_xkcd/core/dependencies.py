@@ -99,6 +99,11 @@ def get_minio_client(
         )
 
         yield _client
+    except _exc.S3Error as s3_err:
+        msg = Exception(f"S3Error during minio connection. Details: {s3_err}")
+        log.error(msg)
+
+        raise s3_err
     except _exc.MaxRetryError as max_retry_err:
         msg = Exception(
             f"Max retries exceeded attempting connection to endpoint: {minio_settings.endpoint}. Details: {max_retry_err}"

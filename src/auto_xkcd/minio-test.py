@@ -49,13 +49,27 @@ if __name__ == "__main__":
                 )
                 log.error(msg)
 
-                raise exc
+                # raise exc
         else:
             log.warning(f"Bucket '{bucket}' already exists.")
 
-        file_exists_in_bucket: bool = minio_client.stat_object(
-            bucket_name=bucket, object_name=dst_file
-        )
+        try:
+            file_exists_in_bucket: bool = minio_client.stat_object(
+                bucket_name=bucket, object_name=dst_file
+            )
+        except _exc.S3Error as s3_err:
+            log.warning(
+                f"File '{Path(src_file).name}' does not exist in remote '(bucket:{bucket}):{dst_file}'."
+            )
+            file_exists_in_bucket = False
+
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception checking for existence of file '{src_file}' in bucket '{bucket}'. Details ({type(exc)}): {exc}"
+            )
+            log.warning(msg)
+
+            file_exists_in_bucket = False
 
         if not file_exists_in_bucket:
             log.debug(f"Uploading file '{src_file}' to '(bucket:{bucket}):{dst_file}'.")
