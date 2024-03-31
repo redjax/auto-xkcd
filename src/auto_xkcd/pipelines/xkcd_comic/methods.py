@@ -14,6 +14,7 @@ import pandas as pd
 from pipelines import helpers
 from red_utils.std import hash_utils
 
+
 def save_img_update_csv(
     comic_res: httpx.Response = None,
     comic: xkcd_mod.XKCDComic = None,
@@ -428,10 +429,18 @@ def pipeline_retrieve_missing_imgs(
     log.info(">> Start retrieve missing comic imgs pipeline")
 
     with xkcd.helpers.ComicNumsController() as cnums_controller:
-        missing_df: pd.DataFrame = cnums_controller.df.loc[
-            cnums_controller.df["img_saved"] == False
-        ]
-        log.debug(f"Downloading [{missing_df.shape[0]}] missing image(s)")
+        try:
+            missing_df: pd.DataFrame = cnums_controller.df.loc[
+                cnums_controller.df["img_saved"] == False
+            ]
+            log.debug(f"Downloading [{missing_df.shape[0]}] missing image(s)")
+        except KeyError as key_err:
+            msg = Exception(
+                f"Could not find image by comic number. Is the DataFrame empty?"
+            )
+            log.warning(msg)
+
+            return
 
         missing_comic_nums: list[int] = missing_df["comic_num"].to_list()
         if missing_comic_nums:

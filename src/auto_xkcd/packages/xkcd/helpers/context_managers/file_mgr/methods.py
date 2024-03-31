@@ -8,6 +8,7 @@ from .constants import COMIC_NUMS_CSV
 from loguru import logger as log
 import pandas as pd
 
+
 class ComicNumsController:
     def __init__(self, filename: t.Union[str, Path] | None = COMIC_NUMS_CSV):
         if filename is None:
@@ -43,6 +44,11 @@ class ComicNumsController:
 
     def __exit__(self, exc_type, exc_value, traceback):
         if isinstance(self.df, pd.DataFrame):
+            if self.df.empty:
+                log.warning(f"DataFrame is empty.")
+
+                return
+
             self.df_drop_duplicates()
             # self.df = self.df.dropna()
 
@@ -183,6 +189,13 @@ class ComicNumsController:
             comic_nums: list[int] = self.df["comic_num"].to_list()
 
             return comic_nums
+        except KeyError as key_err:
+            msg = Exception(
+                f"Could not load list of comic_nums from DataFrame. Is the DataFrame empty?"
+            )
+            log.error(msg)
+
+            return []
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception creating list of comic nums. Details: {exc}"
