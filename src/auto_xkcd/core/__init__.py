@@ -7,7 +7,7 @@ from .dependencies import (
     telegram_settings,
     minio_settings,
 )
-from .dependencies import get_db, get_minio_client
+from .dependencies import get_db
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,

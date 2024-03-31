@@ -9,7 +9,8 @@ from core import (
     DBSettings,
     _exc,
 )
-from core import database, get_db, get_minio_client
+from core import database, get_db
+from modules import minio_mod
 
 from loguru import logger as log
 from red_utils.ext.loguru_utils import init_logger, sinks
@@ -33,9 +34,25 @@ if __name__ == "__main__":
     bucket = "auto-xkcd"
     dst_file = "testfile.txt"
 
-    with get_minio_client() as minio_client:
-        _buckets: list[Bucket] = minio_client.list_buckets()
-        log.debug(f"Buckets: {_buckets}")
+    log.debug(f"Endpoint: {minio_settings.endpoint}")
+
+    with minio_mod.get_minio_controller(
+        minio_settings=minio_settings
+    ) as minio_controller:
+        client = minio_controller.client
+
+        log.info("Listing buckets")
+
+        minio_client: minio.Minio = minio_controller.client
+
+        try:
+            buckets: list[Bucket] = minio_client.list_buckets()
+            log.success(f"Buckets: {buckets}")
+        except Exception as exc:
+            msg = Exception(f"Unhandled exception listing buckets. Details: {exc}")
+            log.error(msg)
+
+            raise exc
 
         ## Create bucket if it doesn't exist
         found: bool = minio_client.bucket_exists(bucket)
