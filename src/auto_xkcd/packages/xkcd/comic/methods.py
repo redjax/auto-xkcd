@@ -1,21 +1,21 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
 import time
+import typing as t
 
 from core import request_client
+import hishel
+import httpx
+from loguru import logger as log
 from modules import xkcd_mod
 from packages.xkcd.helpers import (
     ComicNumsController,
-    url_hash,
-    parse_comic_response,
     comic_num_hash,
+    parse_comic_response,
     serialize_response,
+    url_hash,
 )
-
-from loguru import logger as log
-import httpx
-import hishel
-
 
 def get_comic(
     comic_num: t.Union[str, int] = None,

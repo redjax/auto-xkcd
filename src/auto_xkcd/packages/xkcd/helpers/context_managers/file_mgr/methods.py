@@ -8,7 +8,6 @@ from .constants import COMIC_NUMS_CSV
 from loguru import logger as log
 import pandas as pd
 
-
 class ComicNumsController:
     def __init__(self, filename: t.Union[str, Path] | None = COMIC_NUMS_CSV):
         if filename is None:

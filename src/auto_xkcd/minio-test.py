@@ -1,24 +1,24 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 from core import (
+    AppSettings,
+    DBSettings,
     MinioSettings,
+    _exc,
+    database,
+    db_settings,
+    get_db,
     minio_settings,
     settings,
-    AppSettings,
-    db_settings,
-    DBSettings,
-    _exc,
 )
-from core import database, get_db
-from modules import minio_mod
-
+import httpx
 from loguru import logger as log
-from red_utils.ext.loguru_utils import init_logger, sinks
 import minio
 from minio.datatypes import Bucket
-
-import httpx
-
+from modules import minio_mod
+from red_utils.ext.loguru_utils import init_logger, sinks
 
 if __name__ == "__main__":
     init_logger(sinks=[sinks.LoguruSinkStdErr(level=settings.log_level).as_dict()])

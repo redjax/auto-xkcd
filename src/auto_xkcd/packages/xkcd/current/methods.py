@@ -10,7 +10,6 @@ from modules import xkcd_mod
 from red_utils.std import hash_utils
 from utils import serialize_utils
 
-
 def request_current_comic(
     transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
 ) -> httpx.Response:

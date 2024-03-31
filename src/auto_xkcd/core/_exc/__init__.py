@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from ._exception import (
-    S3Error,
-    MinioException,
-    ServerError,
+    InvalidResponseError,
     MaxRetryError,
     MinioAdminException,
-    InvalidResponseError,
+    MinioException,
     NewConnectionError,
+    S3Error,
+    ServerError,
 )

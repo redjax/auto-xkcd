@@ -1,11 +1,11 @@
-import typing as t
-import json
+from __future__ import annotations
 
-from modules.xkcd_mod.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX, CURRENT_XKCD_URL
+import json
+import typing as t
 
 import httpx
 from loguru import logger as log
-
+from modules.xkcd_mod.constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
 
 def make_req(
     method: str = "GET",

@@ -1,13 +1,15 @@
-from core import ENSURE_DIRS, settings
-from core.request_client import simple_get
-from packages import xkcd
-from modules import xkcd_mod
+from __future__ import annotations
+
 import json
 
+from core import ENSURE_DIRS, settings
+from core.request_client import simple_get
 import httpx
-from red_utils.std import path_utils
-from red_utils.ext.loguru_utils import init_logger, sinks
 from loguru import logger as log
+from modules import xkcd_mod
+from packages import xkcd
+from red_utils.ext.loguru_utils import init_logger, sinks
+from red_utils.std import path_utils
 
 if __name__ == "__main__":
     settings.log_level = "DEBUG"

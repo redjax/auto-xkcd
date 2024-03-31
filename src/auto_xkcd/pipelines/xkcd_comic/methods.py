@@ -1,19 +1,18 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
 import time
+import typing as t
 
-from packages import xkcd
-from modules import xkcd_mod
-from core import request_client, COMIC_IMG_DIR
-from pipelines import helpers
-
-import httpx
+from core import COMIC_IMG_DIR, request_client
 import hishel
+import httpx
 from loguru import logger as log
-from red_utils.std import hash_utils
-
+from modules import xkcd_mod
+from packages import xkcd
 import pandas as pd
-
+from pipelines import helpers
+from red_utils.std import hash_utils
 
 def save_img_update_csv(
     comic_res: httpx.Response = None,

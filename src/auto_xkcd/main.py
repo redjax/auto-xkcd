@@ -5,25 +5,23 @@ import random
 import typing as t
 
 from core import database, request_client
-from core.dependencies import get_db, db_settings, settings
+from core.dependencies import db_settings, get_db, settings
 from core.paths import ENSURE_DIRS, SERIALIZE_DIR
 import httpx
 from loguru import logger as log
 from modules import xkcd_mod
-from pipelines import (
-    pipeline_current_comic,
-    pipeline_random_comic,
-    pipeline_specific_comic,
-    pipeline_multiple_comics,
-    pipeline_retrieve_missing_imgs,
-)
-
 import msgpack
 from packages import xkcd
+from pipelines import (
+    pipeline_current_comic,
+    pipeline_multiple_comics,
+    pipeline_random_comic,
+    pipeline_retrieve_missing_imgs,
+    pipeline_specific_comic,
+)
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
-
 
 def main():
     SPECIFIC_COMIC_NUM: int = 42

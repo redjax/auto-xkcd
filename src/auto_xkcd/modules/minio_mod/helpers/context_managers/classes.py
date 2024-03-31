@@ -1,20 +1,20 @@
-import typing as t
-from pathlib import Path
-from contextlib import AbstractContextManager
+from __future__ import annotations
 
-import minio
-from minio.error import (
-    S3Error,
-    ServerError,
-    InvalidResponseError,
-    MinioException,
-    MinioAdminException,
-)
-from minio import datatypes as minio_dtypes
-from minio.credentials import Provider
+from contextlib import AbstractContextManager
+from pathlib import Path
+import typing as t
 
 from loguru import logger as log
-
+import minio
+from minio import datatypes as minio_dtypes
+from minio.credentials import Provider
+from minio.error import (
+    InvalidResponseError,
+    MinioAdminException,
+    MinioException,
+    S3Error,
+    ServerError,
+)
 
 class MinioController(AbstractContextManager):
     def __init__(

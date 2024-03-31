@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import time
 
 from loguru import logger as log
-
 
 def pause(duration: int = 5, pause_msg: str | None = "Sleeping 5 seconds...") -> None:
     assert duration, ValueError("Missing a pause duration")

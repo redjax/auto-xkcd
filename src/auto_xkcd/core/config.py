@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import typing as t
 from pathlib import Path
+import typing as t
 
-from pydantic import Field, ValidationError, field_validator, computed_field
+from pydantic import Field, ValidationError, computed_field, field_validator
 from pydantic_settings import BaseSettings
 
 ## Uncomment if adding a database config

@@ -1,21 +1,23 @@
+from __future__ import annotations
+
+from minio.error import (
+    InvalidResponseError,
+    MinioAdminException,
+    MinioException,
+    S3Error,
+    ServerError,
+)
 from urllib3.exceptions import (
+    DecodeError,
+    HostChangedError,
     MaxRetryError,
     NameResolutionError,
     NewConnectionError,
     PoolError,
     ProtocolError,
     ProxyError,
-    DecodeError,
-    RequestError,
-    TimeoutError,
-    ResponseError,
-    HostChangedError,
     ReadTimeoutError,
-)
-from minio.error import (
-    S3Error,
-    MinioAdminException,
-    MinioException,
-    ServerError,
-    InvalidResponseError,
+    RequestError,
+    ResponseError,
+    TimeoutError,
 )

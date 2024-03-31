@@ -1,21 +1,21 @@
-import typing as t
-from pathlib import Path
-from contextlib import contextmanager
+from __future__ import annotations
 
-from core import MinioSettings
+from contextlib import contextmanager
+from pathlib import Path
+import typing as t
+
 from .classes import MinioController
 
+from core import MinioSettings
+from loguru import logger as log
 import minio
 from minio.error import (
+    InvalidResponseError,
+    MinioAdminException,
+    MinioException,
     S3Error,
     ServerError,
-    MinioException,
-    MinioAdminException,
-    InvalidResponseError,
 )
-
-from loguru import logger as log
-
 
 @contextmanager
 def get_minio_controller(

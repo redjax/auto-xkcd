@@ -1,1 +1,3 @@
-from ._reqs import make_req, current_comic_req, comic_num_req
+from __future__ import annotations
+
+from ._reqs import comic_num_req, current_comic_req, make_req

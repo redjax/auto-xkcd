@@ -7,7 +7,6 @@ import hishel
 import httpx
 from loguru import logger as log
 
-
 def simple_get(
     request: t.Union[str, httpx.Request] = None,
     method: str | None = "GET",

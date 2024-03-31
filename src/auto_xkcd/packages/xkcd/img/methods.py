@@ -1,14 +1,14 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
 
-from core import request_client, COMIC_IMG_DIR
+from pathlib import Path
+import typing as t
+
+from core import COMIC_IMG_DIR, request_client
+import hishel
+import httpx
+from loguru import logger as log
 from modules import xkcd_mod
 from packages.xkcd.helpers import extract_img_bytes, parse_comic_response
-
-import httpx
-import hishel
-from loguru import logger as log
-
 
 def save_img(
     comic: t.Union[httpx.Response, xkcd_mod.XKCDComic],
