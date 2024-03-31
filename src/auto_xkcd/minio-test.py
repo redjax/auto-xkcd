@@ -41,58 +41,36 @@ if __name__ == "__main__":
     ) as minio_controller:
         log.info("Listing buckets")
 
-        minio_client: minio.Minio = minio_controller.client
-
-        buckets: list[Bucket] = minio_mod.get_buckets(minio_client=minio_client)
+        buckets: list[Bucket] = minio_controller.get_buckets()
         log.debug(f"Buckets: {buckets}")
 
         ## Create bucket if it doesn't exist
-        found: bool = minio_client.bucket_exists(bucket)
-        if not found:
-            try:
-                minio_client.make_bucket(bucket)
-                log.success(f"Bucket created: {bucket}")
-            except Exception as exc:
-                msg = Exception(
-                    f"Unhandled exception creating bucket '{bucket}'. Details: {exc}"
-                )
-                log.error(msg)
+        minio_controller.create_bucket(bucket_name=bucket)
 
-                # raise exc
-        else:
-            log.warning(f"Bucket '{bucket}' already exists.")
+        ## Upload a file. Skip if file exists in bucket
+        minio_controller.upload_file(
+            bucket_name=bucket, src_file=src_file, dest_file=dst_file
+        )
 
+        ## Set a tag on an object
+        minio_controller.set_obj_tags(
+            tags=[{"test": "true"}], bucket_name=bucket, object_path=dst_file
+        )
+
+        ## Delete the test file
+        minio_controller.delete_obj(bucket_name=bucket, object_path=dst_file)
+        log.debug(
+            f"File exists after deletion: {minio_controller.file_exists_in_bucket(bucket_name=bucket, object_path=dst_file)}"
+        )
+
+        ## Re-create file && check for existence again
         try:
-            file_exists_in_bucket: bool = minio_client.stat_object(
-                bucket_name=bucket, object_name=dst_file
+            minio_controller.upload_file(
+                bucket_name=bucket, src_file=src_file, dest_file=dst_file
             )
-        except _exc.S3Error as s3_err:
-            log.warning(
-                f"File '{Path(src_file).name}' does not exist in remote '(bucket:{bucket}):{dst_file}'."
+            log.debug(
+                f"File exists after shenanigans: {minio_controller.file_exists_in_bucket(bucket_name=bucket, object_path=dst_file)}"
             )
-            file_exists_in_bucket = False
-
         except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception checking for existence of file '{src_file}' in bucket '{bucket}'. Details ({type(exc)}): {exc}"
-            )
-            log.warning(msg)
-
-            file_exists_in_bucket = False
-
-        if not file_exists_in_bucket:
-            log.debug(f"Uploading file '{src_file}' to '(bucket:{bucket}):{dst_file}'.")
-            try:
-                minio_client.fput_object(bucket, dst_file, src_file)
-                log.success(f"Uploaded '{src_file}' to (bucket:{bucket}):{dst_file}")
-            except Exception as exc:
-                msg = Exception(
-                    f"Unhandled exception uploading file '{src_file}' to '(bucket:{bucket}):{dst_file}'. Details: {exc}"
-                )
-                log.error(msg)
-
-                raise exc
-        else:
-            log.warning(
-                f"File '{Path(src_file).name}' already exists in bucket '(bucket:{bucket}): {dst_file}'. Skipping upload."
-            )
+            msg = Exception(f"Unhandled exception uploading file. Details: {exc}")
+            log.error(msg)
