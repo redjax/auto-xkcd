@@ -39,20 +39,12 @@ if __name__ == "__main__":
     with minio_mod.get_minio_controller(
         minio_settings=minio_settings
     ) as minio_controller:
-        client = minio_controller.client
-
         log.info("Listing buckets")
 
         minio_client: minio.Minio = minio_controller.client
 
-        try:
-            buckets: list[Bucket] = minio_client.list_buckets()
-            log.success(f"Buckets: {buckets}")
-        except Exception as exc:
-            msg = Exception(f"Unhandled exception listing buckets. Details: {exc}")
-            log.error(msg)
-
-            raise exc
+        buckets: list[Bucket] = minio_mod.get_buckets(minio_client=minio_client)
+        log.debug(f"Buckets: {buckets}")
 
         ## Create bucket if it doesn't exist
         found: bool = minio_client.bucket_exists(bucket)
