@@ -23,6 +23,7 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
+
 def demo_current_comic() -> xkcd_mod.XKCDComic:
     current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
     log.info(f"Current comic: {current_comic_res}")
@@ -79,11 +80,6 @@ def demo_all(
     multi_request_comic_ums: list[int] = [1, 15, 35, 71, 84],
 ):
 
-    with xkcd.helpers.ComicNumsController() as comicnum_ctl:
-        most_recent_comic = comicnum_ctl.max_comic_num()
-
-    ALL_COMIC_NUMS: list[int] = [n for n in range(1, most_recent_comic)]
-
     _current_comic: xkcd_mod.XKCDComic = demo_current_comic()
     _random_comic: xkcd_mod.XKCDComic = demo_random_comic()
     _specific_comic: xkcd_mod.XKCDComic = demo_specific_comic(
@@ -92,6 +88,12 @@ def demo_all(
     _prepared_multi_comic: list[xkcd_mod.XKCDComic] = demo_prepared_muliple_comics(
         comic_nums=multi_request_comic_ums
     )
+
+    with xkcd.helpers.ComicNumsController() as comicnum_ctl:
+        most_recent_comic = comicnum_ctl.max_comic_num()
+
+    ALL_COMIC_NUMS: list[int] = [n for n in range(1, most_recent_comic)]
+
     _all_comics: list[xkcd_mod.XKCDComic] = demo_req_all_comics(
         all_comic_nums=ALL_COMIC_NUMS
     )

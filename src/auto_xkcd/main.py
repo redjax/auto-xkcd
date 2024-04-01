@@ -18,16 +18,16 @@ from pipelines import (
     pipeline_random_comic,
     pipeline_retrieve_missing_imgs,
     pipeline_specific_comic,
+    pipeline_update_img_saved_vals,
 )
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
 
-def main():
-    raise NotImplementedError(
-        "This app does not have a main.py entrypoint yet. Try running demo.py instead."
-    )
+def main() -> None:
+    ## Update img_saved row of CSV data. Do this last
+    pipeline_update_img_saved_vals()
 
 
 if __name__ == "__main__":
