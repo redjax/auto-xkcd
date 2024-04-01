@@ -3,7 +3,7 @@ from __future__ import annotations
 from core.dependencies import settings
 from core.paths import ENSURE_DIRS
 from loguru import logger as log
-from packages.demo import demo
+from packages import demo
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 

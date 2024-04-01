@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .demo import (
+from .methods import (
     demo_all,
     demo_current_comic,
     demo_prepared_muliple_comics,

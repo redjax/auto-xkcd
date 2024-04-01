@@ -12,7 +12,6 @@ from loguru import logger as log
 from modules import xkcd_mod
 import msgpack
 from packages import xkcd
-from packages.demo import demo
 from pipelines import (
     pipeline_current_comic,
     pipeline_multiple_comics,
@@ -23,6 +22,7 @@ from pipelines import (
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
+
 
 def main():
     raise NotImplementedError(
