@@ -28,6 +28,7 @@ INIT_COPY_FILES: list[dict[str, str]] = [
         "src": "containers/env_files/prod.example.env",
         "dest": "containers/env_files/prod.env",
     },
+    {"src":"containers/devcontainers/minio/.env.example", "dest": "containers/devcontainers/minio/.env"},
     # {"src": ".env.example", "dest": ".env"},
     {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
     {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
@@ -162,7 +163,7 @@ def run_tests(session: nox.Session, pdm_ver: str):
     )
 
 
-@nox.session(python=PY_VERSIONS, name="pre-commit-all")
+@nox.session(python=DEFAULT_PYTHON, name="pre-commit-all")
 def run_pre_commit_all(session: nox.Session):
     session.install("pre-commit")
     session.run("pre-commit")
@@ -171,7 +172,7 @@ def run_pre_commit_all(session: nox.Session):
     session.run("pre-commit", "run")
 
 
-@nox.session(python=PY_VERSIONS, name="pre-commit-update")
+@nox.session(python=DEFAULT_PYTHON, name="pre-commit-update")
 def run_pre_commit_autoupdate(session: nox.Session):
     session.install(f"pre-commit")
 
@@ -179,7 +180,7 @@ def run_pre_commit_autoupdate(session: nox.Session):
     session.run("pre-commit", "autoupdate")
 
 
-@nox.session(python=PY_VERSIONS, name="pre-commit-nbstripout")
+@nox.session(python=DEFAULT_PYTHON, name="pre-commit-nbstripout")
 def run_pre_commit_nbstripout(session: nox.Session):
     session.install(f"pre-commit")
 
@@ -187,7 +188,7 @@ def run_pre_commit_nbstripout(session: nox.Session):
     session.run("pre-commit", "run", "nbstripout")
 
 
-@nox.session(python=[PY_VER_TUPLE], name="init-setup")
+@nox.session(python=DEFAULT_PYTHON, name="init-setup")
 def run_initial_setup(session: nox.Session):
     if INIT_MKDIRS is None:
         print(f"INIT_MKDIRS is empty. Skipping.")
@@ -226,7 +227,7 @@ def run_initial_setup(session: nox.Session):
                     print(f"[ERROR] {msg}")
 
 
-@nox.session(python=[PY_VER_TUPLE], name="new-dynaconf-config")
+@nox.session(python=DEFAULT_PYTHON, name="new-dynaconf-config")
 def create_new_dynaconf_config(session: nox.session):
     CONFIG_ROOT: str = "config"
 
