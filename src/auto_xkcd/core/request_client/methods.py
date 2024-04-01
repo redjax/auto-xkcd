@@ -7,6 +7,7 @@ import hishel
 import httpx
 from loguru import logger as log
 
+
 def simple_get(
     request: t.Union[str, httpx.Request] = None,
     method: str | None = "GET",
@@ -33,6 +34,11 @@ def simple_get(
         log.error(msg)
 
         raise _timeout
+    except httpx.ConnectError as _conn:
+        msg = Exception(f"Error while making remote connection. Details: {exc}")
+        log.error(msg)
+
+        raise _conn
     except Exception as exc:
         msg = Exception(f"Unhandled exception building request client. Details: {exc}")
         log.error(msg)

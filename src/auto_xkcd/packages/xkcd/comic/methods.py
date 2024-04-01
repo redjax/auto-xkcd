@@ -18,6 +18,7 @@ from packages.xkcd.helpers import (
     url_hash,
 )
 
+
 def get_comic(
     comic_num: t.Union[str, int] = None,
     save_serial: bool = True,
@@ -48,6 +49,15 @@ def get_comic(
             log.debug(f"URL hash: {_url_hash}")
 
             return res
+
+        except httpx.ConnectError as conn_err:
+            msg = Exception(
+                f"ConnectError while making request for comic #{comic_num}. Details:"
+            )
+            log.error(msg)
+
+            # raise conn_err
+            return
 
         except Exception as exc:
             msg = Exception(
@@ -118,6 +128,14 @@ def get_multiple_comics(
                     log.error(msg)
 
                     # continue
+
+        except httpx.ConnectError as conn_err:
+            msg = Exception(
+                f"ConnectError while requesting comic #{comic_num}. Details: {exc}"
+            )
+            log.error(msg)
+
+            continue
 
         except Exception as exc:
             msg = Exception(
