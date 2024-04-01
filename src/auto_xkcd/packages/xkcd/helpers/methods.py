@@ -1,17 +1,14 @@
 from __future__ import annotations
-import typing as t
 
 from pathlib import Path
+import typing as t
 
-from core.paths import COMIC_IMG_DIR
 from .context_managers import ComicNumsController
 
-from red_utils.std import path_utils
-
-import pandas as pd
-
+from core.paths import COMIC_IMG_DIR
 from loguru import logger as log
-
+import pandas as pd
+from red_utils.std import path_utils
 
 def get_comic_nums() -> list[int]:
     """Return list of comic numbers from controller."""

@@ -1,14 +1,15 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
 
-from core.paths import ENSURE_DIRS
+from pathlib import Path
+import typing as t
+
 from core.dependencies import db_settings, get_db, settings
+from core.paths import ENSURE_DIRS
+from loguru import logger as log
 from modules import xkcd_mod
 from packages import xkcd
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
-from loguru import logger as log
-
 
 if __name__ == "__main__":
     init_logger(sinks=[sinks.LoguruSinkStdOut(level=settings.log_level).as_dict()])
