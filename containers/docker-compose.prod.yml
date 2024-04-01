@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  autoxkcd:
+    container_name: auto-xkcd-p
+    build:
+      context: ..
+      dockerfile: containers/auto-xkcd/Dockerfile
+      target: prod
+    env_file:
+      - env_files/prod.env
+    entrypoint: ["python", "auto_xkcd/main.py"]
+    volumes:
+      - ./src/app:/app
+      - ${AUTOXKCD_DATA_DIR:-./container_data/prod/auto-xkcd}:/.data
+    environment:
+      ENV: dev
+      CONTAINER_ENV: true
+      LOG_LEVEL: "DEBUG"
+      LOGS_DIR: "logs/dev"
+
+      MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}
+      MINIO_PORT: ${AUTOXKCD_MINIO_PORT:-9000}
+      MINIO_HTTPS: ${AUTOXKCD_MINIO_HTTPS:-true}
+      MINIO_USERNAME: ${AUTOXKCD_MINIO_USERNAME:-auto-xkcd}
+      MINIO_PASSWORD: ${AUTOXKCD_MINIO_PASSWORD:-""}
+      MINIO_ACCESS_KEY: ${AUTOXKCD_MINIO_ACCESS_KEY:-""}
+      MINIO_ACCESS_SECRET: ${AUTOXKCD_MINIO_ACCESS_SECRET:-""}
