@@ -137,7 +137,6 @@ class ComicNumsController:
                 log.debug(f"Updated row:\n{row}")
                 try:
                     new_df = self.df.update(row, overwrite=True)
-                    log.debug(f"New dataframe:\n{new_df}")
                     self.df = new_df
                     log.success(f"Updated comic #{_num} data.")
                 except Exception as exc:
@@ -211,3 +210,12 @@ class ComicNumsController:
             log.error(msg)
 
             raise msg
+
+    def max_comic_num(self) -> int:
+        if self.df.empty:
+            log.warning(f"DataFrame is empty, skipping sort.")
+            return
+
+        _max = self.df["comic_num"].max()
+
+        return _max
