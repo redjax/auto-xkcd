@@ -133,6 +133,8 @@ def pipeline_current_comic(
     current_comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic().model_validate(
         current_comic_dict
     )
+    ## Set current_comic.link to xkcd homepage (link for current comic is always null)
+    current_comic.link = "https://xkcd.com"
     # log.info(f"Current comic: {current_comic}")
 
     if save_serial:

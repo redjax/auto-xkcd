@@ -51,7 +51,19 @@ def _setup() -> None:
 
 def main() -> None:
     ## Update img_saved row of CSV data. Do this last
+    log.info("Synching saved comic data...")
     pipeline_update_img_saved_vals()
+
+    log.info("Getting current XKCD comic")
+    current_comic: xkcd_mod.XKCDComic = pipeline_current_comic()
+    log.info(
+        f"""Current XKCD comic [{current_comic.month}-{current_comic.day}-{current_comic.year}]
+Title: #{current_comic.comic_num} - {current_comic.title}
+Link: {current_comic.link if current_comic.link else '<Invalid or null link>.' }
+Comic Img: {current_comic.img_url}
+Alt Text: {current_comic.alt_text}
+"""
+    )
 
 
 if __name__ == "__main__":
