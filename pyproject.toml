@@ -41,3 +41,4 @@ docker-build-main-nocache = { shell = "docker build -t autoxkcd -f containers/au
 compose-build-run-main-d = { shell = "./scripts/compose_full.sh" }
 compose-build-main-d = { shell = "./scripts/compose_build.sh" }
 compose-build-main-d-nocache = { shell = "./scripts/compose_build_no-cache.sh" }
+compose-down-main-d = { shell = "./scripts/compose_down.sh" }
