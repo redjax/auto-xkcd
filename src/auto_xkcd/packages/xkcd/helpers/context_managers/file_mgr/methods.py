@@ -49,11 +49,15 @@ class ComicNumsController:
 
                 return
 
-            self.df_drop_duplicates()
-            # self.df = self.df.dropna()
-
-            ## Sort column after all other cleaning
-            self.sort_by_comic_num()
+            try:
+                self.df_drop_duplicates()
+                ## Sort column after all other cleaning
+                self.sort_by_comic_num()
+            except Exception as exc:
+                msg = Exception(
+                    f"{self.logstr} Unhandled exception cleaning DataFrame. Details: {exc}"
+                )
+                log.error(msg)
 
             try:
                 self.df["comic_num"] = self.df["comic_num"].astype(int)
@@ -67,6 +71,7 @@ class ComicNumsController:
 
             try:
                 self.df.to_csv(self.filename, index=False, lineterminator=f"\n")
+                # log.success(f"DataFrame saved to '{self.filename}'")
             except Exception as exc:
                 msg = Exception(
                     f"{self.logstr} Unhandled exception saving DataFrame to file '{self.filename}'. Details: {exc}."
@@ -101,7 +106,8 @@ class ComicNumsController:
         if self.df.empty:
             ## self.df is empty, concatenate with new row data
             try:
-                self.df = pd.concat([self.df, new_row], ignore_index=True)
+                self.df: pd.DataFrame = pd.concat([self.df, new_row], ignore_index=True)
+
             except Exception as exc:
                 msg = Exception(
                     f"{self.logstr} Unhandled exception adding new data row to DataFrame. Details: {exc}"
@@ -140,8 +146,11 @@ class ComicNumsController:
                     log.error(msg)
 
                     raise msg
+            else:
+                # log.warning(f"Comic #{data['comic_num']} row not found. Adding row.")
+                self.df = pd.concat([self.df, new_row])
 
-        return
+        return self
 
     def highest(self) -> int | None:
         if self.df.empty:

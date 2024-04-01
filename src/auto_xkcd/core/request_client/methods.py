@@ -7,6 +7,7 @@ import hishel
 import httpx
 from loguru import logger as log
 
+
 def simple_get(
     request: t.Union[str, httpx.Request] = None,
     method: str | None = "GET",
@@ -28,6 +29,11 @@ def simple_get(
                 log.error(msg)
 
                 raise msg
+    except httpx.ConnectTimeout as _timeout:
+        msg = Exception(f"Connection timed out. Details: {_timeout}")
+        log.error(msg)
+
+        raise _timeout
     except Exception as exc:
         msg = Exception(f"Unhandled exception building request client. Details: {exc}")
         log.error(msg)

@@ -15,7 +15,9 @@ from packages.xkcd.helpers import (
     parse_comic_response,
     serialize_response,
     url_hash,
+    get_comic_nums,
 )
+
 
 def get_comic(
     comic_num: t.Union[str, int] = None,
@@ -77,45 +79,59 @@ def get_multiple_comics(
 
     comic_responses: list[httpx.Response] = []
 
-    with ComicNumsController() as comic_nums_ctl:
-        comic_nums: list[int] = comic_nums_ctl.as_list()
+    # with ComicNumsController() as comic_nums_ctl:
+    #     comic_nums: list[int] = comic_nums_ctl.as_list()
+    comic_nums: list[int] = get_comic_nums()
 
-        for comic_num in comic_nums_list:
-            assert comic_num, ValueError("Missing a comic_num")
-            assert isinstance(comic_num, str) or isinstance(comic_num, int), TypeError(
-                f"comic_num must be of type str or dict. Got type: ({type(comic_num)})"
+    for comic_num in comic_nums_list:
+        assert comic_num, ValueError("Missing a comic_num")
+        assert isinstance(comic_num, str) or isinstance(comic_num, int), TypeError(
+            f"comic_num must be of type str or dict. Got type: ({type(comic_num)})"
+        )
+
+        if comic_num in comic_nums:
+            log.warning(f"Comic #{comic_num} has already been requested")
+
+        req: httpx.Request = xkcd_mod.comic_num_req(comic_num=comic_num)
+
+        log.info(f"Requesting comic #{comic_num}")
+        try:
+            comic_res: httpx.Response = request_client.simple_get(
+                request=req, transport=transport
             )
+            # log.info(
+            #     f"Comic #{comic_num} response: [{comic_res.status_code}: {comic_res.reason_phrase}]"
+            # )
+            _url_hash: str = url_hash(url=comic_res.url)
+            log.debug(f"URL hash: {_url_hash}")
 
-            if comic_num in comic_nums:
-                log.warning(f"Comic #{comic_num} has already been requested")
+            comic_responses.append(comic_res)
 
-            req: httpx.Request = xkcd_mod.comic_num_req(comic_num=comic_num)
+            with ComicNumsController() as comic_nums_ctl:
+                comic_data_dict = {"comic_num": comic_num, "img_saved": False}
 
-            log.info(f"Requesting comic #{comic_num}")
-            try:
-                comic_res: httpx.Response = request_client.simple_get(
-                    request=req, transport=transport
-                )
-                # log.info(
-                #     f"Comic #{comic_num} response: [{comic_res.status_code}: {comic_res.reason_phrase}]"
-                # )
-                _url_hash: str = url_hash(url=comic_res.url)
-                log.debug(f"URL hash: {_url_hash}")
+                try:
+                    comic_nums_ctl.add_comic_num_data(comic_data_dict)
+                except Exception as exc:
+                    msg = Exception(
+                        f"Unhandled exception saving comic number to CSV. Details: {exc}"
+                    )
+                    log.error(msg)
 
-                comic_responses.append(comic_res)
+                    # continue
 
-            except Exception as exc:
-                msg = Exception(
-                    f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
-                )
-                log.error(msg)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
+            )
+            log.error(msg)
 
-                raise msg
+            raise msg
 
-            if comic_num not in comic_nums:
-                log.info(f"Pause for [{sleep_duration}] second(s) between requests...")
-                time.sleep(sleep_duration)
-            else:
-                continue
+        if comic_num not in comic_nums:
+            log.info(f"Pause for [{sleep_duration}] second(s) between requests...")
+            time.sleep(sleep_duration)
+        else:
+            continue
 
-        return comic_responses
+    return comic_responses
