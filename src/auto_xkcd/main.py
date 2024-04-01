@@ -23,7 +23,6 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
-
 def demo_current_comic(req_sleept: int = 5) -> xkcd_mod.XKCDComic:
     current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
     log.info(f"Current comic: {current_comic_res}")

@@ -1,8 +1,8 @@
-import minio
-from minio.datatypes import Bucket
+from __future__ import annotations
 
 from loguru import logger as log
-
+import minio
+from minio.datatypes import Bucket
 
 def get_buckets(minio_client: minio.Minio = None) -> list[Bucket]:
     assert minio_client, ValueError("Missing a minio client")

@@ -12,12 +12,11 @@ from modules import xkcd_mod
 from packages.xkcd.helpers import (
     ComicNumsController,
     comic_num_hash,
+    get_comic_nums,
     parse_comic_response,
     serialize_response,
     url_hash,
-    get_comic_nums,
 )
-
 
 def get_comic(
     comic_num: t.Union[str, int] = None,

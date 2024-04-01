@@ -1,5 +1,6 @@
-from .context_managers import ComicNumsController
+from __future__ import annotations
 
+from .context_managers import ComicNumsController
 
 def get_comic_nums() -> list[int]:
     """Return list of comic numbers from controller."""

@@ -14,7 +14,6 @@ import pandas as pd
 from pipelines import helpers
 from red_utils.std import hash_utils
 
-
 def save_img_update_csv(
     comic_res: httpx.Response = None,
     comic: xkcd_mod.XKCDComic = None,

@@ -5,7 +5,6 @@ from pathlib import Path
 import typing as t
 
 from core import _exc
-
 from loguru import logger as log
 import minio
 from minio import datatypes as minio_dtypes
@@ -19,7 +18,6 @@ from minio.error import (
     S3Error,
     ServerError,
 )
-
 
 class MinioController(AbstractContextManager):
     def __init__(
@@ -341,7 +339,6 @@ class MinioController(AbstractContextManager):
         self, bucket_name: str = None, recursive: bool = True, prefix: str = None
     ):
         """https://github.com/minio/minio-py/blob/master/examples/list_objects.py"""
-
         raise NotImplementedError(f"Listing objects in a bucket is not yet supported")
         assert bucket_name, ValueError("Missing a bucket name")
         assert isinstance(bucket_name, str), TypeError(
