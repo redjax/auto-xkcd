@@ -8,6 +8,7 @@ from core.paths import ENSURE_DIRS
 from loguru import logger as log
 from modules import xkcd_mod
 from packages import xkcd
+from pipelines.xkcd_comic import pipeline_retrieve_missing_imgs
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 
@@ -18,4 +19,7 @@ if __name__ == "__main__":
 
     path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
 
+    log.info("Analyzing existing data...")
     xkcd.helpers.update_comic_num_img_bool()
+
+    pipeline_retrieve_missing_imgs()

@@ -14,6 +14,7 @@ import pandas as pd
 from pipelines import helpers
 from red_utils.std import hash_utils
 
+
 def save_img_update_csv(
     comic_res: httpx.Response = None,
     comic: xkcd_mod.XKCDComic = None,
@@ -525,6 +526,11 @@ def pipeline_retrieve_missing_imgs(
                         duration=request_sleep,
                         pause_msg=f"Sleeping for {request_sleep} second(s)...",
                     )
+
+        helpers.time.pause(
+            duration=request_sleep,
+            pause_msg=f"Sleeping for {request_sleep} second(s)...",
+        )
 
     log.info("<< End retrieve missing comic imgs pipeline")
 

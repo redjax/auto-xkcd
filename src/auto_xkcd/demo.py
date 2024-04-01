@@ -15,5 +15,5 @@ if __name__ == "__main__":
     path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
 
     log.info(">> Start demo")
-    demo.demo_all(req_sleep=5)
+    demo.demo_all(req_sleep=10)
     log.info("<< End demo")

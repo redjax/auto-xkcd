@@ -24,6 +24,31 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
+
+def _setup() -> None:
+    log.info("Analyzing existing data...")
+
+    try:
+        path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception creating initial directories. Details: {exc}"
+        )
+        log.error(msg)
+
+        raise exc
+
+    try:
+        xkcd.helpers.update_comic_num_img_bool()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception synching saved comic data. Continuing as-is (this will be updated throughout pipelines, it's ok to skip)."
+        )
+        log.error(msg)
+
+        return
+
+
 def main() -> None:
     ## Update img_saved row of CSV data. Do this last
     pipeline_update_img_saved_vals()
@@ -34,6 +59,6 @@ if __name__ == "__main__":
 
     log.info(f"Start auto-xkcd")
 
-    path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
+    _setup()
 
     main()
