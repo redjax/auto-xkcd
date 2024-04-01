@@ -35,3 +35,12 @@ dev = ["black>=24.3.0", "ruff>=0.3.4", "pytest-xdist>=3.5.0", "nox>=2024.3.2"]
 [tool.pdm.scripts]
 
 lint = { cmd = "ruff check ./ --config ruff.ci.toml --fix" }
+
+docker-build-main = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile ." }
+docker-build-main-nocache = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile . --no-cache" }
+compose-build-run-main-d = { shell = "./scripts/compose_full.sh" }
+compose-build-main-d = { shell = "./scripts/compose_build.sh" }
+compose-build-main-d-nocache = { shell = "./scripts/compose_build_no-cache.sh" }
+compose-run-main-d = { shell = "./scripts/compose_run.sh" }
+compose-down-main-d = { shell = "./scripts/compose_down.sh" }
+compose-logs-main-d = { shell = "./scripts/compose_logs.sh" }
