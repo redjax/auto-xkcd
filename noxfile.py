@@ -16,11 +16,21 @@ nox.options.error_on_missing_interpreters = False
 nox.sessions = ["lint", "export", "tests"]
 
 INIT_COPY_FILES: list[dict[str, str]] = [
+    ## App config
     {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
     {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
-    {"src": ".env.example", "dest": ".env"},
+    ## Compose env files
+    {
+        "src": "containers/env_files/dev.example.env",
+        "dest": "containers/env_files/dev.env",
+    },
+    {
+        "src": "containers/env_files/prod.example.env",
+        "dest": "containers/env_files/prod.env",
+    },
+    # {"src": ".env.example", "dest": ".env"},
     {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
-    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"}
+    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
 ]
 INIT_MKDIRS: list[Path] = [Path("docker_data/.data"), Path("docker_data/.cache")]
 ## Define versions to test

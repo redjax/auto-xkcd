@@ -1,1 +1,5 @@
-container_data/
+# Ignore the container_data directory
+/container_data/*
+
+# Allow any .gitkeep file within container_data and its subdirectories
+!/container_data/**/.gitkeep
