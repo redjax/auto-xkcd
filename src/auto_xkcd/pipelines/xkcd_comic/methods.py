@@ -369,6 +369,12 @@ def pipeline_multiple_comics(
     multiple_comics: list[xkcd_mod.XKCDComic] = []
 
     for r in multiple_comics_res:
+        if r.status_code == 404:
+            log.warning(
+                f"404 unfound response: [{r.status_code}: {r.reason_phrase}]: {r.text}"
+            )
+            continue
+
         p: dict = xkcd.helpers.parse_comic_response(res=r)
         multiple_comic_dicts.append(p)
 

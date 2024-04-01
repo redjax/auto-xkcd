@@ -24,6 +24,7 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
+
 def demo_current_comic() -> xkcd_mod.XKCDComic:
     current_comic_res: xkcd_mod.XKCDComic = pipeline_current_comic()
     log.info(f"Current comic: {current_comic_res}")
@@ -85,6 +86,9 @@ def demo_all(
     specific_comic_num: int = 42,
     multi_request_comic_ums: list[int] = [1, 15, 35, 71, 84],
 ):
+
+    log.info("Updating img_saved bool column in CSV file.")
+    _update_csv = xkcd.helpers.update_comic_num_img_bool()
 
     _current_comic: xkcd_mod.XKCDComic = demo_current_comic()
     _random_comic: xkcd_mod.XKCDComic = demo_random_comic()

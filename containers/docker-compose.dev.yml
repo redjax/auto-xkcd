@@ -18,7 +18,8 @@ services:
     # entrypoint: ["ls", "-la", "/app"]
     volumes:
       - ../src:/app
-      - ${AUTOXKCD_DATA_DIR:-./container_data/dev/auto-xkcd/}:/app/.data
+      - ${AUTOXKCD_DATA_DIR:-./container_data/dev/auto-xkcd/data}:/app/.data
+      - ${AUTOXKCD_LOGS_DIR:-./container_data/dev/auto-xkcd/logs}:/app/logs
     environment:
       ENV_FOR_DYNACONF: dev
       DYNACONF_ENV: dev
