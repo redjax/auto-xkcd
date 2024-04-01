@@ -18,6 +18,7 @@ from pipelines import (
     pipeline_random_comic,
     pipeline_retrieve_missing_imgs,
     pipeline_specific_comic,
+    pipeline_update_img_saved_vals,
 )
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
@@ -74,6 +75,12 @@ def demo_req_missing_imgs(req_sleep: int = 5) -> None:
     return retrieved_imgs
 
 
+def demo_update_img_saved_values() -> None:
+    pipeline_update_img_saved_vals()
+
+    return
+
+
 def demo_all(
     req_sleep: int = 5,
     specific_comic_num: int = 42,
@@ -99,6 +106,8 @@ def demo_all(
     )
 
     _missing_imgs: None = demo_req_missing_imgs()
+
+    _update_img_saved = demo_update_img_saved_values()
 
 
 if __name__ == "__main__":
