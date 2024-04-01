@@ -10,14 +10,15 @@ services:
     env_file:
       - env_files/prod.env
     working_dir: /app
-    command: ["python", "auto_xkcd/main.py"]
+    command: ["python", "auto_xkcd/demo.py"]
+
+    ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
     # entrypoint: ["pwd"]
     # entrypoint: ["ls", "-la", "."]
     # entrypoint: ["ls", "-la", "/app"]
-    # entrypoint: ["python", "auto_xkcd/main.py"]    
     volumes:
       - ../src:/app
-      - ${AUTOXKCD_DATA_DIR:-./container_data/dev/auto-xkcd/}:/.data
+      - ${AUTOXKCD_DATA_DIR:-./container_data/dev/auto-xkcd/}:/app/.data
     environment:
       ENV_FOR_DYNACONF: dev
       DYNACONF_ENV: dev
