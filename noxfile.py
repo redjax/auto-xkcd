@@ -19,6 +19,8 @@ INIT_COPY_FILES: list[dict[str, str]] = [
     {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
     {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
     {"src": ".env.example", "dest": ".env"},
+    {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
+    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"}
 ]
 INIT_MKDIRS: list[Path] = [Path("docker_data/.data"), Path("docker_data/.cache")]
 ## Define versions to test
@@ -212,3 +214,59 @@ def run_initial_setup(session: nox.Session):
                         f"Unhandled exception copying file from '{src}' to '{dest}'. Details: {exc}"
                     )
                     print(f"[ERROR] {msg}")
+
+
+@nox.session(python=[PY_VER_TUPLE], name="new-dynaconf-config")
+def create_new_dynaconf_config(session: nox.session):
+    CONFIG_ROOT: str = "config"
+
+    def prompt_config_name(config_root: str = CONFIG_ROOT) -> str:
+        try:
+            new_conf: str = input(f"New config path: {config_root}/")
+            return f"{CONFIG_ROOT}/{new_conf}"
+
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception getting new config path. Details: {exc}"
+            )
+            print(f"[ERROR] {msg}")
+
+            raise exc
+
+    init_files: list[str] = [
+        ".secrets.toml",
+        ".secrets.example.toml",
+        "settings.toml",
+        "settings.local.toml",
+    ]
+    new_file_contents: str = f"[default]\n\n[dev]\n\n[prod]\n"
+    config_dir: str = prompt_config_name()
+
+    if not Path(config_dir).exists():
+        print(f"Creating path '{config_dir}'")
+        try:
+            Path(config_dir).mkdir(parents=True, exist_ok=True)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception creating path '{config_dir}'. Details: {exc}"
+            )
+            print(f"[ERROR] {msg}")
+
+            raise exc
+
+    for f in init_files:
+        f_path: Path = Path(f"{config_dir}/{f}")
+
+        if not f_path.exists():
+            print(f"Creating file '{f_path}'")
+
+            try:
+                with open(f_path, "w") as _f:
+                    _f.write(new_file_contents)
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception creating file '{f_path}'. Details: {exc}"
+                )
+                print(f"[ERROR] {msg}")
+
+                raise exc

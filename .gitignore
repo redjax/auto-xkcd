@@ -200,3 +200,5 @@ site/
 
 .data
 docker_data/
+
+!**/.gitkeep

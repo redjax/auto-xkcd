@@ -39,7 +39,7 @@ def serialize_dict(
 
     try:
         packed = msgpack.packb(data)
-        log.debug(f"Serialized: {packed}")
+        log.debug(f"Serialized objec type: {type(packed)}")
     except Exception as exc:
         msg = Exception(f"Unhandled exception serializing input. Details: {exc}")
         log.error(msg)
@@ -47,8 +47,7 @@ def serialize_dict(
         raise msg
 
     if output_path.exists():
-        log.warning(f"Output path exists, skipping: {output_path}")
-
+        # log.warning(f"Output path exists, skipping: {output_path}")
         return
 
     try:

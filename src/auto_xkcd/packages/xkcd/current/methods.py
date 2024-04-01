@@ -10,35 +10,6 @@ from modules import xkcd_mod
 from red_utils.std import hash_utils
 from utils import serialize_utils
 
-def build_request(
-    method: str = "GET",
-    url: str = None,
-    headers: dict = {"Content-Type": "application/json"},
-) -> httpx.Request:
-    assert method, ValueError("Missing a request method")
-    assert isinstance(method, str), TypeError(
-        f"method must be of type str. Got type: ({type(method)})"
-    )
-    method = method.upper()
-
-    assert url, ValueError("Missing a request URL")
-    assert isinstance(url, str), TypeError(
-        f"url must be a string. Got type: ({type(url)})"
-    )
-
-    try:
-        req: httpx.Request = httpx.Request(method=method, url=url, headers=headers)
-
-        return req
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception building {method} request to URL: {url}. Details: {exc}"
-        )
-
-        raise msg
-
-
 def request_current_comic(
     transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
 ) -> httpx.Response:
@@ -47,7 +18,8 @@ def request_current_comic(
         f"transport must be a hishel.CacheTransport object. Got type: ({type(transport)})"
     )
 
-    req: httpx.Request = build_request(url=xkcd_mod.CURRENT_XKCD_URL)
+    # req: httpx.Request = xkcd_mod.make_req(url=xkcd_mod.CURRENT_XKCD_URL)
+    req: httpx.Request = xkcd_mod.current_comic_req()
 
     try:
         res: httpx.Response = request_client.simple_get(
@@ -72,9 +44,3 @@ def request_current_comic(
     log.info(f"Current comic response: [{res.status_code}: {res.reason_phrase}]")
 
     return res
-
-
-def parse_current_comic_response(res: httpx.Response = None) -> dict:
-    content: dict = request_client.decode_res_content(res=res)
-
-    return content

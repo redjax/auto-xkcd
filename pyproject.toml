@@ -14,6 +14,8 @@ dependencies = [
     "red-utils>=0.2.18",
     "msgpack>=1.0.8",
     "pandas>=2.2.1",
+    "dynaconf>=3.2.5",
+    "minio>=7.2.5",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
