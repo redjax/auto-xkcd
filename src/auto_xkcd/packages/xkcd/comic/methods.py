@@ -18,7 +18,6 @@ from packages.xkcd.helpers import (
     url_hash,
 )
 
-
 def get_comic(
     comic_num: t.Union[str, int] = None,
     save_serial: bool = True,

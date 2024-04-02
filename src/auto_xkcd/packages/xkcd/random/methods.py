@@ -18,7 +18,6 @@ from packages.xkcd.helpers import (
     url_hash,
 )
 
-
 def get_random_comic(
     transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
     ignore_comic_nums: list[int] = IGNORE_COMIC_NUMS,

@@ -24,7 +24,6 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
-
 def _setup() -> None:
     log.info("Analyzing existing data...")
 
@@ -85,7 +84,7 @@ if __name__ == "__main__":
         sinks=[
             sinks.LoguruSinkStdOut(level=settings.log_level).as_dict(),
             sinks.LoguruSinkAppFile(sink=f"{settings.logs_dir}/app.log").as_dict(),
-            sinks.LoguruSinkStdErr(sink=f"{settings.logs_dir}/err.log").as_dict(),
+            sinks.LoguruSinkErrFile(sink=f"{settings.logs_dir}/err.log").as_dict(),
         ]
     )
 

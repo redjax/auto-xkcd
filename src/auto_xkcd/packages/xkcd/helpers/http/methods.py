@@ -6,7 +6,6 @@ from loguru import logger as log
 from red_utils.std import hash_utils
 from utils import serialize_utils
 
-
 def parse_comic_response(res: httpx.Response = None) -> dict:
     assert res, ValueError("Missing httpx.Response object")
     assert isinstance(res, httpx.Response), TypeError(
