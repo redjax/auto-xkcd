@@ -9,6 +9,7 @@ import hishel
 import httpx
 from loguru import logger as log
 from modules import xkcd_mod
+from packages.xkcd.constants import IGNORE_COMIC_NUMS
 from packages.xkcd.helpers import (
     ComicNumsController,
     comic_num_hash,
@@ -19,11 +20,19 @@ from packages.xkcd.helpers import (
 
 def get_random_comic(
     transport: hishel.CacheTransport = request_client.CACHE_TRANSPORT,
+    ignore_comic_nums: list[int] = IGNORE_COMIC_NUMS,
 ) -> httpx.Response:
     with ComicNumsController() as comic_nums:
         highest_comic_num = comic_nums.highest()
 
-    rand_comic_num = random.randint(0, highest_comic_num - 1)
+    rand_comic_num: int = random.randint(0, highest_comic_num - 1)
+    if rand_comic_num in ignore_comic_nums:
+        log.warning(
+            f"Random comic_num [{rand_comic_num}] is in list of ignored comic numbers. Re-rolling."
+        )
+        rand_comic_num: int = get_random_comic(
+            transport=transport, ignore_comic_nums=ignore_comic_nums
+        )
 
     with transport as transport:
         req: httpx.Request = xkcd_mod.comic_num_req(comic_num=rand_comic_num)

@@ -4,13 +4,17 @@
 annotated-types==0.6.0
 anyio==4.3.0
 argcomplete==3.2.3
+argon2-cffi==23.1.0
+argon2-cffi-bindings==21.2.0
 black==24.3.0
 certifi==2024.2.2
+cffi==1.16.0
 click==8.1.7
 colorama==0.4.6; sys_platform == "win32" or platform_system == "Windows"
 colorlog==6.8.2
 diskcache==5.6.3
 distlib==0.3.8
+dynaconf==3.2.5
 execnet==2.0.2
 filelock==3.13.1
 greenlet==3.0.3; platform_machine == "win32" or platform_machine == "WIN32" or platform_machine == "AMD64" or platform_machine == "amd64" or platform_machine == "x86_64" or platform_machine == "ppc64le" or platform_machine == "aarch64"
@@ -23,14 +27,19 @@ iniconfig==2.0.0
 loguru==0.7.2
 markdown-it-py==3.0.0
 mdurl==0.1.2
+minio==7.2.5
 msgpack==1.0.8
 mypy-extensions==1.0.0
 nox==2024.3.2
+numpy==1.26.4; python_version == "3.11" or python_version >= "3.12"
 packaging==24.0
+pandas==2.2.1
 pathspec==0.12.1
 pendulum==3.0.0
 platformdirs==4.2.0
 pluggy==1.4.0
+pycparser==2.22
+pycryptodome==3.20.0
 pydantic==2.6.4
 pydantic-core==2.16.3
 pydantic-settings==2.2.1
@@ -39,6 +48,7 @@ pytest==8.1.1
 pytest-xdist==3.5.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
+pytz==2024.1
 red-utils==0.2.18
 rich==13.7.1
 ruff==0.3.4
@@ -48,5 +58,6 @@ sqlalchemy==2.0.29
 time-machine==2.14.1; implementation_name != "pypy"
 typing-extensions==4.10.0
 tzdata==2024.1
+urllib3==2.2.1
 virtualenv==20.25.1
 win32-setctime==1.1.0; sys_platform == "win32"

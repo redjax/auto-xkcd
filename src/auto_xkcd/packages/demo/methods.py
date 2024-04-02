@@ -86,6 +86,9 @@ def demo_all(
     multi_request_comic_ums: list[int] = [1, 15, 35, 71, 84],
 ):
 
+    log.info("Updating img_saved bool column in CSV file.")
+    _update_csv = xkcd.helpers.update_comic_num_img_bool()
+
     _current_comic: xkcd_mod.XKCDComic = demo_current_comic()
     _random_comic: xkcd_mod.XKCDComic = demo_random_comic()
     _specific_comic: xkcd_mod.XKCDComic = demo_specific_comic(

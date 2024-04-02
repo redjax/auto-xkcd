@@ -16,13 +16,36 @@ nox.options.error_on_missing_interpreters = False
 nox.sessions = ["lint", "export", "tests"]
 
 INIT_COPY_FILES: list[dict[str, str]] = [
+    ## App config
     {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
     {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
-    {"src": ".env.example", "dest": ".env"},
+    ## Compose env files
+    {
+        "src": "containers/env_files/dev.example.env",
+        "dest": "containers/env_files/dev.env",
+    },
+    {
+        "src": "containers/env_files/prod.example.env",
+        "dest": "containers/env_files/prod.env",
+    },
+    {
+        "src": "containers/devcontainers/minio/.env.example",
+        "dest": "containers/devcontainers/minio/.env",
+    },
+    # {"src": ".env.example", "dest": ".env"},
     {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
-    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"}
+    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
 ]
-INIT_MKDIRS: list[Path] = [Path("docker_data/.data"), Path("docker_data/.cache")]
+INIT_MKDIRS: list[Path] = [
+    Path("containers/env_files"),
+    Path("containers/containers/devcontainers"),
+    Path("containers/container_data"),
+    Path("containers/container_data/dev"),
+    Path("containers/container_data/prod"),
+]
+INIT_TOUCH_FILES: list[dict[str, Path]] = [
+    {"path": Path("./testfile.txt"), "content": "This is a minio test file."}
+]
 ## Define versions to test
 PY_VERSIONS: list[str] = ["3.12", "3.11"]
 ## Set PDM version to install throughout
@@ -152,7 +175,7 @@ def run_tests(session: nox.Session, pdm_ver: str):
     )
 
 
-@nox.session(python=PY_VERSIONS, name="pre-commit-all")
+@nox.session(python=DEFAULT_PYTHON, name="pre-commit-all")
 def run_pre_commit_all(session: nox.Session):
     session.install("pre-commit")
     session.run("pre-commit")
@@ -161,7 +184,7 @@ def run_pre_commit_all(session: nox.Session):
     session.run("pre-commit", "run")
 
 
-@nox.session(python=PY_VERSIONS, name="pre-commit-update")
+@nox.session(python=DEFAULT_PYTHON, name="pre-commit-update")
 def run_pre_commit_autoupdate(session: nox.Session):
     session.install(f"pre-commit")
 
@@ -169,7 +192,7 @@ def run_pre_commit_autoupdate(session: nox.Session):
     session.run("pre-commit", "autoupdate")
 
 
-@nox.session(python=PY_VERSIONS, name="pre-commit-nbstripout")
+@nox.session(python=DEFAULT_PYTHON, name="pre-commit-nbstripout")
 def run_pre_commit_nbstripout(session: nox.Session):
     session.install(f"pre-commit")
 
@@ -177,7 +200,7 @@ def run_pre_commit_nbstripout(session: nox.Session):
     session.run("pre-commit", "run", "nbstripout")
 
 
-@nox.session(python=[PY_VER_TUPLE], name="init-setup")
+@nox.session(python=DEFAULT_PYTHON, name="init-setup")
 def run_initial_setup(session: nox.Session):
     if INIT_MKDIRS is None:
         print(f"INIT_MKDIRS is empty. Skipping.")
@@ -215,8 +238,25 @@ def run_initial_setup(session: nox.Session):
                     )
                     print(f"[ERROR] {msg}")
 
+    if INIT_TOUCH_FILES is None:
+        print(f"INIT_TOUCH_FILES is empty. Skipping.")
+        pass
+    else:
+        for f_dict in INIT_TOUCH_FILES:
+            if not f_dict["path"].exists():
+                try:
+                    with open(f_dict["path"], "w") as f:
+                        f.write(f_dict["content"])
+                except Exception as exc:
+                    msg = Exception(
+                        f"Unhandled exception creating file '{f_dict['path']}. Details: {exc}"
+                    )
+                    print(f"[ERROR] {msg}")
 
-@nox.session(python=[PY_VER_TUPLE], name="new-dynaconf-config")
+                    raise msg
+
+
+@nox.session(python=DEFAULT_PYTHON, name="new-dynaconf-config")
 def create_new_dynaconf_config(session: nox.session):
     CONFIG_ROOT: str = "config"
 

@@ -49,6 +49,15 @@ def get_comic(
 
             return res
 
+        except httpx.ConnectError as conn_err:
+            msg = Exception(
+                f"ConnectError while making request for comic #{comic_num}. Details: {conn_err}"
+            )
+            log.error(msg)
+
+            # raise conn_err
+            return
+
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
@@ -118,6 +127,14 @@ def get_multiple_comics(
                     log.error(msg)
 
                     # continue
+
+        except httpx.ConnectError as conn_err:
+            msg = Exception(
+                f"ConnectError while requesting comic #{comic_num}. Details: {exc}"
+            )
+            log.error(msg)
+
+            continue
 
         except Exception as exc:
             msg = Exception(

@@ -12,6 +12,13 @@ def parse_comic_response(res: httpx.Response = None) -> dict:
         f"res should be of type httpx.Response. Got type: ({type(res)})"
     )
 
+    if res.status_code == 404:
+        log.warning(
+            f"404 unfound response: [{res.status_code}: {res.reason_phrase}]: {res.text}"
+        )
+
+        return
+
     try:
         content: dict = request_client.decode_res_content(res=res)
 
