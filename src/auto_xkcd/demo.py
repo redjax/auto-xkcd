@@ -11,8 +11,8 @@ if __name__ == "__main__":
     init_logger(
         sinks=[
             sinks.LoguruSinkStdOut(level=settings.log_level).as_dict(),
-            sinks.LoguruSinkAppFile(level=settings.log_level).as_dict(),
-            sinks.LoguruSinkErrFile(level=settings.log_level).as_dict(),
+            sinks.LoguruSinkAppFile(sink=f"{settings.logs_dir}/app.log").as_dict(),
+            sinks.LoguruSinkStdErr(sink=f"{settings.logs_dir}/err.log").as_dict(),
         ]
     )
 

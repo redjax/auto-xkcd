@@ -81,7 +81,13 @@ Alt Text: {current_comic.alt_text}
 
 
 if __name__ == "__main__":
-    init_logger(sinks=[sinks.LoguruSinkStdOut(level=settings.log_level).as_dict()])
+    init_logger(
+        sinks=[
+            sinks.LoguruSinkStdOut(level=settings.log_level).as_dict(),
+            sinks.LoguruSinkAppFile(sink=f"{settings.logs_dir}/app.log").as_dict(),
+            sinks.LoguruSinkStdErr(sink=f"{settings.logs_dir}/err.log").as_dict(),
+        ]
+    )
 
     log.info(f"Start auto-xkcd")
 
