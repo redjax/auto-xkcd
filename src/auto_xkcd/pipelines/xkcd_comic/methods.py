@@ -567,19 +567,3 @@ def pipeline_retrieve_missing_imgs(
         )
 
     log.info("<< End retrieve missing comic imgs pipeline")
-
-
-def pipeline_update_img_saved_vals(imgs_dir: Path = COMIC_IMG_DIR) -> None:
-    """Iterate over all requested comics & saved images, set `True` values for images downloaded."""
-    log.info(">> Start update 'img_saved' CSV value pipeline")
-    try:
-        xkcd.helpers.update_comic_num_img_bool(img_dir=imgs_dir)
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception running pipeline to update 'img_saved' value in CSV file. Details: {exc}"
-        )
-        log.error(msg)
-
-        raise msg
-
-    log.info("<< End update 'img_saved' CSV value pipeline")
