@@ -28,12 +28,24 @@ INIT_COPY_FILES: list[dict[str, str]] = [
         "src": "containers/env_files/prod.example.env",
         "dest": "containers/env_files/prod.env",
     },
-    {"src":"containers/devcontainers/minio/.env.example", "dest": "containers/devcontainers/minio/.env"},
+    {
+        "src": "containers/devcontainers/minio/.env.example",
+        "dest": "containers/devcontainers/minio/.env",
+    },
     # {"src": ".env.example", "dest": ".env"},
     {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
     {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
 ]
-INIT_MKDIRS: list[Path] = [Path("docker_data/.data"), Path("docker_data/.cache")]
+INIT_MKDIRS: list[Path] = [
+    Path("containers/env_files"),
+    Path("containers/containers/devcontainers"),
+    Path("containers/container_data"),
+    Path("containers/container_data/dev"),
+    Path("containers/container_data/prod"),
+]
+INIT_TOUCH_FILES: list[dict[str, Path]] = [
+    {"path": Path("./testfile.txt"), "content": "This is a minio test file."}
+]
 ## Define versions to test
 PY_VERSIONS: list[str] = ["3.12", "3.11"]
 ## Set PDM version to install throughout
@@ -225,6 +237,23 @@ def run_initial_setup(session: nox.Session):
                         f"Unhandled exception copying file from '{src}' to '{dest}'. Details: {exc}"
                     )
                     print(f"[ERROR] {msg}")
+
+    if INIT_TOUCH_FILES is None:
+        print(f"INIT_TOUCH_FILES is empty. Skipping.")
+        pass
+    else:
+        for f_dict in INIT_TOUCH_FILES:
+            if not f_dict["path"].exists():
+                try:
+                    with open(f_dict["path"], "w") as f:
+                        f.write(f_dict["content"])
+                except Exception as exc:
+                    msg = Exception(
+                        f"Unhandled exception creating file '{f_dict['path']}. Details: {exc}"
+                    )
+                    print(f"[ERROR] {msg}")
+
+                    raise msg
 
 
 @nox.session(python=DEFAULT_PYTHON, name="new-dynaconf-config")

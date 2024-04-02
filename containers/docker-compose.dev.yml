@@ -1,4 +1,5 @@
-version: "3"
+## [DEVELOPMENT]
+# version: "3"
 
 services:
   autoxkcd:
@@ -8,7 +9,7 @@ services:
       dockerfile: containers/auto-xkcd/Dockerfile
       target: dev
     env_file:
-      - env_files/prod.env
+      - env_files/dev.env
     working_dir: /app
     command: ["python", "src/auto_xkcd/demo.py"]
 

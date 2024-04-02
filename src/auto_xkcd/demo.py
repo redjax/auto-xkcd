@@ -23,8 +23,9 @@ if __name__ == "__main__":
     log.info("Updating img_saved bool column in CSV file.")
     _update_csv = xkcd.helpers.update_comic_num_img_bool()
 
-    demo.demo_req_missing_imgs()
+    log.info(">> Start demo")
+    demo.demo_all(req_sleep=10)
+    log.info("<< End demo")
 
-    # log.info(">> Start demo")
-    # demo.demo_all(req_sleep=10)
-    # log.info("<< End demo")
+    log.info("Starting search for missing images")
+    demo.demo_req_missing_imgs()
