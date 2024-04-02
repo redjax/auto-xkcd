@@ -19,6 +19,7 @@ def save_img_update_csv(
     comic_res: httpx.Response = None,
     comic: xkcd_mod.XKCDComic = None,
     output_dir: t.Union[str, Path] = COMIC_IMG_DIR,
+    ignore_comic_nums: list[int] | None = xkcd.IGNORE_COMIC_NUMS,
 ):
     assert comic_res, ValueError("Missing httpx.Response object")
     assert isinstance(comic_res, httpx.Response), TypeError(
@@ -29,6 +30,10 @@ def save_img_update_csv(
     assert isinstance(comic, xkcd_mod.XKCDComic), TypeError(
         f"comic must be of type xkcd_mox.XKCDComic. Got type: ({type(comic)})"
     )
+
+    if comic.comic_num in ignore_comic_nums:
+        log.warning(f"Comic #{comic.comic_num} ignored.")
+        return
 
     assert output_dir, ValueError("Missing image file output directory")
     assert isinstance(output_dir, str) or isinstance(output_dir, Path), TypeError(
@@ -441,7 +446,7 @@ def pipeline_retrieve_missing_imgs(
             missing_df: pd.DataFrame = cnums_controller.df.loc[
                 cnums_controller.df["img_saved"] == False
             ]
-            log.debug(f"Downloading [{missing_df.shape[0]}] missing image(s)")
+            log.info(f"Downloading [{missing_df.shape[0]}] missing image(s)")
         except KeyError as key_err:
             msg = Exception(
                 f"Could not find image by comic number. Is the DataFrame empty?"
@@ -450,6 +455,8 @@ def pipeline_retrieve_missing_imgs(
 
             return
 
+        log.debug(f"Missing column df ({missing_df.shape[0]}):\n{missing_df.head(5)}")
+
         missing_comic_nums: list[int] = missing_df["comic_num"].to_list()
         if missing_comic_nums:
             log.debug(
@@ -457,6 +464,12 @@ def pipeline_retrieve_missing_imgs(
             )
 
     for comic_num in missing_comic_nums:
+        if comic_num in xkcd.IGNORE_COMIC_NUMS:
+            log.warning(
+                f"Comic #{comic_num} in list of ignored comic numbers: {xkcd.IGNORE_COMIC_NUMS}. Skipping."
+            )
+            continue
+
         try:
             missing_comic_res: httpx.Response = xkcd.get_comic(comic_num=comic_num)
         except Exception as exc:
@@ -465,22 +478,36 @@ def pipeline_retrieve_missing_imgs(
             )
             log.error(msg)
 
+        if missing_comic_res.status_code == 404:
+            log.warning(
+                f"404 response: [{missing_comic_res.status_code}: {missing_comic_res.reason_phrase}]: {missing_comic_res.text}. Skipping comic #{comic_num}"
+            )
+            continue
+
         try:
             missing_comic_dict: dict = xkcd.helpers.parse_comic_response(
                 res=missing_comic_res
             )
-            missing_comic_num_hash: str = xkcd.helpers.comic_num_hash(
-                comic_num=missing_comic_dict["num"]
-            )
-            log.debug(
-                f"Missing comic num [{missing_comic_dict['num']}] hash: {missing_comic_num_hash}"
-            )
 
-            ## Append hashes to response dict
-            missing_comic_dict["url_hash"] = hash_utils.get_hash_from_str(
-                input_str=missing_comic_res.url
-            )
-            log.debug(f"URL hash: {missing_comic_dict['url_hash']}")
+            if not missing_comic_dict:
+                log.warning(
+                    f"Parsing comic response for comic #{comic_num} returned None. Skipping."
+                )
+                continue
+            else:
+
+                missing_comic_num_hash: str = xkcd.helpers.comic_num_hash(
+                    comic_num=missing_comic_dict["num"]
+                )
+                log.debug(
+                    f"Missing comic num [{missing_comic_dict['num']}] hash: {missing_comic_num_hash}"
+                )
+
+                ## Append hashes to response dict
+                missing_comic_dict["url_hash"] = hash_utils.get_hash_from_str(
+                    input_str=missing_comic_res.url
+                )
+                log.debug(f"URL hash: {missing_comic_dict['url_hash']}")
 
         except Exception as exc:
             msg = Exception(

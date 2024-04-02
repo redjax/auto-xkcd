@@ -52,7 +52,7 @@ def get_comic(
 
         except httpx.ConnectError as conn_err:
             msg = Exception(
-                f"ConnectError while making request for comic #{comic_num}. Details:"
+                f"ConnectError while making request for comic #{comic_num}. Details: {conn_err}"
             )
             log.error(msg)
 
