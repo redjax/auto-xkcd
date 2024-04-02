@@ -65,6 +65,20 @@ Alt Text: {current_comic.alt_text}
 """
     )
 
+    log.info("Searching missing images")
+    missing_imgs: None = pipeline_retrieve_missing_imgs()
+
+    with xkcd.helpers.ComicNumsController() as comicnums_ctl:
+        ALL_COMIC_NUMS: list[int] = [n for n in range(1, comicnums_ctl.highest)]
+
+    log.info("Searching for downloadable comics")
+    dl_comics: list[xkcd_mod.XKCDComic] = pipeline_multiple_comics(
+        comic_nums_list=ALL_COMIC_NUMS
+    )
+
+    if dl_comics:
+        log.info(f"Downloaded [{len(dl_comics)}] comic(s)")
+
 
 if __name__ == "__main__":
     init_logger(sinks=[sinks.LoguruSinkStdOut(level=settings.log_level).as_dict()])
