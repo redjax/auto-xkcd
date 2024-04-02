@@ -52,9 +52,35 @@ def clear() -> None:
     os.system(cmd)
 
 
+def prompt_env(loop_msg: str = None) -> str:
+    clear()
+
+    try:
+        if loop_msg:
+            print(loop_msg)
+
+        choice = input("> Which environment (dev|prod)?: ").lower()
+
+        if choice not in ["dev", "prod"]:
+            msg = ValueError(
+                f"[ERROR] Invalid choice: {choice}. Must be one of ['dev', 'prod']"
+            )
+
+            choice = prompt_env(loop_msg=msg)
+
+        return choice
+
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception parsing user input. Details: {exc}")
+        print(f"[ERROR] {msg}")
+
+        raise msg
+
+
 class ComposeCLIContext(AbstractContextManager):
-    def __init__(self, compose_meta: ComposeFileMeta):
+    def __init__(self, compose_meta: ComposeFileMeta, env: str | None = None):
         self.compose_meta = compose_meta
+        # self.env = env
         self.proc = None
 
     def __enter__(self):
@@ -66,25 +92,38 @@ class ComposeCLIContext(AbstractContextManager):
 
         return self
 
-    def prompt_container_name(self):
-        self.container_name = input("Enter container name: ")
-
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
+    def prompt_container_name(self):
+        self.container_name = input("Enter container name: ")
+
+    # def prompt_compose_env(self) -> str:
+    #     if self.env:
+    #         return self
+
+    #     _env = prompt_env()
+    #     self.env = _env
+
+    #     return self
+
     def get_choice(self, loop_msg: str = None):
+        # if not self.env:
+        #     prompt_env()
+
         def print_menu() -> None:
-            print("Welcome to Docker Compose CLI!")
+            print(f"[env:{self.compose_meta.env}] Docker Compose CLI\n")
             print("Choose an option:")
             print("1: docker compose build")
             print("2: docker compose build --no-cache")
             print("3: docker compose up -d")
             print("4: docker compose up -d --build")
             print("5: docker compose logs -f <container_name>")
+            print("6: docker compose down")
             print("")
             print("q: quit")
 
-        valid_choices: list[str] = ["1", "2", "3", "4", "5"]
+        valid_choices: list[str] = ["1", "2", "3", "4", "5", "6"]
 
         clear()
 
@@ -112,7 +151,7 @@ class ComposeCLIContext(AbstractContextManager):
         ]
 
         if not with_cache:
-            cmd = cmd + ["--without-cache"]
+            cmd = cmd + ["--no-cache"]
 
         return cmd
 
@@ -133,6 +172,11 @@ class ComposeCLIContext(AbstractContextManager):
 
         return cmd
 
+    def _down(self) -> list[str]:
+        cmd: list[str] = self.compose_meta.cmd_str_prefix() + ["down"]
+
+        return cmd
+
     def run_command(self):
         match self.choice:
             case "1":
@@ -147,6 +191,8 @@ class ComposeCLIContext(AbstractContextManager):
                 if not hasattr(self, "container_name"):
                     self.container_name = input("Enter container name: ")
                 command = self._logs()
+            case "6":
+                command = self._down()
             case _:
                 raise ValueError(f"Invalid choice: {self.choice}")
 
@@ -162,18 +208,23 @@ class ComposeCLIContext(AbstractContextManager):
             return
 
 
-def main(env: str = "prod"):
+def main(env: str = None):
+    if not env:
+        env: str = prompt_env()
+
     match env:
         case "prod":
             compose_meta: ComposeFileMeta = PROD_COMPOSE
         case "dev":
-            compose_meta: ComposeFileMeta = PROD_COMPOSE
+            compose_meta: ComposeFileMeta = DEV_COMPOSE
         case _:
 
             raise ValueError(f"Unknown env: {env}")
+
     with ComposeCLIContext(compose_meta=compose_meta) as ctx:
         ctx.run_command()
 
 
 if __name__ == "__main__":
-    main()
+    env: str = prompt_env()
+    main(env=env)
