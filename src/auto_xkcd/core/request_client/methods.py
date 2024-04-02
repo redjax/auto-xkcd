@@ -24,16 +24,17 @@ def simple_get(
                 log.info(f"[{res.status_code}: {res.reason_phrase}]")
 
                 return res
+            except httpx.ConnectTimeout as _timeout:
+                msg = Exception(f"Connection timed out. Details: {_timeout}")
+                log.error(msg)
+
+                raise _timeout
             except Exception as exc:
                 msg = Exception(f"Unhandled exception sending request. Details: {exc}")
                 log.error(msg)
 
-                raise msg
-    except httpx.ConnectTimeout as _timeout:
-        msg = Exception(f"Connection timed out. Details: {_timeout}")
-        log.error(msg)
+                raise exc
 
-        raise _timeout
     except httpx.ConnectError as _conn:
         msg = Exception(f"Error while making remote connection. Details: {exc}")
         log.error(msg)
@@ -43,7 +44,7 @@ def simple_get(
         msg = Exception(f"Unhandled exception building request client. Details: {exc}")
         log.error(msg)
 
-        raise msg
+        raise exc
 
 
 def decode_res_content(res: httpx.Response = None):
