@@ -119,11 +119,15 @@ class ComposeCLIContext(AbstractContextManager):
             print("3: docker compose up -d")
             print("4: docker compose up -d --build")
             print("5: docker compose logs -f <container_name>")
-            print("6: docker compose down")
+            print(
+                "6: docker compose up -d --build && docker compose logs -f <container_name>"
+            )
+
             print("")
+            print("d: docker compose down")
             print("q: quit")
 
-        valid_choices: list[str] = ["1", "2", "3", "4", "5", "6"]
+        valid_choices: list[str] = ["1", "2", "3", "4", "5", "6", "d"]
 
         clear()
 
@@ -192,6 +196,11 @@ class ComposeCLIContext(AbstractContextManager):
                     self.container_name = input("Enter container name: ")
                 command = self._logs()
             case "6":
+                if not hasattr(self, "container_name"):
+                    self.container_name = input("Enter container name: ")
+                command = self._up(build=True)
+                command = self._logs()
+            case "d":
                 command = self._down()
             case _:
                 raise ValueError(f"Invalid choice: {self.choice}")

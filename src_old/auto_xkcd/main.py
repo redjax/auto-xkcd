@@ -24,6 +24,7 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
+
 def _setup() -> None:
     log.info("Analyzing existing data...")
 
@@ -68,7 +69,7 @@ Alt Text: {current_comic.alt_text}
     missing_imgs: None = pipeline_retrieve_missing_imgs()
 
     with xkcd.helpers.ComicNumsController() as comicnums_ctl:
-        ALL_COMIC_NUMS: list[int] = [n for n in range(1, comicnums_ctl.highest)]
+        ALL_COMIC_NUMS: list[int] = [n for n in range(1, comicnums_ctl.highest())]
 
     log.info("Searching for downloadable comics")
     dl_comics: list[xkcd_mod.XKCDComic] = pipeline_multiple_comics(
@@ -77,6 +78,10 @@ Alt Text: {current_comic.alt_text}
 
     if dl_comics:
         log.info(f"Downloaded [{len(dl_comics)}] comic(s)")
+
+    ## Update img_saved row of CSV data. Do this last
+    log.info("Synching saved comic data...")
+    pipeline_update_img_saved_vals()
 
 
 if __name__ == "__main__":

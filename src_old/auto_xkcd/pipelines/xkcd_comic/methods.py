@@ -14,11 +14,13 @@ import pandas as pd
 from pipelines import helpers
 from red_utils.std import hash_utils
 
+
 def save_img_update_csv(
     comic_res: httpx.Response = None,
     comic: xkcd_mod.XKCDComic = None,
     output_dir: t.Union[str, Path] = COMIC_IMG_DIR,
     ignore_comic_nums: list[int] | None = xkcd.IGNORE_COMIC_NUMS,
+    request_sleep: int = 5,
 ):
     assert comic_res, ValueError("Missing httpx.Response object")
     assert isinstance(comic_res, httpx.Response), TypeError(
@@ -90,6 +92,9 @@ def save_img_update_csv(
             log.error(msg)
 
             raise msg
+
+        log.info(f"Waiting [{request_sleep}] second(s) between requests...")
+        time.sleep(request_sleep)
 
 
 def pipeline_current_comic(
@@ -542,6 +547,11 @@ def pipeline_retrieve_missing_imgs(
 
         try:
             save_img_update_csv(comic_res=missing_comic_res, comic=comic)
+        except httpx.ConnectTimeout as _timeout:
+            msg = Exception(f"Timeout requesting missing comic for {comic.comic_num}")
+            log.error(msg)
+
+            raise _timeout
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception saving missing image for comic #{comic.comic_num}. Details: {exc}"

@@ -8,6 +8,7 @@ from .constants import COMIC_NUMS_CSV
 from loguru import logger as log
 import pandas as pd
 
+
 class ComicNumsController:
     def __init__(self, filename: t.Union[str, Path] | None = COMIC_NUMS_CSV):
         if filename is None:
@@ -198,7 +199,7 @@ class ComicNumsController:
             return comic_nums
         except KeyError as key_err:
             msg = Exception(
-                f"Could not load list of comic_nums from DataFrame. Is the DataFrame empty?"
+                "Could not load list of comic_nums from DataFrame. Is the DataFrame empty?"
             )
             log.error(msg)
 
@@ -209,7 +210,7 @@ class ComicNumsController:
             )
             log.error(msg)
 
-            raise msg
+            raise exc
 
     def max_comic_num(self) -> int:
         if self.df.empty:
