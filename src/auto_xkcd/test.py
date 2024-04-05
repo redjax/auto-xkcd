@@ -8,7 +8,7 @@ from core import database
 from core.request_client import HTTPXController, get_cache_transport
 from core.dependencies import db_settings, get_db, settings, CACHE_TRANSPORT
 from core.paths import ENSURE_DIRS, SERIALIZE_DIR, DATA_DIR
-from packages import data_ctl
+from modules import data_ctl
 import httpx
 import hishel
 from loguru import logger as log
