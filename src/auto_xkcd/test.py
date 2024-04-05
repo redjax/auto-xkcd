@@ -8,6 +8,7 @@ from core import database
 from core.request_client import HTTPXController, get_cache_transport
 from core.dependencies import db_settings, get_db, settings, CACHE_TRANSPORT
 from core.paths import ENSURE_DIRS, SERIALIZE_DIR, DATA_DIR
+from packages import data_ctl
 import httpx
 import hishel
 from loguru import logger as log
@@ -131,21 +132,25 @@ def _get_multiple(
 
 
 def main(cache_transport: hishel.CacheTransport = None):
-    current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
-    current_img_saved = xkcd.comic.img.save_img(
-        comic=current_comic, output_filename=f"{current_comic.comic_num}.png"
-    )
+    # current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
+    # current_img_saved = xkcd.comic.img.save_img(
+    #     comic=current_comic, output_filename=f"{current_comic.comic_num}.png"
+    # )
 
-    comics: list[xkcd_mod.XKCDComic] = _get_multiple(
-        comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
-    )
-    saved_comics: list[xkcd_mod.XKCDComic] = []
-    for c in comics:
-        comic_saved = xkcd.comic.img.save_img(
-            comic=c, output_filename=f"{c.comic_num}.png"
-        )
-        if comic_saved:
-            saved_comics.append(c)
+    # comics: list[xkcd_mod.XKCDComic] = _get_multiple(
+    #     comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
+    # )
+    # saved_comics: list[xkcd_mod.XKCDComic] = []
+    # for c in comics:
+    #     comic_saved = xkcd.comic.img.save_img(
+    #         comic=c, output_filename=f"{c.comic_num}.png"
+    #     )
+    #     if comic_saved:
+    #         saved_comics.append(c)
+
+    with data_ctl.SavedImgsController() as savedimgs_ctl:
+        log.debug(f"Found images for comic numbers: {savedimgs_ctl.comic_nums}")
+        log.debug(f"Images: {savedimgs_ctl.comic_imgs}")
 
     # scraped_comics = xkcd.comic.scraper.start_scrape(cache_transport=cache_transport)
 
