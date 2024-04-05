@@ -45,7 +45,6 @@ def convert_response_to_dict(res: httpx.Response = None) -> dict:
     )
 
     with HTTPXController() as httpx_ctl:
-        log.debug(f"Converting comic Response to dict")
         try:
             comic_dict: dict = httpx_ctl.decode_res_content(res=res)
 
@@ -85,8 +84,6 @@ def get_current_comic(
         url=xkcd_mod.CURRENT_XKCD_URL, cache_transport=cache_transport
     )
     comic_dict: dict = convert_response_to_dict(res=_comic)
-
-    log.debug(f"Converting current comic dict to XKCDComic")
     comic: xkcd_mod.XKCDComic = convert_dict_to_xkcdcomic(_dict=comic_dict)
 
     return comic

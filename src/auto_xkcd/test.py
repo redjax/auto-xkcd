@@ -89,7 +89,7 @@ def update_comic_nums_file(
                 f.write(f"{line}\n")
 
 
-def _get_current(cache_transport: hishel.CacheTransport = None):
+def _get_current(cache_transport: hishel.CacheTransport = None) -> xkcd_mod.XKCDComic:
     current_comic: xkcd_mod.XKCDComic = xkcd.comic.get_current_comic(
         cache_transport=cache_transport
     )
@@ -103,6 +103,8 @@ def _get_current(cache_transport: hishel.CacheTransport = None):
     )
 
     # update_comic_nums_file(comic_num=current_comic.comic_num)
+
+    return current_comic
 
 
 def _get_multiple(
@@ -129,13 +131,17 @@ def _get_multiple(
 
 
 def main(cache_transport: hishel.CacheTransport = None):
-    current_comic = _get_current(cache_transport=cache_transport)
+    current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
 
-    comics: list[xkcd_mod.XKCDComic] = _get_multiple(
-        comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
-    )
+    # comics: list[xkcd_mod.XKCDComic] = _get_multiple(
+    #     comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
+    # )
 
     # scraped_comics = xkcd.comic.scraper.start_scrape(cache_transport=cache_transport)
+
+    img_test = xkcd.comic.img.save_img(
+        comic=current_comic, output_filename=f"{current_comic.comic_num}.png"
+    )
 
 
 if __name__ == "__main__":

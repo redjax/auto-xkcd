@@ -43,27 +43,32 @@ def serialize_dict(
             )
             log.trace(exc)
 
-            raise exc
+            # raise exc
+
+            return False
 
     output_path: Path = Path(f"{output_dir}/{filename}")
 
     try:
         packed = msgpack.packb(data)
-        log.debug(f"Serialized object type: {type(packed)}")
+
     except Exception as exc:
         msg = Exception(f"Unhandled exception serializing input. Details: {exc}")
         log.error(msg)
         log.trace(exc)
 
-        raise exc
+        # raise exc
+        return False
 
     if output_path.exists():
-        log.debug(f"Output path exists, skipping: {output_path}")
-        return
+        log.warning(f"Serialized file already exists, skipping: {output_path}")
+        return True
 
     try:
         with open(output_path, "wb") as f:
             f.write(packed)
+
+        return True
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception saving serialized data to file '{output_path}'. Details: {exc}"
@@ -71,4 +76,6 @@ def serialize_dict(
         log.error(msg)
         log.trace(exc)
 
-        raise exc
+        # raise exc
+
+        return False

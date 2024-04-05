@@ -6,3 +6,4 @@ from .methods import (
     request_comic,
 )
 from . import scraper
+from . import img
