@@ -104,13 +104,17 @@ def save_bytes(
         with open(output_path, "wb") as f:
             f.write(img_bytes)
             log.success(f"Image saved to path '{output_path}'")
+
+        return True
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception saving image to path '{output_path}'. Details: {exc}"
         )
         log.error(msg)
 
-        raise msg
+        # raise msg
+
+        return False
 
 
 def save_img(

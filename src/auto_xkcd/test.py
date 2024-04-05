@@ -132,16 +132,22 @@ def _get_multiple(
 
 def main(cache_transport: hishel.CacheTransport = None):
     current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
-
-    # comics: list[xkcd_mod.XKCDComic] = _get_multiple(
-    #     comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
-    # )
-
-    # scraped_comics = xkcd.comic.scraper.start_scrape(cache_transport=cache_transport)
-
-    img_test = xkcd.comic.img.save_img(
+    current_img_saved = xkcd.comic.img.save_img(
         comic=current_comic, output_filename=f"{current_comic.comic_num}.png"
     )
+
+    comics: list[xkcd_mod.XKCDComic] = _get_multiple(
+        comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
+    )
+    saved_comics: list[xkcd_mod.XKCDComic] = []
+    for c in comics:
+        comic_saved = xkcd.comic.img.save_img(
+            comic=c, output_filename=f"{c.comic_num}.png"
+        )
+        if comic_saved:
+            saved_comics.append(c)
+
+    # scraped_comics = xkcd.comic.scraper.start_scrape(cache_transport=cache_transport)
 
 
 if __name__ == "__main__":
