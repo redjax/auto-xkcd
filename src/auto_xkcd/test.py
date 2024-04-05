@@ -5,8 +5,8 @@ import random
 import typing as t
 
 from core import database
-from core.request_client import HTTPXController
-from core.dependencies import db_settings, get_db, settings
+from core.request_client import HTTPXController, get_cache_transport
+from core.dependencies import db_settings, get_db, settings, CACHE_TRANSPORT
 from core.paths import ENSURE_DIRS, SERIALIZE_DIR, DATA_DIR
 import httpx
 import hishel
@@ -77,41 +77,65 @@ def update_comic_nums_file(
     with open(file, "r") as f:
         lines = f.readlines()
         comic_nums: list[int] = []
-        for l in lines:
-            stripped = int(l.strip())
+        for line in lines:
+            stripped = int(line.strip())
             comic_nums.append(stripped)
 
     if comic_num not in comic_nums:
         log.debug(f"Comic num [{comic_num}] not in comic_nums: {comic_nums}")
         lines.append(comic_num)
         with open(file, "w") as f:
-            for l in lines:
-                f.write(f"{l}\n")
+            for line in lines:
+                f.write(f"{line}\n")
 
 
-def main():
-    XKCD_BASE_URL: str = "https://xkcd.com"
-    CURRENT_COMIC_ENDPOINT: str = "/info.0.json"
-    CURRENT_COMIC_URL: str = f"{XKCD_BASE_URL}/{CURRENT_COMIC_ENDPOINT}"
-
-    # Create a cache instance with hishel
-    CACHE_STORAGE = hishel.FileStorage(base_path=".cache/hishel", ttl=None)
-    HTTP_TRANSPORT = httpx.HTTPTransport(verify=True, cert=None, retries=3)
-    # Create an HTTP cache transport
-    CACHE_TRANSPORT = hishel.CacheTransport(
-        transport=HTTP_TRANSPORT, storage=CACHE_STORAGE
+def _get_current(cache_transport: hishel.CacheTransport = None):
+    current_comic: xkcd_mod.XKCDComic = xkcd.comic.get_current_comic(
+        cache_transport=cache_transport
     )
-
-    current_comic: xkcd_mod.XKCDComic = xkcd.comic.get_current_comic()
     log.info(f"Current comic: {current_comic}")
 
-    comic_serial = serialize_utils.serialize_dict(
+    ## Serialize comic to msgpack file
+    serialize_utils.serialize_dict(
         data=current_comic.model_dump(),
         output_dir=f"{SERIALIZE_DIR}/comic_responses",
         filename=f"{current_comic.comic_num}.msgpack",
     )
 
-    update_comic_nums_file(comic_num=current_comic.comic_num)
+    # update_comic_nums_file(comic_num=current_comic.comic_num)
+
+
+def _get_multiple(
+    comic_nums: list[int] = None, cache_transport: hishel.CacheTransport = None
+) -> list[xkcd_mod.XKCDComic]:
+    comics: list[xkcd_mod.XKCDComic] = xkcd.comic.get_multiple_comics(
+        comic_nums=comic_nums, cache_transport=cache_transport
+    )
+    log.info(f"Requested [{len(comics)}] comic(s)")
+
+    for c in comics:
+        log.debug(f"Comic: {c}")
+
+        ## Serialize comic to msgpack file
+        serialize_utils.serialize_dict(
+            data=c.model_dump(),
+            output_dir=f"{SERIALIZE_DIR}/comic_responses",
+            filename=f"{c.comic_num}.msgpack",
+        )
+
+        # update_comic_nums_file(comic_num=c.comic_num)
+
+    return comics
+
+
+def main(cache_transport: hishel.CacheTransport = None):
+    current_comic = _get_current(cache_transport=cache_transport)
+
+    comics: list[xkcd_mod.XKCDComic] = _get_multiple(
+        comic_nums=[1, 15, 64, 83, 125, 65], cache_transport=cache_transport
+    )
+
+    # scraped_comics = xkcd.comic.scraper.start_scrape(cache_transport=cache_transport)
 
 
 if __name__ == "__main__":
@@ -127,4 +151,6 @@ if __name__ == "__main__":
 
     _setup()
 
-    main()
+    cache_transport = get_cache_transport(retries=3)
+
+    main(cache_transport=cache_transport)

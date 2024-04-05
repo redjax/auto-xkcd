@@ -46,7 +46,7 @@ class HTTPXController(AbstractContextManager):
         retries: int | None = None,
         timeout: t.Union[int, float] | None = 60,
         limits: httpx.Limits | None = None,
-        transport: httpx.HTTPTransport | hishel.CacheTransport | None = None,
+        transport: t.Union[httpx.HTTPTransport, hishel.CacheTransport] | None = None,
         default_encoding: str = autodetect_charset,
     ):
         self.url: httpx.URL | None = httpx.URL(url) if url else None
@@ -63,7 +63,9 @@ class HTTPXController(AbstractContextManager):
         self.retries: int | None = retries
         self.timeout: t.Union[int, float] | None = timeout
         self.limits: httpx.Limits | None = limits
-        self.transport: httpx.HTTPTransport | hishel.CacheTransport | None = transport
+        self.transport: t.Union[httpx.HTTPTransport, hishel.CacheTransport] | None = (
+            transport
+        )
         self.default_encoding: str = default_encoding
 
         ## Placeholder for initialized httpx.Client
@@ -197,40 +199,6 @@ class HTTPXController(AbstractContextManager):
             log.error(msg)
 
             raise msg
-
-    def get_cache_transport(
-        self,
-        cache_dir: str = ".cache/hishel",
-        ttl: int | None = None,
-        verify: bool = True,
-        retries: int = 0,
-        cert: t.Union[
-            str, tuple[str, str | None], tuple[str, str | None, str | None]
-        ] = None,
-    ) -> hishel.CacheTransport:
-        if not retries:
-            retries = self.retries
-
-        # Create a cache instance with hishel
-        cache_storage = hishel.FileStorage(base_path=cache_dir, ttl=ttl)
-        cache_transport = httpx.HTTPTransport(verify=verify, cert=cert, retries=retries)
-
-        try:
-            # Create an HTTP cache transport
-            cache_transport = hishel.CacheTransport(
-                transport=cache_transport, storage=cache_storage
-            )
-
-            self.transport = cache_transport
-
-            return self
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception returning cache transport. Details: {exc}"
-            )
-            log.error(msg)
-
-            raise exc
 
     def decode_res_content(self, res: httpx.Response = None) -> dict:
         """Use multiple methods to attempt to decode an `httpx.Response.content` bytestring."""

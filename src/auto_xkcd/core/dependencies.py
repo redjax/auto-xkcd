@@ -5,6 +5,7 @@ import typing as t
 
 from core import _exc, database
 from core.config import AppSettings, DBSettings, MinioSettings, TelegramSettings
+from core.request_client import get_cache_transport
 from dynaconf import Dynaconf
 import hishel
 import httpx
@@ -47,6 +48,8 @@ minio_settings: MinioSettings = MinioSettings(
 DB_URI: sa.URL = db_settings.get_db_uri()
 ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)
 SESSION_POOL: so.sessionmaker[so.Session] = database.get_session_pool(engine=ENGINE)
+
+CACHE_TRANSPORT: hishel.CacheTransport = get_cache_transport(retries=3)
 
 
 @contextmanager
