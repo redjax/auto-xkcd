@@ -60,25 +60,21 @@ class CurrentComicMeta(BaseModel):
         raise ValidationError
 
     @field_validator("last_updated")
-    def validate_date_sent(cls, v) -> pendulum.Date:
+    def validate_date_sent(cls, v) -> pendulum.DateTime:
         if v is None:
             return None
 
-        if isinstance(v, pendulum.Date):
-            if isinstance(v, pendulum.DateTime):
-                return v.date()
+        if isinstance(v, pendulum.DateTime):
             return v
+
         else:
             if isinstance(v, datetime.datetime):
-                d = pendulum.instance(v).date()
-
-                return d
-            elif isinstance(v, datetime.date):
                 d = pendulum.instance(v)
 
                 return d
+
             elif isinstance(v, str):
-                d = pendulum.parse(v).date()
+                d = pendulum.parse(v)
 
         raise ValidationError
 
@@ -94,13 +90,13 @@ class XKCDComicBase(BaseModel):
     year: str = Field(default=None)
     month: str = Field(default=None)
     day: str = Field(default=None)
-    comic_num: int = Field(default=None, alias="num")
+    num: int = Field(default=None, alias="num")
     link: str | None = Field(default=None)
     title: str = Field(default=None)
     transcript: str | None = Field(default=None)
     alt_text: str = Field(default=None, alias="alt")
     img_url: str = Field(default=None, alias="img")
-    img: bytes = Field(default=None, repr=False)
+    img_bytes: bytes | None = Field(default=None, repr=False)
 
     @property
     def telegram_msg(self) -> str:
@@ -108,7 +104,7 @@ class XKCDComicBase(BaseModel):
         msg: str = f"""XKCD Comic for {self.month}-{self.day}-{self.year}
 
 Title: {self.title}
-Comic Number: {self.comic_num}
+Comic Number: {self.num}
 Transcript: {self.transcript}
 Alt: {self.alt_text}
 Link: {self.img_url}
@@ -120,12 +116,12 @@ Link: {self.img_url}
     @property
     def comic_num_hash(self) -> str:
         try:
-            _hash: str = hash_utils.get_hash_from_str(input_str=str(self.comic_num))
+            _hash: str = hash_utils.get_hash_from_str(input_str=str(self.num))
 
             return _hash
         except Exception as exc:
             msg = Exception(
-                f"Unhandled exception getting hash from comic num ({type(self.comic_num)}): {self.comic_num}. Details: {exc}"
+                f"Unhandled exception getting hash from comic num ({type(self.num)}): {self.num}. Details: {exc}"
             )
 
             raise msg

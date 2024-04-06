@@ -99,10 +99,10 @@ def _get_current(cache_transport: hishel.CacheTransport = None) -> xkcd_mod.XKCD
     serialize_utils.serialize_dict(
         data=current_comic.model_dump(),
         output_dir=f"{SERIALIZE_DIR}/comic_responses",
-        filename=f"{current_comic.comic_num}.msgpack",
+        filename=f"{current_comic.num}.msgpack",
     )
 
-    # update_comic_nums_file(comic_num=current_comic.comic_num)
+    # update_comic_nums_file(comic_num=current_comic.num)
 
     return current_comic
 
@@ -122,10 +122,10 @@ def _get_multiple(
         serialize_utils.serialize_dict(
             data=c.model_dump(),
             output_dir=f"{SERIALIZE_DIR}/comic_responses",
-            filename=f"{c.comic_num}.msgpack",
+            filename=f"{c.num}.msgpack",
         )
 
-        # update_comic_nums_file(comic_num=c.comic_num)
+        # update_comic_nums_file(comic_num=c.num)
 
     return comics
 
@@ -133,7 +133,7 @@ def _get_multiple(
 def main(cache_transport: hishel.CacheTransport = None):
     current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
     current_img_saved = xkcd.comic.img.save_img(
-        comic=current_comic, output_filename=f"{current_comic.comic_num}.png"
+        comic=current_comic, output_filename=f"{current_comic.num}.png"
     )
 
     comics: list[xkcd_mod.XKCDComic] = _get_multiple(
@@ -141,9 +141,7 @@ def main(cache_transport: hishel.CacheTransport = None):
     )
     saved_comics: list[xkcd_mod.XKCDComic] = []
     for c in comics:
-        comic_saved = xkcd.comic.img.save_img(
-            comic=c, output_filename=f"{c.comic_num}.png"
-        )
+        comic_saved = xkcd.comic.img.save_img(comic=c, output_filename=f"{c.num}.png")
         if comic_saved:
             saved_comics.append(c)
 

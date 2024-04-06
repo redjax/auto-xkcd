@@ -83,8 +83,13 @@ def get_current_comic(
     _comic: None | httpx.Response = request_comic(
         url=xkcd_mod.CURRENT_XKCD_URL, cache_transport=cache_transport
     )
+    # log.debug(f"Current comic response ({type(_comic)}): {_comic}")
+
     comic_dict: dict = convert_response_to_dict(res=_comic)
+    # log.debug(f"Current comic response dict ({type(comic_dict)}): {comic_dict}")
     comic: xkcd_mod.XKCDComic = convert_dict_to_xkcdcomic(_dict=comic_dict)
+    # log.debug(f"Current XKCD Comic ({type(comic)}): {comic}")
+    comic.link = f"{xkcd_mod.XKCD_URL_BASE}/{comic.num}"
 
     return comic
 
@@ -113,7 +118,7 @@ def get_multiple_comics(
             continue
 
         c_url: str = f"{xkcd_mod.XKCD_URL_BASE}/{c}/{xkcd_mod.XKCD_URL_POSTFIX}"
-        log.debug(f"Requesting comic URL: {c_url}")
+        # log.debug(f"Requesting comic URL: {c_url}")
 
         comic_res: httpx.Response = request_comic(
             url=c_url, cache_transport=cache_transport

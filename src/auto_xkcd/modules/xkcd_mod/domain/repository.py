@@ -12,6 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
+
 class XKCDComicRepository(XKCDComicRepositoryBase):
     def __init__(self, session: so.Session) -> None:
         assert session is not None, ValueError("session cannot be None")
@@ -66,7 +67,7 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
         _nums: list[int] = []
 
         for _comic in all_comics:
-            _nums.append(_comic.comic_num)
+            _nums.append(_comic.num)
 
         return _nums
 
@@ -150,7 +151,7 @@ class XKCDSentComicRepository(XKCDSentComicRepositoryBase):
         _nums: list[int] = []
 
         for _comic in all_sent_comics:
-            _nums.append(_comic.comic_num)
+            _nums.append(_comic.num)
 
         return _nums
 

@@ -30,10 +30,10 @@ def start_scrape(cache_transport: hishel.CacheTransport = None):
     current_comic: xkcd_mod.XKCDComic = get_current_comic(
         cache_transport=cache_transport
     )
-    log.debug(f"Current XKCD comic: #{current_comic.comic_num}")
+    log.debug(f"Current XKCD comic: #{current_comic.num}")
 
     missing_comic_imgs: list[int] = find_missing_comic_imgs(
-        current_comic_num=current_comic.comic_num
+        current_comic_num=current_comic.num
     )
     if not missing_comic_imgs:
         log.warning(

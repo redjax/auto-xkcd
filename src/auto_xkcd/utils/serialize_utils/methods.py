@@ -9,7 +9,10 @@ import msgpack
 
 
 def serialize_dict(
-    data: dict = None, output_dir: t.Union[str, Path] = None, filename: str = None
+    data: dict = None,
+    output_dir: t.Union[str, Path] = None,
+    filename: str = None,
+    overwrite: bool = False,
 ):
     assert data, ValueError("Missing data dict to serialize.")
     assert isinstance(data, dict), TypeError(
@@ -60,9 +63,10 @@ def serialize_dict(
         # raise exc
         return False
 
-    if output_path.exists():
-        log.warning(f"Serialized file already exists, skipping: {output_path}")
-        return True
+    if not overwrite:
+        if output_path.exists():
+            log.warning(f"Serialized file already exists, skipping: {output_path}")
+            return True
 
     try:
         with open(output_path, "wb") as f:

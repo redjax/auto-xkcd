@@ -34,6 +34,7 @@ def get_saved_imgs(
     _imgs: list[Path] = path_utils.scan_dir(
         target=comic_img_dir, as_pathlib=True, return_type="files"
     )
+    # log.debug(f"_imgs ({type(_imgs)}): {_imgs}")
 
     if as_int:
         int_list: list[int] = []
@@ -99,7 +100,7 @@ def save_bytes(
 
             raise msg
 
-    log.debug(f"Saving image bytes.")
+    # log.debug(f"Saving image bytes.")
     try:
         with open(output_path, "wb") as f:
             f.write(img_bytes)
@@ -162,11 +163,40 @@ def save_img(
         f"output_filename must be a string. Got type: ({type(output_filename)})"
     )
 
-    saved_imgs: list[int] = get_saved_imgs()
-    if comic.comic_num in saved_imgs:
-        log.warning(f"Comic #{comic.comic_num} image has already been saved. Skipping.")
+    try:
+        saved_imgs: list[int] = get_saved_imgs()
+        if saved_imgs is None:
+            log.warning(f"Did not find any saved images in path '{output_dir}'.")
 
-        return
+            return False
+
+        if isinstance(saved_imgs, list):
+            log.debug(
+                f"Found [{len(saved_imgs)}] saved image(s) in path '{output_dir}'."
+            )
+        else:
+            log.error(
+                f"saved_imgs should be a list of integers. Got type: ({type(saved_imgs)})"
+            )
+
+            return False
+
+    except Exception as exc:
+        msg = Exception(f"Could not load saved comic image numbers. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    if comic.num in saved_imgs:
+        log.warning(f"Comic #{comic.num} image has already been saved. Skipping.")
+
+        return True
+
+    if comic.img_url is None:
+        log.warning(
+            f"Image URL for comic #{comic.num}' is None. Requesting comic #{comic.num} to get image URL"
+        )
 
     img_bytes: bytes = request_img(
         cache_transport=cache_transport, img_url=comic.img_url
@@ -175,7 +205,7 @@ def save_img(
         img_bytes=img_bytes, output_dir=output_dir, output_filename=output_filename
     )
     if not _saved:
-        log.warning(f"Could not save image for comic #{comic.comic_num}")
+        log.warning(f"Could not save image for comic #{comic.num}")
         return False
 
     return True

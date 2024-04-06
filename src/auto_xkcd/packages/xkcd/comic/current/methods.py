@@ -68,7 +68,7 @@ def read_current_comic_meta(
     try:
         with open(current_comic_file, "r") as f:
             _data = json.load(f)
-            log.debug(f"Current comic metadata ({type(_data)}): {_data}")
+            # log.debug(f"Current comic metadata ({type(_data)}): {_data}")
 
     except Exception as exc:
         msg = Exception(
