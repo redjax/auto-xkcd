@@ -1,1 +1,1 @@
-from .context_managers.file import SavedImgsController
+from .context_managers.file import SavedImgsController, CurrentComicController

@@ -17,3 +17,5 @@ ENSURE_DIRS: list[Path] = [
     CACHE_DIR,
     COMIC_IMG_DIR,
 ]
+
+CURRENT_COMIC_FILE: Path = Path(f"{DATA_DIR}/current_comic.json")

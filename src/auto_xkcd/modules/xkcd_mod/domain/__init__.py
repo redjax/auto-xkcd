@@ -8,4 +8,5 @@ from .schemas import (
     XKCDComicOut,
     XKCDSentComic,
     XKCDSentComicOut,
+    CurrentComicMeta,
 )

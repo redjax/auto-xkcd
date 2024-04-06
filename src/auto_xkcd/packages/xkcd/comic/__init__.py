@@ -7,3 +7,4 @@ from .methods import (
 )
 from . import scraper
 from . import img
+from .current import read_current_comic_meta, update_current_comic_meta

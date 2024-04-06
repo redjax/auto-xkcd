@@ -1,1 +1,1 @@
-from .handlers import SavedImgsController
+from .handlers import SavedImgsController, CurrentComicController

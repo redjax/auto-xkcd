@@ -17,4 +17,5 @@ from .paths import (
     ENSURE_DIRS,
     PQ_DIR,
     SERIALIZE_DIR,
+    CURRENT_COMIC_FILE,
 )

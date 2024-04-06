@@ -1,11 +1,23 @@
 import typing as t
 from pathlib import Path
 from contextlib import AbstractContextManager
+import json
 
-from core.paths import DATA_DIR, SERIALIZE_DIR, COMIC_IMG_DIR
+from core.paths import DATA_DIR, SERIALIZE_DIR, COMIC_IMG_DIR, CURRENT_COMIC_FILE
 
 from loguru import logger as log
 from red_utils.std import path_utils
+
+import pendulum
+
+
+def get_ts(as_str: bool = False) -> t.Union[str, pendulum.DateTime]:
+    ts: pendulum.DateTime = pendulum.now()
+
+    if as_str:
+        ts: str = ts.format("YYYY-MM-DD_HH:mm:ss")
+
+    return ts
 
 
 class SavedImgsController(AbstractContextManager):
@@ -45,3 +57,59 @@ class SavedImgsController(AbstractContextManager):
             log.trace(traceback)
 
             return
+
+
+class CurrentComicController(AbstractContextManager):
+    def __init__(
+        self,
+        current_comic_file: t.Union[str, Path] = CURRENT_COMIC_FILE,
+        mode: str = "r",
+    ):
+        assert current_comic_file, ValueError("Missing current comic details file")
+        assert isinstance(current_comic_file, str) or isinstance(
+            current_comic_file, Path
+        ), TypeError(
+            f"current_comic_file must be a str or Path. Got type: ({type(current_comic_file)})"
+        )
+        if isinstance(current_comic_file, str):
+            current_comic_file: Path = Path(current_comic_file)
+        if "~" in f"{current_comic_file}":
+            current_comic_file = current_comic_file.expanduser()
+
+        self.mode = mode.lower()
+        self.current_comic_file: Path = current_comic_file
+        self.current_comic_meta: dict = {
+            "comic_num": None,
+            "last_updated": None,
+        }
+
+    def __enter__(self):
+        self.file = open(self.current_comic_file, self.mode)
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            log.error(f"({exc_type}): {exc_value}")
+            log.trace(traceback)
+
+            return
+
+        if self.file:
+            self.file.close()
+
+    def read(self):
+        if self.mode != "r":
+            raise ValueError(
+                f"File not opened in read mode. Opened with mode: {self.mode}"
+            )
+
+        return json.load(self.file)
+
+    def write(self, data):
+        if self.mode != "w":
+            raise ValueError(
+                f"File not opened in write mode. Opened with mode: {self.mode}"
+            )
+
+        json.dump(data, self.file)

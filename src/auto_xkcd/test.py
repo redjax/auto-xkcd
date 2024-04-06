@@ -15,6 +15,7 @@ from loguru import logger as log
 
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
+from red_utils.ext import time_utils
 
 from utils import serialize_utils
 
@@ -132,7 +133,7 @@ def _get_multiple(
 
 
 def main(cache_transport: hishel.CacheTransport = None):
-    # current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
+    current_comic: xkcd_mod.XKCDComic = _get_current(cache_transport=cache_transport)
     # current_img_saved = xkcd.comic.img.save_img(
     #     comic=current_comic, output_filename=f"{current_comic.comic_num}.png"
     # )
@@ -148,11 +149,21 @@ def main(cache_transport: hishel.CacheTransport = None):
     #     if comic_saved:
     #         saved_comics.append(c)
 
-    with data_ctl.SavedImgsController() as savedimgs_ctl:
-        log.debug(f"Found images for comic numbers: {savedimgs_ctl.comic_nums}")
-        log.debug(f"Images: {savedimgs_ctl.comic_imgs}")
+    # with data_ctl.SavedImgsController() as savedimgs_ctl:
+    #     log.debug(f"Found images for comic numbers: {savedimgs_ctl.comic_nums}")
+    #     log.debug(f"Images: {savedimgs_ctl.comic_imgs}")
 
     # scraped_comics = xkcd.comic.scraper.start_scrape(cache_transport=cache_transport)
+
+    current_meta = xkcd_mod.CurrentComicMeta = xkcd_mod.CurrentComicMeta(
+        comic_num=current_comic.comic_num, last_updated=None
+    )
+    log.debug(f"Current comic metadata: {current_meta}")
+
+    xkcd.comic.update_current_comic_meta(current_comic=current_meta)
+
+    _current_meta = xkcd.comic.read_current_comic_meta()
+    log.debug(f"Current comic metadata: {_current_meta}")
 
 
 if __name__ == "__main__":
