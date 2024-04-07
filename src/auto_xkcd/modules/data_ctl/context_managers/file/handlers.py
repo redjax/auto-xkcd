@@ -5,10 +5,12 @@ import json
 from pathlib import Path
 import typing as t
 
+from core.constants import IGNORE_COMIC_NUMS
 from core.paths import COMIC_IMG_DIR, CURRENT_COMIC_FILE, DATA_DIR, SERIALIZE_DIR
 from loguru import logger as log
 import pendulum
 from red_utils.std import path_utils
+
 
 def get_ts(as_str: bool = False) -> t.Union[str, pendulum.DateTime]:
     ts: pendulum.DateTime = pendulum.now()
@@ -39,16 +41,33 @@ class SavedImgsController(AbstractContextManager):
     def __enter__(self):
         _imgs: list[Path] = []
         _img_nums: list[int] = []
-        for p in path_utils.scan_dir(
-            self.img_dir, as_pathlib=True, return_type="files"
-        ):
-            _imgs.append(p)
-            _img_nums.append(int(p.stem))
 
-        self.comic_imgs = sorted(_imgs)
-        self.comic_nums = sorted(_img_nums)
+        try:
+            for p in path_utils.scan_dir(
+                self.img_dir, as_pathlib=True, return_type="files"
+            ):
+                log.debug(f"IGNORE_COMIC_NUMS ({type(IGNORE_COMIC_NUMS)})")
+                log.debug(f"Path stem ({type(p.stem)}): {p.stem}")
+                if int(p.stem) in IGNORE_COMIC_NUMS:
+                    log.warning(f"Ignoring comic #{p.stem}")
+                    continue
 
-        return self
+                _imgs.append(p)
+                _img_nums.append(int(p.stem))
+
+            self.comic_imgs = sorted(_imgs)
+            self.comic_nums = sorted(_img_nums)
+
+            return self
+
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception scanning path '{self.img_dir}' for saved comics. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type:

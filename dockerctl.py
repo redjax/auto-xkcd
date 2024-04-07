@@ -59,7 +59,12 @@ def prompt_env(loop_msg: str = None) -> str:
         if loop_msg:
             print(loop_msg)
 
-        choice = input("> Which environment (dev|prod)?: ").lower()
+        choice = input("> Which environment [options: (d)ev|(p)rod]?: ").lower()
+
+        if choice in ["d", "dev"]:
+            choice = "dev"
+        elif choice in ["p", "prod"]:
+            choice = "prod"
 
         if choice not in ["dev", "prod"]:
             msg = ValueError(
