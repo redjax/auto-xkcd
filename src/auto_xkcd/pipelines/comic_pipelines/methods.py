@@ -14,7 +14,6 @@ from packages.xkcd.comic import read_current_comic_meta
 import pendulum
 from utils import serialize_utils
 
-
 def _get_current(
     cache_transport: hishel.CacheTransport = None,
     force_live_request: bool = False,

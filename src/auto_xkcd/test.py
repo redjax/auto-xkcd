@@ -22,7 +22,6 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
-
 def main(cache_transport: hishel.CacheTransport = None):
     current_comic: xkcd_mod.XKCDComic = comic_pipelines.pipeline_get_current_comic(
         cache_transport=cache_transport
