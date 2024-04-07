@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from .methods import _get_current, _get_multiple, _list_missing_comic_imgs
 
+from core.constants import IGNORE_COMIC_NUMS
 import hishel
 from loguru import logger as log
 from modules import xkcd_mod
 from packages import xkcd
+from packages.xkcd.comic.img import save_img
+
 
 def pipeline_get_current_comic(
     cache_transport: hishel.CacheTransport = None, force_live_request: bool = False
@@ -59,9 +62,7 @@ def pipeline_get_multiple_comics(
 
     saved_comics: list[xkcd_mod.XKCDComic] = []
     for c in comics:
-        comic_saved: bool = xkcd.comic.img.save_img(
-            comic=c, output_filename=f"{c.num}.png"
-        )
+        comic_saved: bool = save_img(comic=c, output_filename=f"{c.num}.png")
         if comic_saved:
             saved_comics.append(c)
 
@@ -74,21 +75,44 @@ def pipeline_scrape_missing_comics(
     assert cache_transport, ValueError("Missing cache transport  for request client")
 
     log.info(f"Getting current XKCD comic number")
-    current_comic: xkcd_mod.XKCDComic = pipeline_get_current_comic(
-        cache_transport=cache_transport
-    )
-    current_comic: xkcd_mod.XKCDComic = _get_current(
-        cache_transport=cache_transport, force_live_request=True
-    )
-    log.debug(f"Current XKCD comic: #{current_comic.num}")
+    try:
+        current_comic: xkcd_mod.XKCDComic = pipeline_get_current_comic(
+            cache_transport=cache_transport
+        )
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception getting current comic. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
 
-    missing_comic_imgs: list[int] = _list_missing_comic_imgs(
-        current_comic_num=current_comic.num
-    )
+        raise exc
+
+    # try:
+    #     current_comic: xkcd_mod.XKCDComic = _get_current(
+    #         cache_transport=cache_transport, force_live_request=True
+    #     )
+    #     log.debug(f"Current XKCD comic: #{current_comic.num}")
+    # except Exception as exc:
+
+    try:
+        missing_comic_imgs: list[int] = _list_missing_comic_imgs(
+            current_comic_num=current_comic.num
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting list of missing comic image numbers. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
     if not missing_comic_imgs:
         log.warning(
             f"Did not find any missing comic images. Either an error occurred, or all comic images have been downloaded."
         )
+
+        return None
+
     if len(missing_comic_imgs) > 1:
         log.debug(f"Scraping [{len(missing_comic_imgs)}] missing comic(s)")
     else:

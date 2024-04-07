@@ -2,8 +2,42 @@
 # version: "3"
 
 services:
-  autoxkcd:
-    container_name: auto-xkcd-d
+  # autoxkcd:
+  #   container_name: auto-xkcd-d
+  #   build:
+  #     context: ..
+  #     dockerfile: containers/auto-xkcd/Dockerfile
+  #     target: dev
+  #   env_file:
+  #     - env_files/dev.env
+  #   working_dir: /app
+  #   command: ["python", "src/auto_xkcd/demo.py"]
+
+  #   ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
+  #   # entrypoint: ["pwd"]
+  #   # entrypoint: ["ls", "-la", "."]
+  #   # entrypoint: ["ls", "-la", "/app"]
+  #   volumes:
+  #     - ../src:/app/src
+  #     - ${AUTOXKCD_DATA_DIR:-./container_data/dev/auto-xkcd/data}:/app/.data
+  #     - ${AUTOXKCD_LOGS_DIR:-./container_data/dev/auto-xkcd/logs}:/app/logs
+  #   environment:
+  #     ENV_FOR_DYNACONF: dev
+  #     DYNACONF_ENV: dev
+  #     DYNACONF_CONTAINER_ENV: true
+  #     DYNACONF_LOG_LEVEL: "DEBUG"
+  #     DYNACONF_LOGS_DIR: "logs/dev"
+
+  #     DYNACONF_MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}
+  #     DYNACONF_MINIO_PORT: ${AUTOXKCD_MINIO_PORT:-9000}
+  #     DYNACONF_MINIO_HTTPS: ${AUTOXKCD_MINIO_HTTPS:-true}
+  #     DYNACONF_MINIO_USERNAME: ${AUTOXKCD_MINIO_USERNAME:-auto-xkcd}
+  #     DYNACONF_MINIO_PASSWORD: ${AUTOXKCD_MINIO_PASSWORD:-""}
+  #     DYNACONF_MINIO_ACCESS_KEY: ${AUTOXKCD_MINIO_ACCESS_KEY:-""}
+  #     DYNACONF_MINIO_ACCESS_SECRET: ${AUTOXKCD_MINIO_ACCESS_SECRET:-""}
+
+  autoxkcd-scraper:
+    container_name: auto-xkcd-scraper-d
     build:
       context: ..
       dockerfile: containers/auto-xkcd/Dockerfile
@@ -11,7 +45,7 @@ services:
     env_file:
       - env_files/dev.env
     working_dir: /app
-    command: ["python", "src/auto_xkcd/demo.py"]
+    command: ["python", "src/auto_xkcd/start_comic_scraper.py"]
 
     ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
     # entrypoint: ["pwd"]
@@ -25,7 +59,7 @@ services:
       ENV_FOR_DYNACONF: dev
       DYNACONF_ENV: dev
       DYNACONF_CONTAINER_ENV: true
-      DYNACONF_LOG_LEVEL: "DEBUG"
+      DYNACONF_LOG_LEVEL: "INFO"
       DYNACONF_LOGS_DIR: "logs/dev"
 
       DYNACONF_MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}

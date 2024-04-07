@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import typing as t
-
+from core.constants import IGNORE_COMIC_NUMS
 from core.paths import DATA_DIR, SERIALIZE_DIR
 import hishel
 import httpx
@@ -10,9 +10,16 @@ from loguru import logger as log
 from modules import data_ctl, xkcd_mod
 import msgpack
 from packages import xkcd
-from packages.xkcd.comic import read_current_comic_meta
+from packages.xkcd.comic import (
+    read_current_comic_meta,
+    update_current_comic_meta,
+    get_multiple_comics,
+    get_current_comic,
+    get_specific_comic,
+)
 import pendulum
 from utils import serialize_utils
+
 
 def _get_current(
     cache_transport: hishel.CacheTransport = None,
@@ -67,7 +74,7 @@ def _get_current(
     if force_live_request:
         log.warning(f"force_live_request=True, skipping check for existing comic data.")
 
-        current_comic: xkcd_mod.XKCDComic = xkcd.comic.get_current_comic(
+        current_comic: xkcd_mod.XKCDComic = get_current_comic(
             cache_transport=cache_transport
         )
         log.info(f"Current comic: {current_comic}")
@@ -97,7 +104,7 @@ def _get_current(
             raise exc
 
         try:
-            xkcd.comic.update_current_comic_meta(current_comic=current_meta)
+            update_current_comic_meta(current_comic=current_meta)
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception updating current_comic_metadata file with metadata: {current_meta}. Details: {exc}"
@@ -221,6 +228,10 @@ def _get_multiple(
 
     deserialized_comics: list[xkcd_mod.XKCDComic] = []
     for num in comic_nums:
+        if num in IGNORE_COMIC_NUMS:
+            log.warning(f"Ignoring comic #{num}")
+            continue
+
         serialized_res_path: Path = Path(
             f"{SERIALIZE_DIR}/comic_responses/{num}.msgpack"
         )
@@ -288,7 +299,7 @@ def _get_multiple(
 
     # log.debug(f"Comic nums: {comic_nums}")
 
-    comics: list[xkcd_mod.XKCDComic] = xkcd.comic.get_multiple_comics(
+    comics: list[xkcd_mod.XKCDComic] = get_multiple_comics(
         comic_nums=comic_nums,
         cache_transport=cache_transport,
         request_sleep=request_sleep,
@@ -316,11 +327,24 @@ def _get_multiple(
 
 
 def _list_missing_comic_imgs(current_comic_num: int = None):
-    with data_ctl.SavedImgsController() as imgs_ctl:
-        saved_comic_nums: list[int] = imgs_ctl.comic_nums
+    try:
+        with data_ctl.SavedImgsController() as imgs_ctl:
+            saved_comic_nums: list[int] = imgs_ctl.comic_nums
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting list of saved comic numbers. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
 
     missing_comic_nums: list[int] = []
     for i in range(1, current_comic_num):
+        if i in IGNORE_COMIC_NUMS:
+            log.warning(f"Skipping comic #{i}.")
+            continue
+
         if i not in saved_comic_nums:
             missing_comic_nums.append(i)
 

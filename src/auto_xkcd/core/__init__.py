@@ -9,6 +9,7 @@ from .dependencies import (
     settings,
     telegram_settings,
 )
+from .constants import IGNORE_COMIC_NUMS
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,
