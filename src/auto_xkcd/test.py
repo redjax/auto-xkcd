@@ -51,11 +51,13 @@ def main(cache_transport: hishel.CacheTransport = None):
     # log.debug(f"Image saved ({type(current_img_saved)}): {current_img_saved}")
 
     comics: list[xkcd_mod.XKCDComic] = comic_pipelines.pipeline_get_multiple_comics(
-        cache_transport=cache_transport, comic_nums=[1, 15, 64, 83, 125, 65]
+        cache_transport=cache_transport,
+        comic_nums=[1, 15, 64, 83, 125, 65],
+        request_sleep=5,
     )
 
     scraped_comics = comic_pipelines.pipeline_scrape_missing_comics(
-        cache_transport=cache_transport
+        cache_transport=cache_transport, request_sleep=5
     )
 
     _current_meta: xkcd_mod.CurrentComicMeta = xkcd.comic.read_current_comic_meta()

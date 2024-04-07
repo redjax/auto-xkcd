@@ -32,6 +32,7 @@ def pipeline_get_multiple_comics(
     cache_transport: hishel.CacheTransport = None,
     comic_nums: list[int] = None,
     force_live_request: bool = False,
+    request_sleep: int = 5,
 ) -> list[xkcd_mod.XKCDComic]:
     assert cache_transport, ValueError("Missing cache transport for request client")
     assert comic_nums, ValueError("Missing list of comic numbers to scrape")
@@ -43,7 +44,9 @@ def pipeline_get_multiple_comics(
 
     try:
         comics: list[xkcd_mod.XKCDComic] = _get_multiple(
-            cache_transport=cache_transport, comic_nums=comic_nums
+            cache_transport=cache_transport,
+            comic_nums=comic_nums,
+            request_sleep=request_sleep,
         )
 
     except Exception as exc:
@@ -64,7 +67,9 @@ def pipeline_get_multiple_comics(
     return saved_comics
 
 
-def pipeline_scrape_missing_comics(cache_transport: hishel.CacheTransport = None):
+def pipeline_scrape_missing_comics(
+    cache_transport: hishel.CacheTransport = None, request_sleep: int = 5
+):
     assert cache_transport, ValueError("Missing cache transport  for request client")
 
     log.info(f"Getting current XKCD comic number")
@@ -88,6 +93,16 @@ def pipeline_scrape_missing_comics(cache_transport: hishel.CacheTransport = None
     else:
         log.debug(f"Scraping 1 comic: {missing_comic_imgs[0]}")
 
-    for missing_img in missing_comic_imgs:
-        # log.debug(f"Scraping comic #{missing_img}")
-        pass
+    scraped_comics: list[xkcd_mod.XKCDComic] = pipeline_get_multiple_comics(
+        cache_transport=cache_transport,
+        comic_nums=missing_comic_imgs,
+        request_sleep=request_sleep,
+    )
+    if scraped_comics is None or len(scraped_comics) == 0:
+        log.warning(f"No comics were scraped. Have all comic images been downloaded?")
+
+        return []
+
+    log.debug(f"Scraped [{len(scraped_comics)}] comic(s)")
+
+    return scraped_comics

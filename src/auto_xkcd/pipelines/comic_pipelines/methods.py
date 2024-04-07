@@ -210,21 +210,24 @@ def _get_current(
 
 
 def _get_multiple(
-    comic_nums: list[int] = None, cache_transport: hishel.CacheTransport = None
+    comic_nums: list[int] = None,
+    cache_transport: hishel.CacheTransport = None,
+    request_sleep: int = 5,
 ) -> list[xkcd_mod.XKCDComic]:
 
     # if len(comic_nums) > 50:
     #     log.warning(f"Large list of comics detected. Breaking into smaller chunks.")
-
-    log.debug(f"ORIGINAL COMIC NUMS: {comic_nums}")
 
     deserialized_comics: list[xkcd_mod.XKCDComic] = []
     for num in comic_nums:
         serialized_res_path: Path = Path(
             f"{SERIALIZE_DIR}/comic_responses/{num}.msgpack"
         )
-        log.debug(f"Searching for serialized response: {serialized_res_path}")
+
+        # log.debug(f"Searching for serialized response: {serialized_res_path}")
         if serialized_res_path.exists():
+            ## Found serialized response
+
             log.success(
                 f"Comic #{num} found in serialized responses. Loading from file '{serialized_res_path}'"
             )
@@ -258,8 +261,12 @@ def _get_multiple(
                 raise exc
 
         else:
-            log.warning(f"Did not find serialized response for comic #{num}")
-            pass
+            ## Did not find serialized response
+
+            ## Suppress log output for large lists of comic numbers. Keeps from cluttering up the logs
+            if len(comic_nums) < 20:
+                log.warning(f"Did not find serialized response for comic #{num}")
+            continue
 
     if deserialized_comics:
         log.debug(
@@ -278,10 +285,12 @@ def _get_multiple(
 
         return deserialized_comics
 
-    log.debug(f"Comic nums: {comic_nums}")
+    # log.debug(f"Comic nums: {comic_nums}")
 
     comics: list[xkcd_mod.XKCDComic] = xkcd.comic.get_multiple_comics(
-        comic_nums=comic_nums, cache_transport=cache_transport
+        comic_nums=comic_nums,
+        cache_transport=cache_transport,
+        request_sleep=request_sleep,
     )
     log.info(f"Requested [{len(comics)}] comic(s)")
 
