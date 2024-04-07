@@ -1,17 +1,15 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
+
+from contextlib import AbstractContextManager, contextmanager
 import json
-
-from contextlib import contextmanager, AbstractContextManager
-
-import httpx
-import hishel
+from pathlib import Path
+import typing as t
 
 ## For auto detecting response character set
 import chardet
-
+import hishel
+import httpx
 from loguru import logger as log
-
 
 def autodetect_charset(content: bytes = None):
     try:

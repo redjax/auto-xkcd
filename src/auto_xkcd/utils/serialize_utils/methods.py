@@ -7,7 +7,6 @@ from core.paths import SERIALIZE_DIR
 from loguru import logger as log
 import msgpack
 
-
 def serialize_dict(
     data: dict = None,
     output_dir: t.Union[str, Path] = None,

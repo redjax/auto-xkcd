@@ -1,8 +1,9 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from loguru import logger as log
-
 
 def save_bytes(
     img_bytes: bytes = None,

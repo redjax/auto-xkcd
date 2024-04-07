@@ -1,17 +1,17 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
-from core.request_client import HTTPXController, save_bytes
 from core.paths import COMIC_IMG_DIR, SERIALIZE_DIR
-from modules import xkcd_mod, data_ctl
-from packages.xkcd.comic import get_specific_comic
-from utils import serialize_utils
-
-from loguru import logger as log
-from red_utils.std import path_utils
-import httpx
+from core.request_client import HTTPXController, save_bytes
 import hishel
-
+import httpx
+from loguru import logger as log
+from modules import data_ctl, xkcd_mod
+from packages.xkcd.comic import get_specific_comic
+from red_utils.std import path_utils
+from utils import serialize_utils
 
 def request_img(
     cache_transport: hishel.CacheTransport = None, img_url: str = None

@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import typing as t
-from loguru import logger as log
+
 import hishel
 import httpx
-
+from loguru import logger as log
 
 def get_cache_transport(
     cache_dir: str = ".cache/hishel",

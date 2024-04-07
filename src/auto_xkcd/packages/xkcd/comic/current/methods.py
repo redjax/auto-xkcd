@@ -1,13 +1,14 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
+
 import json
+from pathlib import Path
+import typing as t
 
 from .json_encoders import DateTimeEncoder
+
 from core.paths import CURRENT_COMIC_FILE
-from modules import xkcd_mod
-
 from loguru import logger as log
-
+from modules import xkcd_mod
 
 def validate_current_comic_file(current_comic_file: t.Union[str, Path] = None) -> Path:
     assert current_comic_file, ValueError("Missing current comic details file")

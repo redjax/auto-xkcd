@@ -1,8 +1,10 @@
-import typing as t
-from datetime import datetime
-import pendulum
-import json
+from __future__ import annotations
 
+from datetime import datetime
+import json
+import typing as t
+
+import pendulum
 
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, o):

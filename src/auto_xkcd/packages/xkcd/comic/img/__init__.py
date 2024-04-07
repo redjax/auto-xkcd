@@ -1,1 +1,3 @@
-from .methods import save_img, save_bytes, request_img
+from __future__ import annotations
+
+from .methods import request_img, save_bytes, save_img

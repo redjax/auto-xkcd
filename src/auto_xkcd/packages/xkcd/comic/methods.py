@@ -1,17 +1,16 @@
-import typing as t
-import time
+from __future__ import annotations
+
 from pathlib import Path
+import time
+import typing as t
 
-from core.paths import SERIALIZE_DIR, COMIC_IMG_DIR
+from core.paths import COMIC_IMG_DIR, SERIALIZE_DIR
 from core.request_client import HTTPXController, save_bytes
-from modules import xkcd_mod, data_ctl
-from utils import serialize_utils
-
-from loguru import logger as log
-
 import hishel
 import httpx
-
+from loguru import logger as log
+from modules import data_ctl, xkcd_mod
+from utils import serialize_utils
 
 def request_comic(
     url: str = None, cache_transport: hishel.CacheTransport = None

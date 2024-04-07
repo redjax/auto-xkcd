@@ -1,10 +1,11 @@
-from modules import xkcd_mod
+from __future__ import annotations
+
 from .methods import _get_current, _get_multiple, _list_missing_comic_imgs
-from packages import xkcd
 
-from loguru import logger as log
 import hishel
-
+from loguru import logger as log
+from modules import xkcd_mod
+from packages import xkcd
 
 def pipeline_get_current_comic(
     cache_transport: hishel.CacheTransport = None, force_live_request: bool = False
@@ -69,7 +70,7 @@ def pipeline_get_multiple_comics(
 
 def pipeline_scrape_missing_comics(
     cache_transport: hishel.CacheTransport = None, request_sleep: int = 5
-):
+) -> list[xkcd_mod.XKCDComic] | None:
     assert cache_transport, ValueError("Missing cache transport  for request client")
 
     log.info(f"Getting current XKCD comic number")
@@ -101,7 +102,7 @@ def pipeline_scrape_missing_comics(
     if scraped_comics is None or len(scraped_comics) == 0:
         log.warning(f"No comics were scraped. Have all comic images been downloaded?")
 
-        return []
+        return
 
     log.debug(f"Scraped [{len(scraped_comics)}] comic(s)")
 

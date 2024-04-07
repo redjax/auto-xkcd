@@ -1,15 +1,14 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
+
 from contextlib import AbstractContextManager
 import json
+from pathlib import Path
+import typing as t
 
-from core.paths import DATA_DIR, SERIALIZE_DIR, COMIC_IMG_DIR, CURRENT_COMIC_FILE
-
+from core.paths import COMIC_IMG_DIR, CURRENT_COMIC_FILE, DATA_DIR, SERIALIZE_DIR
 from loguru import logger as log
-from red_utils.std import path_utils
-
 import pendulum
-
+from red_utils.std import path_utils
 
 def get_ts(as_str: bool = False) -> t.Union[str, pendulum.DateTime]:
     ts: pendulum.DateTime = pendulum.now()

@@ -1,17 +1,17 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
-from modules import xkcd_mod, data_ctl
-from packages import xkcd
-from core.paths import SERIALIZE_DIR, DATA_DIR
-from utils import serialize_utils
-
-from loguru import logger as log
-import pendulum
-import httpx
+from core.paths import DATA_DIR, SERIALIZE_DIR
 import hishel
+import httpx
+from loguru import logger as log
+from modules import data_ctl, xkcd_mod
 import msgpack
-
+from packages import xkcd
+import pendulum
+from utils import serialize_utils
 
 def _get_current(
     cache_transport: hishel.CacheTransport = None,

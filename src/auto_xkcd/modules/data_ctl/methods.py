@@ -1,11 +1,11 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
-from core.paths import DATA_DIR, COMIC_IMG_DIR, SERIALIZE_DIR
-
+from core.paths import COMIC_IMG_DIR, DATA_DIR, SERIALIZE_DIR
 from loguru import logger as log
 from red_utils.std import path_utils
-
 
 def update_comic_nums_file(
     file: t.Union[str, Path] = f"{DATA_DIR}/comic_nums.txt", comic_num: int = None

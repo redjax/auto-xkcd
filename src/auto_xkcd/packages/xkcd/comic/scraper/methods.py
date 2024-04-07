@@ -1,17 +1,16 @@
+from __future__ import annotations
+
 import typing as t
 
-from modules import xkcd_mod, data_ctl
+import hishel
+import httpx
+from loguru import logger as log
+from modules import data_ctl, xkcd_mod
 from packages.xkcd.comic.methods import (
+    get_current_comic,
     get_multiple_comics,
     request_comic,
-    get_current_comic,
 )
-
-
-from loguru import logger as log
-import httpx
-import hishel
-
 
 def list_missing_comic_imgs(current_comic_num: int = None):
     with data_ctl.SavedImgsController() as imgs_ctl:

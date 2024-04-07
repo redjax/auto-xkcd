@@ -12,9 +12,8 @@ from pydantic import (
     computed_field,
     field_validator,
 )
-from red_utils.std import hash_utils
 from red_utils.ext import time_utils
-
+from red_utils.std import hash_utils
 
 class ComicNumCSVData(BaseModel):
     comic_num: t.Union[int, str] = Field(default=None)

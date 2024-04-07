@@ -5,40 +5,21 @@ import random
 import typing as t
 
 from core import database
+from core.dependencies import CACHE_TRANSPORT, db_settings, get_db, settings
+from core.paths import DATA_DIR, ENSURE_DIRS, SERIALIZE_DIR
 from core.request_client import HTTPXController, get_cache_transport
-from core.dependencies import db_settings, get_db, settings, CACHE_TRANSPORT
-from core.paths import ENSURE_DIRS, SERIALIZE_DIR, DATA_DIR
-
-from modules import data_ctl
-from utils import serialize_utils
-from modules import xkcd_mod
-from packages import xkcd
-from pipelines import comic_pipelines
-
-import httpx
 import hishel
-import pendulum
+import httpx
 from loguru import logger as log
-
+from modules import data_ctl, setup, xkcd_mod
+import msgpack
+from packages import xkcd
+import pendulum
+from pipelines import comic_pipelines
+from red_utils.ext import time_utils
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
-from red_utils.ext import time_utils
-import msgpack
-
-
-def _setup() -> None:
-    log.info("Analyzing existing data...")
-
-    try:
-        path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception creating initial directories. Details: {exc}"
-        )
-        log.error(msg)
-
-        raise exc
-
+from utils import serialize_utils
 
 def main(cache_transport: hishel.CacheTransport = None):
     current_comic: xkcd_mod.XKCDComic = comic_pipelines.pipeline_get_current_comic(
@@ -60,9 +41,6 @@ def main(cache_transport: hishel.CacheTransport = None):
         cache_transport=cache_transport, request_sleep=5
     )
 
-    _current_meta: xkcd_mod.CurrentComicMeta = xkcd.comic.read_current_comic_meta()
-    # log.debug(f"Current comic metadata: {_current_meta}")
-
 
 if __name__ == "__main__":
     init_logger(
@@ -75,7 +53,7 @@ if __name__ == "__main__":
 
     log.info(f"Start auto-xkcd")
 
-    _setup()
+    setup._setup()
 
     cache_transport: hishel.CacheTransport = get_cache_transport(retries=3)
 
