@@ -94,6 +94,24 @@ def get_current_comic(
     return comic
 
 
+def get_specific_comic(
+    cache_transport: hishel.CacheTransport = None, comic_num: int = None
+) -> xkcd_mod.XKCDComic:
+    comic_url: str = f"{xkcd_mod.XKCD_URL_BASE}/{comic_num}/{xkcd_mod.XKCD_URL_POSTFIX}"
+    comic_res: httpx.Response = request_comic(
+        url=comic_url, cache_transport=cache_transport
+    )
+    log.debug(
+        f"Comic #{comic_num} response: [{comic_res.status_code}: {comic_res.reason_phrase}]"
+    )
+    comic_dict: dict = convert_response_to_dict(res=comic_res)
+    log.debug(f"Comic #{comic_num} res dict: {comic_dict}")
+    comic: xkcd_mod.XKCDComic = convert_dict_to_xkcdcomic(_dict=comic_dict)
+    log.debug(f"Comic #{comic_num}: {comic_num}")
+
+    return comic
+
+
 def get_multiple_comics(
     comic_nums: list[int] = None, cache_transport: hishel.CacheTransport = None
 ) -> list[xkcd_mod.XKCDComic]:

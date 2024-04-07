@@ -13,7 +13,7 @@ import httpx
 import hishel
 
 
-def find_missing_comic_imgs(current_comic_num: int = None):
+def list_missing_comic_imgs(current_comic_num: int = None):
     with data_ctl.SavedImgsController() as imgs_ctl:
         saved_comic_nums: list[int] = imgs_ctl.comic_nums
 
@@ -32,7 +32,7 @@ def start_scrape(cache_transport: hishel.CacheTransport = None):
     )
     log.debug(f"Current XKCD comic: #{current_comic.num}")
 
-    missing_comic_imgs: list[int] = find_missing_comic_imgs(
+    missing_comic_imgs: list[int] = list_missing_comic_imgs(
         current_comic_num=current_comic.num
     )
     if not missing_comic_imgs:
@@ -43,3 +43,7 @@ def start_scrape(cache_transport: hishel.CacheTransport = None):
         log.debug(f"Scraping [{len(missing_comic_imgs)}] missing comic(s)")
     else:
         log.debug(f"Scraping 1 comic: {missing_comic_imgs[0]}")
+
+    for missing_img in missing_comic_imgs:
+        # log.debug(f"Scraping comic #{missing_img}")
+        pass

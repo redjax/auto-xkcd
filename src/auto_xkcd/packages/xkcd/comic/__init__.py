@@ -4,6 +4,7 @@ from .methods import (
     convert_dict_to_xkcdcomic,
     convert_response_to_dict,
     request_comic,
+    get_specific_comic,
 )
 from . import scraper
 from . import img

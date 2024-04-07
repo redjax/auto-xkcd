@@ -2,8 +2,10 @@ import typing as t
 from pathlib import Path
 
 from core.request_client import HTTPXController
-from core.paths import COMIC_IMG_DIR
+from core.paths import COMIC_IMG_DIR, SERIALIZE_DIR
 from modules import xkcd_mod
+from packages.xkcd.comic import get_specific_comic
+from utils import serialize_utils
 
 from loguru import logger as log
 from red_utils.std import path_utils
@@ -136,13 +138,15 @@ def save_img(
         )
         with HTTPXController() as httpx_ctl:
             comic_dict: dict = httpx_ctl.decode_res_content(res=comic)
-        _comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(comic_dict)
+            _comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(comic_dict)
 
-        comic = _comic
+        comic: xkcd_mod.XKCDComic = _comic
+
     if isinstance(comic, dict):
         log.warning(f"Input comic is a dict. Converting to XKCDComic instance.")
         _comic: xkcd_mod.XKCDComic = xkcd_mod.XKCDComic.model_validate(comic)
-        comic = _comic
+        comic: xkcd_mod.XKCDComic = _comic
+        log.debug(f"Converted comic dict to XKCDComic ({type(comic)}): {comic}")
 
     assert output_dir, ValueError("Missing output directory path")
     assert isinstance(output_dir, str) or isinstance(output_dir, Path), TypeError(
@@ -194,14 +198,66 @@ def save_img(
         return True
 
     if comic.img_url is None:
+        log.debug(f"⚠️  Detected empty comic.img_url: {comic}")
         log.warning(
             f"Image URL for comic #{comic.num}' is None. Requesting comic #{comic.num} to get image URL"
         )
 
-    img_bytes: bytes = request_img(
-        cache_transport=cache_transport, img_url=comic.img_url
-    )
-    _saved = save_bytes(
+        ## Re-request comic response
+        try:
+            _comic_new: xkcd_mod.XKCDComic = get_specific_comic(
+                cache_transport=cache_transport, comic_num=comic.num
+            )
+            comic: xkcd_mod.XKCDComic = _comic_new
+            log.debug(f"Updated comic #{comic.num}: {comic}")
+
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception refreshing img_url for comic #{comic.num}. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
+
+        ## Serialize response
+        try:
+            serialize_utils.serialize_dict(
+                data=comic.model_dump(),
+                output_dir=f"{SERIALIZE_DIR}/comic_responses",
+                filename=f"{comic.num}.msgpack",
+                overwrite=True,
+            )
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception serializing comic #{comic.num} response. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
+
+        ## Get img bytes
+        try:
+            img_bytes: bytes = request_img(
+                cache_transport=cache_transport, img_url=comic.img_url
+            )
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception requesting comic #{comic.num} image bytes. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(msg)
+
+            raise exc
+
+    else:
+        ## Found comic.img_url, request img bytes
+        img_bytes: bytes = request_img(
+            cache_transport=cache_transport, img_url=comic.img_url
+        )
+
+    _saved: bool = save_bytes(
         img_bytes=img_bytes, output_dir=output_dir, output_filename=output_filename
     )
     if not _saved:
