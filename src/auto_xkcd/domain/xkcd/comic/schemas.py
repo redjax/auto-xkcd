@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 import typing as t
 
+from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
+
 import pendulum
 from pydantic import (
     BaseModel,
@@ -100,7 +102,7 @@ class XKCDComicBase(BaseModel):
     month: str = Field(default=None)
     day: str = Field(default=None)
     num: int = Field(default=None, alias="num")
-    link: str | None = Field(default=None)
+    # link: str | None = Field(default=None)
     title: str = Field(default=None)
     transcript: str | None = Field(default=None)
     alt_text: str = Field(default=None, alias="alt")
@@ -120,6 +122,13 @@ Link: {self.img_url}
 """
 
         return msg
+
+    @computed_field
+    @property
+    def link(self) -> str:
+        _link: str = f"{XKCD_URL_BASE}/{self.num}"
+
+        return _link
 
     @computed_field
     @property

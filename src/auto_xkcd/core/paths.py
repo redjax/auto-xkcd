@@ -7,9 +7,14 @@ PQ_DIR: Path = Path(f"{DATA_DIR}/parquet")
 BACKUP_DIR: Path = Path(f"{DATA_DIR}/backup")
 COMIC_IMG_DIR: Path = Path(f"{DATA_DIR}/comic_imgs")
 
+SERIALIZE_COMIC_RESPONSES_DIR: Path = Path(f"{SERIALIZE_DIR}/comic_responses")
+SERIALIZE_COMIC_OBJECTS_DIR: Path = Path(f"{SERIALIZE_DIR}/xkcdcomic_objects")
+
 ENSURE_DIRS: list[Path] = [
     DATA_DIR,
     SERIALIZE_DIR,
+    SERIALIZE_COMIC_RESPONSES_DIR,
+    SERIALIZE_COMIC_OBJECTS_DIR,
     PQ_DIR,
     BACKUP_DIR,
     CACHE_DIR,
