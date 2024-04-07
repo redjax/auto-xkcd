@@ -34,8 +34,19 @@ def main(cache_transport: hishel.CacheTransport = None):
         with request_client.HTTPXController(transport=cache_transport) as httpx_ctl:
             res: httpx.Response = httpx_ctl.send_request(request=current_comic_req)
             log.debug(
-                f"Current comic response: [{res.status_code}: {res.reason_phrase}]: {res.text}"
+                f"Current comic response: [{res.status_code}: {res.reason_phrase}]"
             )
+
+            if not res.status_code == 200:
+                log.warning(
+                    f"Non-200 status code: [{res.status_code}: {res.reason_phrase}]: {res.text}"
+                )
+
+                raise NotImplementedError(
+                    f"Error handling for non-200 status codes not yet implemented."
+                )
+
+        log.success(f"Current XKCD comic requested")
 
     except Exception as exc:
         msg = Exception(f"Unhandled exception requesting current comic. Details: {exc}")

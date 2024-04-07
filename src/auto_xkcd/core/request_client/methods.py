@@ -11,7 +11,14 @@ def save_bytes(
     _bytes: bytes = None,
     output_dir: t.Union[str, Path] = None,
     output_filename: str = None,
-):
+) -> bool:
+    """Save bytestring to a file.
+
+    Params:
+        output_dir (str|Path): Directory where bytes file will be saved.
+        output_filename (str): Name of the file to be saved at `output_dir/`output_filename`.
+
+    """
     assert output_dir, ValueError("Missing output directory path")
     assert isinstance(output_dir, str) or isinstance(output_dir, Path), TypeError(
         f"output_dir must be a str or Path. Got type: ({type(output_dir)})"
@@ -36,8 +43,10 @@ def save_bytes(
         f"_bytes must be of type bytes. Got type: ({type(_bytes)})"
     )
 
+    ## Concatenate output_dir and output_filename into a Path object
     output_path: Path = Path(f"{output_dir}/{output_filename}")
     if not output_path.parent.exists():
+        ## Create output_dir if it does not exist.
         log.warning(
             f"Parent directory '{output_path.parent}' does not exist. Creating."
         )
@@ -51,13 +60,14 @@ def save_bytes(
 
             raise msg
 
-    # log.debug(f"Saving image bytes.")
+    ## Save img bytes
     try:
         with open(output_path, "wb") as f:
             f.write(_bytes)
             log.success(f"Image saved to path '{output_path}'")
 
         return True
+
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception saving image to path '{output_path}'. Details: {exc}"
