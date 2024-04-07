@@ -10,8 +10,10 @@ from loguru import logger as log
 from modules import data_ctl, xkcd_mod
 import msgpack
 from packages import xkcd
+from packages.xkcd.comic import read_current_comic_meta
 import pendulum
 from utils import serialize_utils
+
 
 def _get_current(
     cache_transport: hishel.CacheTransport = None,
@@ -110,7 +112,7 @@ def _get_current(
 
         return current_comic
 
-    _current_meta: xkcd_mod.CurrentComicMeta = xkcd.comic.read_current_comic_meta()
+    _current_meta: xkcd_mod.CurrentComicMeta = read_current_comic_meta()
     # log.debug(f"Current comic metadata: {_current_meta}")
 
     if _current_meta.comic_num is None:

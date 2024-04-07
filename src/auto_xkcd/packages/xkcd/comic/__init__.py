@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from . import img, scraper
+# from . import img, scraper
 from .current import read_current_comic_meta, update_current_comic_meta
 from .methods import (
     convert_dict_to_xkcdcomic,

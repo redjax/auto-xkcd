@@ -14,6 +14,7 @@ from loguru import logger as log
 from modules import data_ctl, setup, xkcd_mod
 import msgpack
 from packages import xkcd
+from packages.xkcd.comic.img import save_img
 import pendulum
 from pipelines import comic_pipelines
 from red_utils.ext import time_utils
@@ -21,12 +22,13 @@ from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
+
 def main(cache_transport: hishel.CacheTransport = None):
     current_comic: xkcd_mod.XKCDComic = comic_pipelines.pipeline_get_current_comic(
         cache_transport=cache_transport
     )
     # log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
-    current_img_saved: bool = xkcd.comic.img.save_img(
+    current_img_saved: bool = save_img(
         comic=current_comic, output_filename=f"{current_comic.num}.png"
     )
     # log.debug(f"Image saved ({type(current_img_saved)}): {current_img_saved}")
