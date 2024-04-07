@@ -1,3 +1,9 @@
+"""Methods meant to be called early during execution.
+
+Handle setup tasks, like creating directories that must exist, initializing logging, etc.
+
+"""
+
 from pathlib import Path
 
 from core.config import AppSettings
@@ -8,6 +14,7 @@ from loguru import logger as log
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 
+## Default loguru sinks
 DEFAULT_LOGGING_SINKS: list = [
     sinks.LoguruSinkStdErr(level=settings.log_level).as_dict(),
     sinks.LoguruSinkAppFile(sink=f"logs/{settings.env}/app.log").as_dict(),
@@ -18,17 +25,19 @@ DEFAULT_LOGGING_SINKS: list = [
 
 def logging_setup(
     settings: AppSettings = settings, sinks: list = DEFAULT_LOGGING_SINKS
-):
+) -> None:
+    """Initialize app logging (with Loguru)."""
     assert settings, ValueError("Missing AppSettings object")
     assert isinstance(settings, AppSettings), TypeError(
         f"settings must be of type AppSettings. Got type: ({type(settings)})"
     )
 
-    init_logger(sinks=DEFAULT_LOGGING_SINKS)
+    init_logger(sinks=sinks)
     log.info("Logging initialized")
 
 
-def setup_ensure_dirs(ensure_dirs: list[Path] = ENSURE_DIRS):
+def setup_ensure_dirs(ensure_dirs: list[Path] = ENSURE_DIRS) -> None:
+    """Loop over list of Paths, create them if they do not exist."""
     try:
         path_utils.ensure_dirs_exist(ensure_dirs=ensure_dirs)
     except Exception as exc:
@@ -44,6 +53,7 @@ def setup_ensure_dirs(ensure_dirs: list[Path] = ENSURE_DIRS):
 def base_app_setup(
     settings: AppSettings = settings, ensure_dirs: list[Path] = ENSURE_DIRS
 ) -> None:
+    """Run setup methods."""
     assert settings, ValueError("Missing AppSettings object")
     assert isinstance(settings, AppSettings), TypeError(
         f"settings must be of type AppSettings. Got type: ({type(settings)})"
