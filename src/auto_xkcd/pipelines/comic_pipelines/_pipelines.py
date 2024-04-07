@@ -1,5 +1,6 @@
 from modules import xkcd_mod
 from .methods import _get_current, _get_multiple, _list_missing_comic_imgs
+from packages import xkcd
 
 from loguru import logger as log
 import hishel
@@ -44,7 +45,6 @@ def pipeline_get_multiple_comics(
         comics: list[xkcd_mod.XKCDComic] = _get_multiple(
             cache_transport=cache_transport, comic_nums=comic_nums
         )
-        return comics
 
     except Exception as exc:
         msg = Exception(f"Unhandled exception scraping multiple comics. Details: {exc}")
@@ -52,6 +52,16 @@ def pipeline_get_multiple_comics(
         log.trace(msg)
 
         raise exc
+
+    saved_comics: list[xkcd_mod.XKCDComic] = []
+    for c in comics:
+        comic_saved: bool = xkcd.comic.img.save_img(
+            comic=c, output_filename=f"{c.num}.png"
+        )
+        if comic_saved:
+            saved_comics.append(c)
+
+    return saved_comics
 
 
 def pipeline_scrape_missing_comics(cache_transport: hishel.CacheTransport = None):

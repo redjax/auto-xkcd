@@ -53,15 +53,6 @@ def main(cache_transport: hishel.CacheTransport = None):
     comics: list[xkcd_mod.XKCDComic] = comic_pipelines.pipeline_get_multiple_comics(
         cache_transport=cache_transport, comic_nums=[1, 15, 64, 83, 125, 65]
     )
-    saved_comics: list[xkcd_mod.XKCDComic] = []
-    for c in comics:
-        comic_saved = xkcd.comic.img.save_img(comic=c, output_filename=f"{c.num}.png")
-        if comic_saved:
-            saved_comics.append(c)
-
-    # with data_ctl.SavedImgsController() as savedimgs_ctl:
-    #     log.debug(f"Found images for comic numbers: {savedimgs_ctl.comic_nums}")
-    #     log.debug(f"Images: {savedimgs_ctl.comic_imgs}")
 
     scraped_comics = comic_pipelines.pipeline_scrape_missing_comics(
         cache_transport=cache_transport

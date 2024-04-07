@@ -82,7 +82,7 @@ def _get_current(
         )
 
         try:
-            current_meta = xkcd_mod.CurrentComicMeta = xkcd_mod.CurrentComicMeta(
+            current_meta: xkcd_mod.CurrentComicMeta = xkcd_mod.CurrentComicMeta(
                 comic_num=current_comic.num, last_updated=pendulum.now()
             )
             log.debug(f"Current comic metadata: {current_meta}")
