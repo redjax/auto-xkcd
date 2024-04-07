@@ -56,3 +56,12 @@ Query the [XKCD API](https://xkcd.com/json.html).
     - Check for any missing images, loop requests to retrieve
   - Synchronize data
     - Check for any downloaded images and metadata that still believes it's missing
+  - Pipelines
+    - Get current comic pipeline
+      - Load from cache/serialized, if recent request exists
+    - Scrape missing comics
+      - Loop over list of missing comic numbers
+      - Make request, serialize, download image, return `XKCDComic` object
+    - Request multiple/batch
+      - Iterate over a list of comic numbers
+      - Make request, serialize, download image, add `XKCDComic` object to a list, then return the list
