@@ -206,9 +206,12 @@ class MinioController(AbstractContextManager):
     def upload_file(
         self, bucket_name: str = None, src_file: str = None, dest_file: str = None
     ) -> bool:
-        """References:
-        https://github.com/minio/minio-py/blob/master/examples/fput_object.py
-        https://github.com/minio/minio-py/blob/master/examples/put_object.py
+        """Uploadd a file to minio.
+
+        References:
+            https://github.com/minio/minio-py/blob/master/examples/fput_object.py
+            https://github.com/minio/minio-py/blob/master/examples/put_object.py
+
         """
         file_exists_in_bucket: bool = self.file_exists_in_bucket(
             bucket_name=bucket_name, object_path=dest_file
@@ -311,7 +314,12 @@ class MinioController(AbstractContextManager):
             raise exc
 
     def delete_obj(self, bucket_name: str = None, object_path: str = None):
-        """https://github.com/minio/minio-py/blob/master/examples/remove_objects.py"""
+        """Delete object in minio storage.
+
+        References:
+            https://github.com/minio/minio-py/blob/master/examples/remove_objects.py
+
+        """
         assert bucket_name, ValueError("Missing a bucket name")
         assert isinstance(bucket_name, str), TypeError(
             f"bucket_name must be a string. Got type: ({type(bucket_name)})"
@@ -338,7 +346,12 @@ class MinioController(AbstractContextManager):
     def get_objects(
         self, bucket_name: str = None, recursive: bool = True, prefix: str = None
     ):
-        """https://github.com/minio/minio-py/blob/master/examples/list_objects.py"""
+        """List objects in a minio bucket.
+
+        References:
+            https://github.com/minio/minio-py/blob/master/examples/list_objects.py
+
+        """
         raise NotImplementedError(f"Listing objects in a bucket is not yet supported")
         assert bucket_name, ValueError("Missing a bucket name")
         assert isinstance(bucket_name, str), TypeError(
@@ -346,11 +359,12 @@ class MinioController(AbstractContextManager):
         )
 
     def download_file(self, bucket_name: str = None, object_path: str = None):
-        """https://github.com/minio/minio-py/blob/master/examples/fget_object.py"""
-        raise NotImplementedError("Downloading a single file is not yet supported.")
+        """Download a file from minio storage.
 
-    def download_file(self, bucket_name: str = None, object_path: str = None):
-        """https://github.com/minio/minio-py/blob/master/examples/get_object.py"""
+        References:
+            https://github.com/minio/minio-py/blob/master/examples/get_object.py
+
+        """
         raise NotImplementedError(f"Downloading objects is not yet implemented")
         assert bucket_name, ValueError("Missing a bucket name")
         assert isinstance(bucket_name, str), TypeError(
@@ -358,5 +372,10 @@ class MinioController(AbstractContextManager):
         )
 
     def copy_obj():
-        """https://github.com/minio/minio-py/blob/master/examples/copy_object.py"""
+        """Copy an object in minio storage.
+
+        References:
+            https://github.com/minio/minio-py/blob/master/examples/copy_object.py
+
+        """
         raise NotImplementedError("Copying objects is not yet supported.")

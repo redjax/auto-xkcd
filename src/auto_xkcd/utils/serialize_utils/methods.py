@@ -8,7 +8,10 @@ from loguru import logger as log
 import msgpack
 
 def serialize_dict(
-    data: dict = None, output_dir: t.Union[str, Path] = None, filename: str = None
+    data: dict = None,
+    output_dir: t.Union[str, Path] = None,
+    filename: str = None,
+    overwrite: bool = False,
 ):
     assert data, ValueError("Missing data dict to serialize.")
     assert isinstance(data, dict), TypeError(
@@ -24,6 +27,14 @@ def serialize_dict(
 
     if output_dir is None:
         output_dir: Path = Path(f"{SERIALIZE_DIR}/comic_responses")
+    else:
+        assert isinstance(output_dir, str) or isinstance(output_dir, Path), TypeError(
+            f"output_dir must be a string or Path object. Got type: ({type(output_dir)})"
+        )
+        if isinstance(output_dir, str):
+            output_dir: Path = Path(output_dir)
+        if "~" in f"{output_dir}":
+            output_dir: Path = output_dir.expanduser()
 
     if not output_dir.exists():
         try:
@@ -32,31 +43,42 @@ def serialize_dict(
             msg = Exception(
                 f"Unhandled exception creating directory '{output_dir}'. Details: {exc}"
             )
+            log.trace(exc)
 
-            raise msg
+            # raise exc
+
+            return False
 
     output_path: Path = Path(f"{output_dir}/{filename}")
 
     try:
         packed = msgpack.packb(data)
-        log.debug(f"Serialized objec type: {type(packed)}")
+
     except Exception as exc:
         msg = Exception(f"Unhandled exception serializing input. Details: {exc}")
         log.error(msg)
+        log.trace(exc)
 
-        raise msg
+        # raise exc
+        return False
 
-    if output_path.exists():
-        # log.warning(f"Output path exists, skipping: {output_path}")
-        return
+    if not overwrite:
+        if output_path.exists():
+            log.warning(f"Serialized file already exists, skipping: {output_path}")
+            return True
 
     try:
         with open(output_path, "wb") as f:
             f.write(packed)
+
+        return True
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception saving serialized data to file '{output_path}'. Details: {exc}"
         )
         log.error(msg)
+        log.trace(exc)
 
-        raise msg
+        # raise exc
+
+        return False

@@ -1,105 +1,62 @@
 from __future__ import annotations
 
-import json
+from pathlib import Path
 import typing as t
 
-import hishel
-import httpx
 from loguru import logger as log
 
-def simple_get(
-    request: t.Union[str, httpx.Request] = None,
-    method: str | None = "GET",
-    transport: hishel.CacheTransport = None,
-) -> httpx.Response:
-    if isinstance(request, str):
-        _req = httpx.Request(method=method, url=request)
-        request = _req
-
-    try:
-        with httpx.Client(transport=transport) as client:
-            try:
-                res: httpx.Response = client.send(request)
-                log.info(f"[{res.status_code}: {res.reason_phrase}]")
-
-                return res
-            except httpx.ConnectTimeout as _timeout:
-                msg = Exception(f"Connection timed out. Details: {_timeout}")
-                log.error(msg)
-
-                raise _timeout
-            except Exception as exc:
-                msg = Exception(f"Unhandled exception sending request. Details: {exc}")
-                log.error(msg)
-
-                raise exc
-
-    except httpx.ConnectError as _conn:
-        msg = Exception(f"Error while making remote connection. Details: {exc}")
-        log.error(msg)
-
-        raise _conn
-    except Exception as exc:
-        msg = Exception(f"Unhandled exception building request client. Details: {exc}")
-        log.error(msg)
-
-        raise exc
-
-
-def decode_res_content(res: httpx.Response = None):
-    assert res, ValueError("Missing httpx Response object")
-    assert isinstance(res, httpx.Response), TypeError(
-        f"res must be of type httpx.Response. Got type: ({type(res)})"
+def save_bytes(
+    img_bytes: bytes = None,
+    output_dir: t.Union[str, Path] = None,
+    output_filename: str = None,
+):
+    assert output_dir, ValueError("Missing output directory path")
+    assert isinstance(output_dir, str) or isinstance(output_dir, Path), TypeError(
+        f"output_dir must be a str or Path. Got type: ({type(output_dir)})"
     )
-
-    _content: bytes = res.content
-    assert _content, ValueError("Response content is empty")
-    assert isinstance(_content, bytes), TypeError(
-        f"Expected response.content to be a bytestring. Got type: ({type(_content)})"
-    )
-
-    try:
-        _decode = res.content.decode("utf-8")
-    except Exception as exc:
-        msg = Exception(
-            f"[Attempt 1/2] Unhandled exception decoding response content. Details: {exc}"
-        )
-        log.warning(msg)
-
-        if not res.encoding == "utf-8":
-            log.warning(
-                f"Retrying response content decode with encoding '{res.encoding}'"
-            )
-            try:
-                _decode = res.content.decode(res.encoding)
-            except Exception as exc:
-                inner_msg = Exception(
-                    f"[Attempt 2/2] Unhandled exception decoding response content. Details: {exc}"
-                )
-                log.error(inner_msg)
-
-                raise inner_msg
-
+    if isinstance(output_dir, Path):
+        if "~" in f"{output_dir}":
+            _dir: Path = output_dir.expanduser()
+            output_dir = _dir
+    elif isinstance(output_dir, str):
+        if "~" in output_dir:
+            output_dir: Path = Path(output_dir).expanduser()
         else:
-            log.warning(
-                f"Detected UTF-8 encoding, but decoding as UTF-8 failed. Retrying with encoding ISO-8859-1."
+            output_dir: Path = Path(output_dir)
+
+    assert output_filename, ValueError("Missing output filename")
+    assert isinstance(output_filename, str), TypeError(
+        f"output_filename must be a string. Got type: ({type(output_filename)})"
+    )
+
+    output_path: Path = Path(f"{output_dir}/{output_filename}")
+    if not output_path.parent.exists():
+        log.warning(
+            f"Parent directory '{output_path.parent}' does not exist. Creating."
+        )
+        try:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception creating directory '{output_path.parent}'. Details: {exc}"
             )
-            try:
-                _decode = res.content.decode("ISO-8859-1")
-            except Exception as exc:
-                msg = Exception(
-                    f"Failure attempting to decode content as UTF-8 and ISO-8859-1. Details: {exc}"
-                )
+            log.error(msg)
 
-                raise msg
+            raise msg
 
+    # log.debug(f"Saving image bytes.")
     try:
-        _json = json.loads(_decode)
+        with open(output_path, "wb") as f:
+            f.write(img_bytes)
+            log.success(f"Image saved to path '{output_path}'")
 
-        return _json
+        return True
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception loading decoded response content to dict. Details: {exc}"
+            f"Unhandled exception saving image to path '{output_path}'. Details: {exc}"
         )
+        log.error(msg)
 
-        raise msg
+        # raise msg
+
+        return False

@@ -4,79 +4,42 @@ from pathlib import Path
 import random
 import typing as t
 
-from core import database, request_client
-from core.dependencies import db_settings, get_db, settings
-from core.paths import ENSURE_DIRS, SERIALIZE_DIR
+from core import database
+from core.dependencies import CACHE_TRANSPORT, db_settings, get_db, settings
+from core.paths import DATA_DIR, ENSURE_DIRS, SERIALIZE_DIR
+from core.request_client import HTTPXController, get_cache_transport
+import hishel
 import httpx
 from loguru import logger as log
-from modules import xkcd_mod
+from modules import data_ctl, setup, xkcd_mod
 import msgpack
 from packages import xkcd
-from pipelines import (
-    pipeline_current_comic,
-    pipeline_multiple_comics,
-    pipeline_random_comic,
-    pipeline_retrieve_missing_imgs,
-    pipeline_specific_comic,
-    pipeline_update_img_saved_vals,
-)
+import pendulum
+from pipelines import comic_pipelines
+from red_utils.ext import time_utils
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 from utils import serialize_utils
 
-def _setup() -> None:
-    log.info("Analyzing existing data...")
+def main(cache_transport: hishel.CacheTransport = None):
+    current_comic: xkcd_mod.XKCDComic = comic_pipelines.pipeline_get_current_comic(
+        cache_transport=cache_transport
+    )
+    # log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
+    current_img_saved: bool = xkcd.comic.img.save_img(
+        comic=current_comic, output_filename=f"{current_comic.num}.png"
+    )
+    # log.debug(f"Image saved ({type(current_img_saved)}): {current_img_saved}")
 
-    try:
-        path_utils.ensure_dirs_exist(ensure_dirs=ENSURE_DIRS)
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception creating initial directories. Details: {exc}"
-        )
-        log.error(msg)
-
-        raise exc
-
-    try:
-        xkcd.helpers.update_comic_num_img_bool()
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception synching saved comic data. Continuing as-is (this will be updated throughout pipelines, it's ok to skip)."
-        )
-        log.error(msg)
-
-        return
-
-
-def main() -> None:
-    ## Update img_saved row of CSV data. Do this last
-    log.info("Synching saved comic data...")
-    pipeline_update_img_saved_vals()
-
-    log.info("Getting current XKCD comic")
-    current_comic: xkcd_mod.XKCDComic = pipeline_current_comic()
-    log.info(
-        f"""Current XKCD comic [{current_comic.month}-{current_comic.day}-{current_comic.year}]
-Title: #{current_comic.comic_num} - {current_comic.title}
-Link: {current_comic.link if current_comic.link else '<Invalid or null link>.' }
-Comic Img: {current_comic.img_url}
-Alt Text: {current_comic.alt_text}
-"""
+    comics: list[xkcd_mod.XKCDComic] = comic_pipelines.pipeline_get_multiple_comics(
+        cache_transport=cache_transport,
+        comic_nums=[1, 15, 64, 83, 125, 65],
+        request_sleep=5,
     )
 
-    log.info("Searching missing images")
-    missing_imgs: None = pipeline_retrieve_missing_imgs()
-
-    with xkcd.helpers.ComicNumsController() as comicnums_ctl:
-        ALL_COMIC_NUMS: list[int] = [n for n in range(1, comicnums_ctl.highest)]
-
-    log.info("Searching for downloadable comics")
-    dl_comics: list[xkcd_mod.XKCDComic] = pipeline_multiple_comics(
-        comic_nums_list=ALL_COMIC_NUMS
+    scraped_comics = comic_pipelines.pipeline_scrape_missing_comics(
+        cache_transport=cache_transport, request_sleep=5
     )
-
-    if dl_comics:
-        log.info(f"Downloaded [{len(dl_comics)}] comic(s)")
 
 
 if __name__ == "__main__":
@@ -90,6 +53,8 @@ if __name__ == "__main__":
 
     log.info(f"Start auto-xkcd")
 
-    _setup()
+    setup._setup()
 
-    main()
+    cache_transport: hishel.CacheTransport = get_cache_transport(retries=3)
+
+    main(cache_transport=cache_transport)

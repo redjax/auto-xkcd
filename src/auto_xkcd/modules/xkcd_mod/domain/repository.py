@@ -66,7 +66,7 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
         _nums: list[int] = []
 
         for _comic in all_comics:
-            _nums.append(_comic.comic_num)
+            _nums.append(_comic.num)
 
         return _nums
 
@@ -150,7 +150,7 @@ class XKCDSentComicRepository(XKCDSentComicRepositoryBase):
         _nums: list[int] = []
 
         for _comic in all_sent_comics:
-            _nums.append(_comic.comic_num)
+            _nums.append(_comic.num)
 
         return _nums
 

@@ -13,6 +13,7 @@ from .paths import (
     BACKUP_DIR,
     CACHE_DIR,
     COMIC_IMG_DIR,
+    CURRENT_COMIC_FILE,
     DATA_DIR,
     ENSURE_DIRS,
     PQ_DIR,
