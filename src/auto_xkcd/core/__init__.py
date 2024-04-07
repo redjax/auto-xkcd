@@ -14,3 +14,4 @@ from .constants import (
     CURRENT_XKCD_URL,
 )
 from .dependencies import db_settings, minio_settings, settings, telegram_settings
+from .dependencies import get_db

@@ -1,6 +1,9 @@
 from core.dependencies import settings
 from core import request_client, XKCD_URL_POSTFIX, XKCD_URL_BASE, CURRENT_XKCD_URL
 from _setup import base_app_setup
+from modules import requests_prefab
+
+from modules import xkcd_mod
 
 from loguru import logger as log
 
@@ -8,18 +11,28 @@ import httpx
 import hishel
 
 
-if __name__ == "__main__":
-    base_app_setup(settings=settings)
-    log.info(f"[TEST][env:{settings.env}|container:{settings.container_env}] App Start")
-
-    current_comic_req: httpx.Request = request_client.build_request(
-        url=CURRENT_XKCD_URL
+def main(cache_transport: hishel.CacheTransport = None):
+    assert cache_transport, ValueError(
+        "Missing a cache transport for the request client"
     )
-    CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
+    assert isinstance(cache_transport, hishel.CacheTransport), TypeError(
+        f"cache_transport must be a hishel.CacheTransport. Got type: ({type(cache_transport)})"
+    )
 
     try:
-        with request_client.HTTPXController(transport=CACHE_TRANSPORT) as httpx_ctl:
-            res = httpx_ctl.send_request(request=current_comic_req)
+        current_comic_req: httpx.Request = requests_prefab.current_comic_req()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting current comic request prefab. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    try:
+        with request_client.HTTPXController(transport=cache_transport) as httpx_ctl:
+            res: httpx.Response = httpx_ctl.send_request(request=current_comic_req)
             log.debug(
                 f"Current comic response: [{res.status_code}: {res.reason_phrase}]: {res.text}"
             )
@@ -30,3 +43,12 @@ if __name__ == "__main__":
         log.trace(exc)
 
         raise exc
+
+
+if __name__ == "__main__":
+    base_app_setup(settings=settings)
+    log.info(f"[TEST][env:{settings.env}|container:{settings.container_env}] App Start")
+
+    CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
+
+    main(cache_transport=CACHE_TRANSPORT)

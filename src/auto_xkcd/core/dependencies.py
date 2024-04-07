@@ -2,10 +2,13 @@ from contextlib import contextmanager
 import typing as t
 
 from core.config import AppSettings, DBSettings, MinioSettings, TelegramSettings
-
+from core import database
+from core import request_client
 from dynaconf import Dynaconf
 import hishel
 import httpx
+import sqlalchemy as sa
+import sqlalchemy.orm as so
 
 from loguru import logger as log
 
@@ -40,40 +43,41 @@ minio_settings: MinioSettings = MinioSettings(
     access_secret=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_SECRET,
 )
 
-# DB_URI: sa.URL = db_settings.get_db_uri()
-# ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)
-# SESSION_POOL: so.sessionmaker[so.Session] = database.get_session_pool(engine=ENGINE)
+DB_URI: sa.URL = db_settings.get_db_uri()
+ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)
+SESSION_POOL: so.sessionmaker[so.Session] = database.get_session_pool(engine=ENGINE)
 
-# CACHE_TRANSPORT: hishel.CacheTransport = get_cache_transport(retries=3)
+CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport(retries=3)
 
-# @contextmanager
-# def get_db() -> t.Generator[so.Session, t.Any, None]:
-#     """Dependency to yield a SQLAlchemy Session pool.
 
-#     Usage:
+@contextmanager
+def get_db() -> t.Generator[so.Session, t.Any, None]:
+    """Dependency to yield a SQLAlchemy Session pool.
 
-#         ```py title="get_db() dependency usage" linenums="1"
+    Usage:
 
-#         from core.dependencies import get_db
+        ```py title="get_db() dependency usage" linenums="1"
 
-#         with get_db() as session:
-#             repo = someRepoClass(session)
+        from core.dependencies import get_db
 
-#             all = repo.get_all()
-#         ```
-#     """
-#     db: so.Session = SESSION_POOL()
+        with get_db() as session:
+            repo = someRepoClass(session)
 
-#     try:
-#         yield db
-#     except Exception as exc:
-#         msg = Exception(
-#             f"Unhandled exception yielding database session. Details: {exc}"
-#         )
+            all = repo.get_all()
+        ```
+    """
+    db: so.Session = SESSION_POOL()
 
-#         raise msg
-#     finally:
-#         db.close()
+    try:
+        yield db
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception yielding database session. Details: {exc}"
+        )
+
+        raise msg
+    finally:
+        db.close()
 
 
 # @contextmanager
