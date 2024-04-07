@@ -1,17 +1,21 @@
 import typing as t
 from pathlib import Path
 
+from pendulum import DateTime
+
 from core import request_client
 from modules import xkcd_mod, requests_prefab
+from helpers import data_ctl
 from utils import serialize_utils
 from helpers.validators import validate_hishel_cachetransport
-from domain.xkcd import XKCDComic
+from domain.xkcd import XKCDComic, CurrentComicMeta
 
 
 import hishel
 import httpx
 import msgpack
 from loguru import logger as log
+from red_utils.ext import time_utils
 
 
 def _request_current_comic_res(
@@ -155,5 +159,41 @@ def get_current_comic(
             )
             log.error(msg)
             log.trace(exc)
+
+    ## Update comic_nums.txt file
+    try:
+        data_ctl.update_comic_nums_file(comic_num=comic.num)
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception updating comic_nums file. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+    ## Update current_comic.json file
+    try:
+        _ts: str | DateTime = time_utils.get_ts()
+        current_comic_meta: CurrentComicMeta = CurrentComicMeta(
+            comic_num=comic.num, last_updated=_ts
+        )
+
+        try:
+            data_ctl.update_current_comic_meta(current_comic=current_comic_meta)
+            log.success(f"Current comic metadata file updated.")
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception updating current comic metadata file. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
+
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception updating current comic metadata. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
 
     return comic
