@@ -21,6 +21,7 @@ from red_utils.ext import time_utils
 def _request_current_comic_res(
     cache_transport: hishel.CacheTransport = None,
 ) -> httpx.Response:
+    """Make request for current XKCD comic."""
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     try:
@@ -67,7 +68,8 @@ def _request_current_comic_res(
 def get_current_comic(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,
-):
+) -> XKCDComic:
+    """Run through operations to get the current XKCD comic."""
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     ## Get comic Response

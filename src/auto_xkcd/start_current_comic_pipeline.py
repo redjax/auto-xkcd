@@ -27,17 +27,15 @@ import hishel
 import msgpack
 
 
-def main(cache_transport: hishel.CacheTransport = None):
+def main(cache_transport: hishel.CacheTransport = None) -> XKCDComic:
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
-    comic: XKCDComic = xkcd_comic.get_current_comic(
-        cache_transport=cache_transport, overwrite_serialized_comic=True
+    current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
+        cache_transport=CACHE_TRANSPORT
     )
+    log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
 
-    deserialized_comic: XKCDComic | None = xkcd_mod.load_serialized_comic(
-        comic_num=comic.num
-    )
-    log.debug(f"Deserialized comic ({type(deserialized_comic)}): {deserialized_comic}")
+    return current_comic
 
 
 if __name__ == "__main__":
@@ -46,7 +44,4 @@ if __name__ == "__main__":
 
     CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
 
-    current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
-        cache_transport=CACHE_TRANSPORT
-    )
-    log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
+    current_comic: XKCDComic = main(cache_transport=CACHE_TRANSPORT)
