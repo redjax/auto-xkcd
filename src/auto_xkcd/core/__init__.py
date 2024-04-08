@@ -1,3 +1,11 @@
+"""The `core` module stores globally accessible objects.
+
+Configuration classes are defined here, as well as base database setup & some default variables for things like
+directory paths & file paths.
+
+Code in this module should not import from outside the `core` directory, if possible.
+"""
+
 from __future__ import annotations
 
 from .constants import (

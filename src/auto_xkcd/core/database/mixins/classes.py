@@ -4,6 +4,7 @@ import pendulum
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
+
 class TimestampMixin:
     """Add a created_at & updated_at column to records.
 
@@ -12,7 +13,7 @@ class TimestampMixin:
 
     Usage:
 
-    ``` py linenums=1
+    ```py title="TimestampMixin SQLAlchemy table class" linenums="1"
     class Record(Base, TimestampMixin):
         __tablename__ = ...
 
