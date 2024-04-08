@@ -90,45 +90,14 @@ def get_current_comic(
 
         raise exc
 
-    ## Convert Response to dict
+    ## Convert httpx.Response into XKCDComic object
     try:
-        current_comic_res_dict: dict = (
-            xkcd_mod.response_handler.convert_response_to_dict(res=current_comic_res)
+        comic = xkcd_mod.response_handler.convert_comic_response_to_xkcdcomic(
+            comic_res=current_comic_res
         )
-        log.success(f"Converted current XKCD comic response to a dict.")
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception converting current XKCD comic Response to dict. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        raise exc
-
-    ## Save serialized Response
-    try:
-        xkcd_mod.response_handler.serialize_comic_response_dict(
-            res_dict=current_comic_res_dict
-        )
-        log.success(f"Saved serialized Response to file")
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception serializing current XKCD comic response. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        raise exc
-
-    ## Convert Response dict to XKCDComic
-    try:
-        comic: XKCDComic = xkcd_mod.response_handler.convert_dict_to_xkcdcomic(
-            _dict=current_comic_res_dict
-        )
-        log.success(f"Converted Response dict to XKCDComic object")
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception converting current XKCD comic response dict to XKCDComic object. Details: {exc}"
+            f"Unhandled exception converting httpx.Response to XKCDComic object. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)

@@ -28,11 +28,12 @@ import msgpack
 
 
 def main(cache_transport: hishel.CacheTransport = None):
-    # cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
-    # comic: XKCDComic = xkcd_comic.get_current_comic(
-    #     cache_transport=cache_transport, overwrite_serialized_comic=True
-    # )
+    comic: XKCDComic = xkcd_comic.get_current_comic(
+        cache_transport=cache_transport, overwrite_serialized_comic=True
+    )
+    log.debug(f"Comic: {comic}")
     # deserialized_comic: XKCDComic | None = xkcd_mod.load_serialized_comic(
     #     comic_num=comic.num
     # )
@@ -44,20 +45,15 @@ def main(cache_transport: hishel.CacheTransport = None):
     # log.debug(f"Comic #42: {comic}")
 
     # comic: XKCDComic = xkcd_comic.get_single_comic(
-    #     cache_transport=cache_transport, overwrite_serialized_comic=True, comic_num=404
+    #     cache_transport=cache_transport, overwrite_serialized_comic=True, comic_num=42
     # )
-    # log.debug(f"Comic #42: {comic}")
+    # log.debug(f"Comic #{comic.num}: {comic}")
 
-    # comics: list[XKCDComic] = xkcd_comic.get_multiple_comics(
-    #     cache_transport=cache_transport, comic_nums=[1, 24, 86, 92, 320, 500, 555, 720]
+    # comics: list[XKCDComic] = comic_pipelines.pipeline_multiple_comics(
+    #     cache_transport=cache_transport,
+    #     comic_nums=[1, 24, 86, 92, 320, 500, 555, 615, 645, 720, 732],
+    #     request_sleep=5,
     # )
-    # log.info(f"Downloaded [{len(comics)}] comic(s)")
-
-    comics: list[XKCDComic] = comic_pipelines.pipeline_multiple_comics(
-        cache_transport=cache_transport,
-        comic_nums=[1, 24, 86, 92, 320, 500, 555, 615, 645, 720, 732],
-        request_sleep=5,
-    )
 
 
 if __name__ == "__main__":

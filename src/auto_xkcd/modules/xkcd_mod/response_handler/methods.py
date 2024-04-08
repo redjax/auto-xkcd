@@ -55,6 +55,51 @@ def convert_dict_to_xkcdcomic(_dict: dict = None) -> XKCDComic:
         raise exc
 
 
+def convert_comic_response_to_xkcdcomic(
+    comic_res: httpx.Response = None, serialize_response: bool = True
+) -> XKCDComic:
+    """Extract Response content to a dict, then validate into an XKCDComic object."""
+    ## Convert Response to dict
+    try:
+        comic_res_dict: dict = convert_response_to_dict(res=comic_res)
+        log.success(f"Converted comic #{comic_res_dict['num']} Response to a dict.")
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception converting comic Response to a dict")
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    if serialize_response:
+        ## Save serialized Response
+        try:
+            serialize_comic_response_dict(res_dict=comic_res_dict)
+            log.success(f"Saved serialized comic Response to file")
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception serializing XKCD comic #{comic_res_dict['num']} response dict. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
+
+    ## Convert Response dict to XKCDComic
+    try:
+        comic: XKCDComic = convert_dict_to_xkcdcomic(_dict=comic_res_dict)
+        log.success(f"Converted comic #{comic.num} Response dict to XKCDComic object")
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception converting XKCD comic #{comic.num} response dict to XKCDComic object. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    return comic
+
+
 def serialize_comic_response_dict(
     res_dict: dict = None,
     output_dir: t.Union[str, Path] = SERIALIZE_COMIC_RESPONSES_DIR,
