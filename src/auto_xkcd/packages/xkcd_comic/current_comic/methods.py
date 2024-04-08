@@ -65,6 +65,10 @@ def _request_current_comic_res(
         raise exc
 
 
+def save_current_comic_to_db():
+    raise NotImplementedError("Saving to database is not yet implemented")
+
+
 def get_current_comic(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,

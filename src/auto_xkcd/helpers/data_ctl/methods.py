@@ -13,18 +13,18 @@ from red_utils.std import path_utils
 
 
 def update_comic_nums_file(
-    file: t.Union[str, Path] = f"{DATA_DIR}/comic_nums.txt", comic_num: int = None
+    file: t.Union[str, Path] = Path(f"{DATA_DIR}/comic_nums.txt"), comic_num: int = None
 ):
-    assert comic_num, ValueError("Missing comic number")
+    assert comic_num is not None, ValueError("Missing comic number")
     assert isinstance(comic_num, int), TypeError(f"comic_num must be an integer")
 
     assert isinstance(file, str) or isinstance(file, Path), TypeError(
         f"file must be a string or Path object. Got type: ({type(file)})"
     )
     if isinstance(file, str):
-        file: Path = Path(file)
-    if "~" in f"{file}":
-        file: Path = file.expanduser()
+        file = Path(file)
+    if "~" in str(file):
+        file = file.expanduser()
 
     if not file.parent.exists():
         try:
@@ -35,7 +35,6 @@ def update_comic_nums_file(
             )
             log.error(msg)
             log.trace(exc)
-
             raise exc
 
     if not file.exists():
@@ -43,17 +42,21 @@ def update_comic_nums_file(
 
     with open(file, "r") as f:
         lines = f.readlines()
-        comic_nums: list[int] = []
+        comic_nums = []
         for line in lines:
-            stripped = int(line.strip())
-            comic_nums.append(stripped)
+            stripped_line = line.strip()
+            if stripped_line:
+                comic_nums.append(int(stripped_line))
 
     if comic_num not in comic_nums:
-        log.debug(f"Comic num [{comic_num}] not in comic_nums: {comic_nums}")
-        lines.append(comic_num)
-        with open(file, "w") as f:
-            for line in lines:
-                f.write(f"{line}\n")
+        comic_nums.append(comic_num)
+
+    comic_nums.sort()
+    log.debug(f"Comic nums: {comic_nums}")
+
+    with open(file, "w") as f:
+        for num in comic_nums:
+            f.write(f"{num}\n")
 
 
 def get_saved_imgs(

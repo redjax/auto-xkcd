@@ -17,7 +17,7 @@ from modules import requests_prefab
 from modules import xkcd_mod
 from utils import serialize_utils
 from packages import xkcd_comic
-from helpers.validators import validate_hishel_cachetransport
+from helpers.validators import validate_hishel_cachetransport, validate_comic_nums_lst
 
 from loguru import logger as log
 
@@ -54,3 +54,33 @@ def pipeline_current_comic(
     log.info("<< End current XKCD comic pipeline")
 
     return comic
+
+
+def pipeline_multiple_comics(
+    cache_transport: hishel.CacheTransport = None,
+    comic_nums: list[int] = None,
+    overwrite_serialized_comic: bool = False,
+    request_sleep: int = 5,
+) -> list[XKCDComic]:
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+    comic_nums = validate_comic_nums_lst(comic_nums=comic_nums)
+
+    log.info(">> Start multiple comic pipeline")
+
+    try:
+        comics: list[XKCDComic] = xkcd_comic.get_multiple_comics(
+            cache_transport=cache_transport,
+            comic_nums=comic_nums,
+            overwrite_serialized_comic=overwrite_serialized_comic,
+            request_sleep=request_sleep,
+        )
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception getting multiple comics. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    log.info("<< End multiple comic pipeline")
+
+    return comics
