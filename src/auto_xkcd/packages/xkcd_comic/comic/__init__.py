@@ -1,2 +1,4 @@
-from .methods import get_single_comic, get_multiple_comics
+from __future__ import annotations
+
+from .methods import get_multiple_comics, get_single_comic
 from .scraper import scrape_missing_comics

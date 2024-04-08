@@ -1,5 +1,6 @@
-import typing as t
+from __future__ import annotations
 
+import typing as t
 
 def validate_comic_nums_lst(comic_nums: list[int] = None) -> list[int]:
     """Return a validated list of integers.

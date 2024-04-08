@@ -1,5 +1,7 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from core import request_client
 from core.paths import (
@@ -7,15 +9,13 @@ from core.paths import (
     SERIALIZE_COMIC_OBJECTS_DIR,
     SERIALIZE_COMIC_RESPONSES_DIR,
 )
-from domain.xkcd.comic import XKCDComic, CurrentComicMeta
-from utils import serialize_utils
+from domain.xkcd.comic import CurrentComicMeta, XKCDComic
 from helpers import data_ctl
-
 import hishel
 import httpx
 from loguru import logger as log
 import msgpack
-
+from utils import serialize_utils
 
 def request_and_save_comic_img(
     comic: XKCDComic = None,

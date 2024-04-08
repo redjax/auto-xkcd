@@ -1,16 +1,17 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from loguru import logger as log
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
-    field_validator,
     ValidationError,
     computed_field,
-    ConfigDict,
+    field_validator,
 )
-
 
 class PipelineLoopConfigBase(BaseModel):
     loop: bool = Field(default=False, description="Apply loop configuration if True")

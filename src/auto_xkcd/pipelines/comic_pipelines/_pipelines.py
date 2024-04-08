@@ -1,30 +1,28 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
-from core.dependencies import settings
-from core import (
-    request_client,
-    XKCD_URL_POSTFIX,
-    XKCD_URL_BASE,
-    CURRENT_XKCD_URL,
-    SERIALIZE_COMIC_RESPONSES_DIR,
-    SERIALIZE_COMIC_OBJECTS_DIR,
-    COMIC_IMG_DIR,
-)
-from domain.xkcd.comic import XKCDComic
 from _setup import base_app_setup
-from modules import requests_prefab
-from modules import xkcd_mod
-from utils import serialize_utils
-from packages import xkcd_comic
-from helpers.validators import validate_hishel_cachetransport, validate_comic_nums_lst
-
-from loguru import logger as log
-
-import httpx
+from core import (
+    COMIC_IMG_DIR,
+    CURRENT_XKCD_URL,
+    SERIALIZE_COMIC_OBJECTS_DIR,
+    SERIALIZE_COMIC_RESPONSES_DIR,
+    XKCD_URL_BASE,
+    XKCD_URL_POSTFIX,
+    request_client,
+)
+from core.dependencies import settings
+from domain.xkcd.comic import XKCDComic
+from helpers.validators import validate_comic_nums_lst, validate_hishel_cachetransport
 import hishel
+import httpx
+from loguru import logger as log
+from modules import requests_prefab, xkcd_mod
 import msgpack
-
+from packages import xkcd_comic
+from utils import serialize_utils
 
 def pipeline_current_comic(
     cache_transport: hishel.CacheTransport = None,

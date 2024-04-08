@@ -1,22 +1,20 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
 
-from pendulum import DateTime
+from pathlib import Path
+import typing as t
 
 from core import request_client
-from modules import xkcd_mod, requests_prefab
+from domain.xkcd import CurrentComicMeta, XKCDComic
 from helpers import data_ctl
-from utils import serialize_utils
 from helpers.validators import validate_hishel_cachetransport
-from domain.xkcd import XKCDComic, CurrentComicMeta
-
-
 import hishel
 import httpx
-import msgpack
 from loguru import logger as log
+from modules import requests_prefab, xkcd_mod
+import msgpack
+from pendulum import DateTime
 from red_utils.ext import time_utils
-
+from utils import serialize_utils
 
 def _request_current_comic_res(
     cache_transport: hishel.CacheTransport = None,

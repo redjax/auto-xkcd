@@ -3,11 +3,10 @@ from __future__ import annotations
 import json
 import typing as t
 
+from core import request_client
+from core.constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
 import httpx
 from loguru import logger as log
-from core.constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
-from core import request_client
-
 
 def current_comic_req() -> httpx.Request:
     """Build an `httpx.Request` object for the current XKCD comic.

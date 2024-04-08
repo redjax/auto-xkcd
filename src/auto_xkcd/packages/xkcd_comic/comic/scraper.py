@@ -1,27 +1,28 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
 
+from pathlib import Path
+import typing as t
+
+from .methods import get_multiple_comics, get_single_comic
+
+from core import request_client
 from core.paths import (
     COMIC_IMG_DIR,
     SERIALIZE_COMIC_OBJECTS_DIR,
     SERIALIZE_COMIC_RESPONSES_DIR,
 )
-from core import request_client
 from domain.xkcd.comic.schemas import CurrentComicMeta, XKCDComic
-from modules import xkcd_mod, requests_prefab
 from helpers import data_ctl
 from helpers.validators import (
     validate_comic_nums_lst,
     validate_hishel_cachetransport,
     validate_path,
 )
-from utils import list_utils
-from .methods import get_multiple_comics, get_single_comic
-
-from loguru import logger as log
-import httpx
 import hishel
-
+import httpx
+from loguru import logger as log
+from modules import requests_prefab, xkcd_mod
+from utils import list_utils
 
 def scrape_missing_comics(
     cache_transport: hishel.CacheTransport = None,

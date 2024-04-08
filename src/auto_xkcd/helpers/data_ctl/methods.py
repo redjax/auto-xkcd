@@ -1,16 +1,14 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import typing as t
-import json
 
-from core.paths import COMIC_IMG_DIR, DATA_DIR, SERIALIZE_DIR, CURRENT_COMIC_FILE
-from domain.xkcd import CurrentComicMeta
 from core import request_client
-
+from core.paths import COMIC_IMG_DIR, CURRENT_COMIC_FILE, DATA_DIR, SERIALIZE_DIR
+from domain.xkcd import CurrentComicMeta
 from loguru import logger as log
 from red_utils.std import path_utils
-
 
 def update_comic_nums_file(
     file: t.Union[str, Path] = Path(f"{DATA_DIR}/comic_nums.txt"), comic_num: int = None

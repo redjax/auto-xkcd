@@ -11,7 +11,6 @@ from loguru import logger as log
 import pendulum
 from red_utils.std import path_utils
 
-
 def get_ts(as_str: bool = False) -> t.Union[str, pendulum.DateTime]:
     ts: pendulum.DateTime = pendulum.now()
 

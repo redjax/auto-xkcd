@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 import typing as t
 
+from core import database, request_client
 from core.config import AppSettings, DBSettings, MinioSettings, TelegramSettings
-from core import database
-from core import request_client
 from dynaconf import Dynaconf
 import hishel
 import httpx
+from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-
-from loguru import logger as log
 
 DYNACONF_SETTINGS: Dynaconf = Dynaconf(
     environments=True,

@@ -4,12 +4,13 @@ Handle setup tasks, like creating directories that must exist, initializing logg
 
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from core.config import AppSettings
 from core.dependencies import settings
 from core.paths import ENSURE_DIRS
-
 from loguru import logger as log
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils

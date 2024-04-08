@@ -1,11 +1,11 @@
+from __future__ import annotations
+
+import json
 from pathlib import Path
 import typing as t
-import json
-
-from loguru import logger as log
 
 import httpx
-
+from loguru import logger as log
 
 def save_bytes(
     _bytes: bytes = None,

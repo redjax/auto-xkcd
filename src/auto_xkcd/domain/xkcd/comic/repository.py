@@ -12,7 +12,6 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
-
 class XKCDComicRepository(XKCDComicRepositoryBase):
     def __init__(self, session: so.Session) -> None:
         assert session is not None, ValueError("session cannot be None")

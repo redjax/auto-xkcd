@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import hishel
 import httpx
-
 
 def validate_hishel_cachetransport(
     cache_transport: hishel.CacheTransport = None,

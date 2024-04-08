@@ -7,7 +7,6 @@ from core.database import INT_PK, Base, TableNameMixin, TimestampMixin
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
-
 class XKCDComicModel(Base):
     __tablename__ = "xkcd_comic"
     __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
