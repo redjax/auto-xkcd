@@ -1,3 +1,5 @@
+"""Methods to handle generic HTTPX data."""
+
 from __future__ import annotations
 
 import json
@@ -7,6 +9,7 @@ import typing as t
 import httpx
 from loguru import logger as log
 
+
 def save_bytes(
     _bytes: bytes = None,
     output_dir: t.Union[str, Path] = None,
@@ -15,6 +18,7 @@ def save_bytes(
     """Save bytestring to a file.
 
     Params:
+        _bytes (bytes): A bytestring to save to a file.
         output_dir (str|Path): Directory where bytes file will be saved.
         output_filename (str): Name of the file to be saved at `output_dir/`output_filename`.
 
@@ -84,12 +88,20 @@ def build_request(
     url: str = None,
     headers: dict | None = {"Content-Type": "application/json"},
     params: dict | None = None,
-    data: t.Union[dict, str] = None,
+    data: t.Union[dict, str] | None = None,
 ) -> httpx.Request:
     """Assemble an httpx.Request instance from inputs.
 
     Params:
         method (str): The request method type, i.e. "GET", "POST", "PUT", "DELETE".
+        url (str): The URL to request.
+        headers (dict|None): Optional request headers dict.
+        params (dict|None): Optional request params dict.
+        data (dict|str|None): Optional request data.
+
+    Returns:
+        (httpx.Request): An initialized `httpx.Request` object.
+
     """
     assert method, ValueError("Missing a request method")
     assert isinstance(method, str), TypeError(

@@ -12,7 +12,10 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
+
 class XKCDComicRepository(XKCDComicRepositoryBase):
+    """Database repository for handling XKCDComic models."""
+
     def __init__(self, session: so.Session) -> None:
         assert session is not None, ValueError("session cannot be None")
         assert isinstance(session, so.Session), TypeError(
@@ -97,6 +100,8 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
 
 
 class XKCDSentComicRepository(XKCDSentComicRepositoryBase):
+    """Database repository for handling XKCDSentComic models."""
+
     def __init__(self, session: so.Session) -> None:
         assert session is not None, ValueError("session cannot be None")
         assert isinstance(session, so.Session), TypeError(

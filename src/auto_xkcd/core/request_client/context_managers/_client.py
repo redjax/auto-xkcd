@@ -11,6 +11,7 @@ import hishel
 import httpx
 from loguru import logger as log
 
+
 def autodetect_charset(content: bytes = None):
     """Attempt to automatically detect encoding from input bytestring."""
     try:
@@ -177,6 +178,9 @@ class HTTPXController(AbstractContextManager):
             cookies (dict): <Not yet documented>
             timeout (int|float): Timeout (in seconds) before cancelling request.
 
+        Returns:
+            (httpx.Request): An initialized `httpx.Request` object.
+
         """
         assert method, ValueError("Missing a request method")
         assert isinstance(method, str), TypeError(
@@ -236,6 +240,9 @@ class HTTPXController(AbstractContextManager):
             stream (bool): When `True`, response bytes will be streamed. This can be useful for large file downloads.
             auth (httpx.Auth): <Not yet documented>
 
+        Returns:
+            (httpx.Response): An `httpx.Response` from the request.
+
         """
         assert request, ValueError("Missing an httpx.Request object")
         assert isinstance(request, httpx.Request), TypeError(
@@ -275,6 +282,9 @@ class HTTPXController(AbstractContextManager):
 
         Params:
             res (httpx.Response): An `httpx.Response` object, with `.content` to be decoded.
+
+        Returns:
+            (dict): A `dict` from the `httpx.Response`'s `.content` param.
 
         """
         assert res, ValueError("Missing httpx Response object")

@@ -16,8 +16,15 @@ from pydantic import (
 from red_utils.ext import time_utils
 from red_utils.std import hash_utils
 
+
 class ComicNumCSVData(BaseModel):
-    """Store metadata about a comic number, like if the image has been saved."""
+    """Store metadata about a comic number, like if the image has been saved.
+
+    Params:
+        comic_num (int|str): An XKCD comic number.
+        img_saved (bool): Whether or not `.png` of comic has been saved.
+
+    """
 
     comic_num: t.Union[int, str] = Field(default=None)
     img_saved: bool = Field(default=False)
@@ -144,10 +151,27 @@ Link: {self.img_url}
 
 
 class XKCDComic(XKCDComicBase):
+    """XKCD comic data retrieved from the XKCD API.
+
+    Params:
+        year (str): Published year
+        month (str): Published month
+        day (str): Published day
+        num (int): XKCD comic number
+        title (str): XKCD comic title
+        transcript (str): XKCD comic transcript
+        alt_text (str): XKCD comic alt text
+        img_url (str): XKCD comic's image URL
+        img_bytes (bytes): XKCD comic image bytes. Initialized as `None` and populated once the image is requested.
+
+    """
+
     pass
 
 
 class XKCDComicOut(XKCDComicBase):
+    """Append the XKCD comic's database ID."""
+
     comic_id: int
 
 
@@ -181,6 +205,14 @@ class XKCDSentComicBase(BaseModel):
 
 
 class XKCDSentComic(XKCDSentComicBase):
+    """Metadata class for comics sent via Telegram.
+
+    Params:
+        comic_num (int): The XKCD comic's number
+        date_sent (datetime.datetime|datetime.date|pendulum.DateTime|pendulum.Date): Timestamp for when the comic was sent via Telegram.
+
+    """
+
     pass
 
 

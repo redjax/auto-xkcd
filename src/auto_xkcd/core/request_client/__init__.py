@@ -1,3 +1,5 @@
+"""Lower-level methods & context managers to control an HTTPX client."""
+
 from __future__ import annotations
 
 from . import encoders

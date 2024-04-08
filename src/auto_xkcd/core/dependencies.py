@@ -1,3 +1,9 @@
+"""Importable dependencies for the app.
+
+Includes initialized `Dynaconf` settings objects, initialized SQLAlchemy variables,
+and methods/context managers for yielding objects like a database connection.
+"""
+
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -56,15 +62,15 @@ def get_db() -> t.Generator[so.Session, t.Any, None]:
 
     Usage:
 
-        ```py title="get_db() dependency usage" linenums="1"
+    ```py title="get_db() dependency usage" linenums="1"
 
-        from core.dependencies import get_db
+    from core.dependencies import get_db
 
-        with get_db() as session:
-            repo = someRepoClass(session)
+    with get_db() as session:
+        repo = someRepoClass(session)
 
-            all = repo.get_all()
-        ```
+        all = repo.get_all()
+    ```
     """
     db: so.Session = SESSION_POOL()
 
