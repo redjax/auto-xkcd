@@ -7,12 +7,22 @@ from core.paths import SERIALIZE_DIR
 from loguru import logger as log
 import msgpack
 
+
 def serialize_dict(
     data: dict = None,
     output_dir: t.Union[str, Path] = None,
     filename: str = None,
     overwrite: bool = False,
-):
+) -> bool:
+    """Serialize a `dict` to a file using `msgpack`.
+
+    Params:
+        data (dict): Input data to serialize
+        output_dir (str|Path): Directory where `.msgpack` file will be saved.
+        filename (str): The name of the `.msgpack` file. If `.msgpack` is omitted, it will be appended during validation.
+        overwrite (bool): If `True`, serialization will occur even if the file already exists.
+
+    """
     assert data, ValueError("Missing data dict to serialize.")
     assert isinstance(data, dict), TypeError(
         f"data must be a dict. Got type: ({type(data)})"
@@ -23,6 +33,7 @@ def serialize_dict(
         f"filename should be a string. Got type: ({type(filename)})"
     )
     if not filename.endswith(".msgpack"):
+        ## Append '.msgpack' if filename does not end with it already
         filename: str = f"{filename}.msgpack"
 
     if output_dir is None:
@@ -49,8 +60,16 @@ def serialize_dict(
 
             return False
 
+    ## Concatenate output_dir and filename into a Path object
     output_path: Path = Path(f"{output_dir}/{filename}")
 
+    if not overwrite:
+        ## Skip if file exists and overwrite=False
+        if output_path.exists():
+            log.warning(f"Serialized file already exists, skipping: {output_path}")
+            return True
+
+    ## Create msgpack
     try:
         packed = msgpack.packb(data)
 
@@ -62,13 +81,9 @@ def serialize_dict(
         # raise exc
         return False
 
-    if not overwrite:
-        if output_path.exists():
-            log.warning(f"Serialized file already exists, skipping: {output_path}")
-            return True
-
     try:
-        with open(output_path, "wb") as f:
+        ## Save msgpack to file
+        with open(file=output_path, mode="wb") as f:
             f.write(packed)
 
         return True

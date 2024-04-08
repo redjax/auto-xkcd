@@ -1,16 +1,7 @@
-from __future__ import annotations
-
-from .constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
-from .domain import (
-    ComicNumCSVData,
-    CurrentComicMeta,
-    XKCDComic,
-    XKCDComicModel,
-    XKCDComicOut,
-    XKCDComicRepository,
-    XKCDSentComic,
-    XKCDSentComicModel,
-    XKCDSentComicOut,
-    XKCDSentComicRepository,
+from . import response_handler
+from .methods import (
+    request_and_save_comic_img,
+    load_serialized_comic,
+    save_serialize_comic_object,
+    list_missing_nums,
 )
-from .requests_prefab import comic_num_req, current_comic_req, make_req

@@ -1,22 +1,19 @@
-from __future__ import annotations
-
-from . import _exc
-from .config import AppSettings, DBSettings, MinioSettings, TelegramSettings
-from .dependencies import (
-    db_settings,
-    get_db,
-    minio_settings,
-    settings,
-    telegram_settings,
-)
-from .constants import IGNORE_COMIC_NUMS
 from .paths import (
-    BACKUP_DIR,
-    CACHE_DIR,
-    COMIC_IMG_DIR,
-    CURRENT_COMIC_FILE,
-    DATA_DIR,
     ENSURE_DIRS,
-    PQ_DIR,
+    DATA_DIR,
+    CACHE_DIR,
     SERIALIZE_DIR,
+    SERIALIZE_COMIC_RESPONSES_DIR,
+    SERIALIZE_COMIC_OBJECTS_DIR,
+    PQ_DIR,
+    BACKUP_DIR,
+    COMIC_IMG_DIR,
 )
+from .constants import (
+    IGNORE_COMIC_NUMS,
+    XKCD_URL_BASE,
+    XKCD_URL_POSTFIX,
+    CURRENT_XKCD_URL,
+)
+from .dependencies import db_settings, minio_settings, settings, telegram_settings
+from .dependencies import get_db
