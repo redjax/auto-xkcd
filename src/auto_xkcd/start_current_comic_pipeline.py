@@ -27,7 +27,7 @@ import hishel
 import msgpack
 
 
-def main(cache_transport: hishel.CacheTransport = None) -> XKCDComic:
+def run_pipeline(cache_transport: hishel.CacheTransport = None) -> XKCDComic:
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
@@ -40,8 +40,12 @@ def main(cache_transport: hishel.CacheTransport = None) -> XKCDComic:
 
 if __name__ == "__main__":
     base_app_setup(settings=settings)
-    log.info(f"[TEST][env:{settings.env}|container:{settings.container_env}] App Start")
+    log.info(
+        f"[env:{settings.env}|container:{settings.container_env}] CURRENT COMIC PIPELINE"
+    )
 
     CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
 
-    current_comic: XKCDComic = main(cache_transport=CACHE_TRANSPORT)
+    current_comic: XKCDComic = run_pipeline(
+        cache_transport=CACHE_TRANSPORT,
+    )
