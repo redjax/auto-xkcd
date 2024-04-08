@@ -15,6 +15,17 @@ valid_db_types: list[str] = ["sqlite", "postgres", "mssql"]
 
 
 class AppSettings(BaseSettings):
+    """Application settings container.
+
+    Params:
+        env (str): Usually `prod` or `dev`.
+        container_env (bool): If running in a container, you can set an env variable
+            `DYNACONF_CONTAINER_ENV=True` to indicate the app is running in a container.
+            This can be useful for controlling certain behaviors when running in a container.
+        log_level (str): Control logging level. i.e. `"INFO"`, `"DEBUG"`, `"WARNING"`, etc
+        logs_dir (str|Path): The directory where logs will be stored, if file logging is enabled.
+    """
+
     env: str = Field(default="prod", env="ENV")
     container_env: bool = Field(default=False, env="CONTAINER_ENV")
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
@@ -33,6 +44,13 @@ class AppSettings(BaseSettings):
                 return v.expanduser()
             else:
                 return v
+
+        raise ValidationError
+
+    @field_validator("log_level")
+    def validate_log_level(cls, v) -> str:
+        if isinstance(v, str):
+            return v.upper()
 
         raise ValidationError
 

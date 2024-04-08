@@ -1,25 +1,23 @@
-from __future__ import annotations
-
 from contextlib import contextmanager
 import typing as t
 
-from core import _exc, database
 from core.config import AppSettings, DBSettings, MinioSettings, TelegramSettings
-from core.request_client import get_cache_transport
+from core import database
+from core import request_client
 from dynaconf import Dynaconf
 import hishel
 import httpx
-from loguru import logger as log
-import minio
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+
+from loguru import logger as log
 
 DYNACONF_SETTINGS: Dynaconf = Dynaconf(
     environments=True,
     envvar_prefix="DYNACONF",
     settings_files=["settings.toml", ".secrets.toml"],
 )
-DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf()
+DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(environments=True, envvar_prefix="DB")
 DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
     environments=True,
     envvar_prefix="MINIO",
@@ -32,7 +30,7 @@ settings: AppSettings = AppSettings(
     log_level=DYNACONF_SETTINGS.LOG_LEVEL,
     logs_dir=DYNACONF_SETTINGS.LOGS_DIR,
 )
-## Uncomment if you're configuring a database for the app
+
 db_settings: DBSettings = DBSettings()
 telegram_settings: TelegramSettings = TelegramSettings()
 minio_settings: MinioSettings = MinioSettings(
@@ -49,7 +47,7 @@ DB_URI: sa.URL = db_settings.get_db_uri()
 ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)
 SESSION_POOL: so.sessionmaker[so.Session] = database.get_session_pool(engine=ENGINE)
 
-CACHE_TRANSPORT: hishel.CacheTransport = get_cache_transport(retries=3)
+CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport(retries=3)
 
 
 @contextmanager

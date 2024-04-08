@@ -1,61 +1,75 @@
-from __future__ import annotations
-
-from pathlib import Path
-import random
 import typing as t
+from pathlib import Path
 
-from core import database
-from core.dependencies import CACHE_TRANSPORT, db_settings, get_db, settings
-from core.paths import DATA_DIR, ENSURE_DIRS, SERIALIZE_DIR
-from core.request_client import HTTPXController, get_cache_transport
-import hishel
-import httpx
-from loguru import logger as log
-from modules import data_ctl, setup, xkcd_mod
-import msgpack
-from packages import xkcd
-from packages.xkcd.comic.img import save_img
-import pendulum
-from pipelines import comic_pipelines
-from red_utils.ext import time_utils
-from red_utils.ext.loguru_utils import init_logger, sinks
-from red_utils.std import path_utils
+from core.dependencies import settings
+from core import (
+    request_client,
+    XKCD_URL_POSTFIX,
+    XKCD_URL_BASE,
+    CURRENT_XKCD_URL,
+    SERIALIZE_COMIC_RESPONSES_DIR,
+    SERIALIZE_COMIC_OBJECTS_DIR,
+    COMIC_IMG_DIR,
+)
+from domain.xkcd.comic import XKCDComic
+from _setup import base_app_setup
+from modules import requests_prefab
+from modules import xkcd_mod
 from utils import serialize_utils
+from packages import xkcd_comic
+from helpers.validators import validate_hishel_cachetransport
+from pipelines import comic_pipelines
+
+from loguru import logger as log
+
+import httpx
+import hishel
+import msgpack
+
 
 def main(cache_transport: hishel.CacheTransport = None):
-    current_comic: xkcd_mod.XKCDComic = comic_pipelines.pipeline_get_current_comic(
-        cache_transport=cache_transport
-    )
-    # log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
-    current_img_saved: bool = save_img(
-        comic=current_comic, output_filename=f"{current_comic.num}.png"
-    )
-    # log.debug(f"Image saved ({type(current_img_saved)}): {current_img_saved}")
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
-    comics: list[xkcd_mod.XKCDComic] = comic_pipelines.pipeline_get_multiple_comics(
-        cache_transport=cache_transport,
-        comic_nums=[1, 15, 64, 83, 125, 65],
-        request_sleep=5,
-    )
+    # comic: XKCDComic = xkcd_comic.get_current_comic(
+    #     cache_transport=cache_transport, overwrite_serialized_comic=True
+    # )
+    # log.debug(f"Comic: {comic}")
 
-    scraped_comics = comic_pipelines.pipeline_scrape_missing_comics(
+    # deserialized_comic: XKCDComic | None = xkcd_mod.load_serialized_comic(
+    #     comic_num=comic.num
+    # )
+    # log.debug(f"Deserialized comic ({type(deserialized_comic)}): {deserialized_comic}")
+
+    # comic: XKCDComic = xkcd_comic.get_single_comic(
+    #     cache_transport=cache_transport, overwrite_serialized_comic=True, comic_num=42
+    # )
+    # log.debug(f"Comic #42: {comic}")
+
+    # comic: XKCDComic = xkcd_comic.get_single_comic(
+    #     cache_transport=cache_transport, overwrite_serialized_comic=True, comic_num=42
+    # )
+    # log.debug(f"Comic #{comic.num}: {comic}")
+
+    # comics: list[XKCDComic] = comic_pipelines.pipeline_multiple_comics(
+    #     cache_transport=cache_transport,
+    #     comic_nums=[1, 24, 86, 92, 320, 500, 555, 615, 645, 720, 732],
+    #     request_sleep=5,
+    # )
+
+    scraped_comics: list[XKCDComic] | None = xkcd_comic.scrape_missing_comics(
         cache_transport=cache_transport, request_sleep=5
     )
 
 
 if __name__ == "__main__":
-    init_logger(
-        sinks=[
-            sinks.LoguruSinkStdOut(level=settings.log_level).as_dict(),
-            sinks.LoguruSinkAppFile(sink=f"{settings.logs_dir}/app.log").as_dict(),
-            sinks.LoguruSinkErrFile(sink=f"{settings.logs_dir}/err.log").as_dict(),
-        ]
-    )
+    base_app_setup(settings=settings)
+    log.info(f"[TEST][env:{settings.env}|container:{settings.container_env}] App Start")
 
-    log.info(f"Start auto-xkcd")
+    CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
 
-    setup._setup()
+    # current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
+    #     cache_transport=CACHE_TRANSPORT
+    # )
+    # log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
 
-    cache_transport: hishel.CacheTransport = get_cache_transport(retries=3)
-
-    main(cache_transport=cache_transport)
+    main(cache_transport=CACHE_TRANSPORT)

@@ -1,133 +1,124 @@
-from __future__ import annotations
+import typing as t
+from pathlib import Path
 
-from .methods import _get_current, _get_multiple, _list_missing_comic_imgs
-
-from core.constants import IGNORE_COMIC_NUMS
-import hishel
-from loguru import logger as log
+from core.dependencies import settings
+from core import (
+    request_client,
+    XKCD_URL_POSTFIX,
+    XKCD_URL_BASE,
+    CURRENT_XKCD_URL,
+    SERIALIZE_COMIC_RESPONSES_DIR,
+    SERIALIZE_COMIC_OBJECTS_DIR,
+    COMIC_IMG_DIR,
+)
+from domain.xkcd.comic import XKCDComic
+from _setup import base_app_setup
+from modules import requests_prefab
 from modules import xkcd_mod
-from packages import xkcd
-from packages.xkcd.comic.img import save_img
+from utils import serialize_utils
+from packages import xkcd_comic
+from helpers.validators import validate_hishel_cachetransport, validate_comic_nums_lst
+
+from loguru import logger as log
+
+import httpx
+import hishel
+import msgpack
 
 
-def pipeline_get_current_comic(
-    cache_transport: hishel.CacheTransport = None, force_live_request: bool = False
-) -> xkcd_mod.XKCDComic:
-    assert cache_transport, ValueError("Missing cache transport for request client")
+def pipeline_current_comic(
+    cache_transport: hishel.CacheTransport = None,
+    overwrite_serialized_comic: bool = False,
+) -> XKCDComic:
+    """Pipeline to request & process the current XKCD comic."""
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+
+    log.info(">> Start current XKCD comic pipeline")
 
     try:
-        current_comic: xkcd_mod.XKCDComic = _get_current(
-            cache_transport=cache_transport, force_live_request=force_live_request
+        comic: XKCDComic = xkcd_comic.get_current_comic(
+            cache_transport=cache_transport,
+            overwrite_serialized_comic=overwrite_serialized_comic,
         )
-
-        return current_comic
+        log.success(f"Current XKCD comic requested")
 
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception getting current XKCD comic. Details: {exc}"
+            f"Unhandled exception running current XKCD comic pipeline. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)
 
         raise exc
 
+    log.info("<< End current XKCD comic pipeline")
 
-def pipeline_get_multiple_comics(
+    return comic
+
+
+def pipeline_multiple_comics(
     cache_transport: hishel.CacheTransport = None,
     comic_nums: list[int] = None,
-    force_live_request: bool = False,
+    overwrite_serialized_comic: bool = False,
     request_sleep: int = 5,
-) -> list[xkcd_mod.XKCDComic]:
-    assert cache_transport, ValueError("Missing cache transport for request client")
-    assert comic_nums, ValueError("Missing list of comic numbers to scrape")
+) -> list[XKCDComic]:
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+    comic_nums = validate_comic_nums_lst(comic_nums=comic_nums)
 
-    if force_live_request:
-        raise NotImplementedError(
-            f"Forcing a live request on multiple comics not yet supported."
-        )
+    log.info(">> Start multiple comic pipeline")
 
     try:
-        comics: list[xkcd_mod.XKCDComic] = _get_multiple(
+        comics: list[XKCDComic] = xkcd_comic.get_multiple_comics(
             cache_transport=cache_transport,
             comic_nums=comic_nums,
+            overwrite_serialized_comic=overwrite_serialized_comic,
             request_sleep=request_sleep,
         )
-
     except Exception as exc:
-        msg = Exception(f"Unhandled exception scraping multiple comics. Details: {exc}")
+        msg = Exception(f"Unhandled exception getting multiple comics. Details: {exc}")
         log.error(msg)
-        log.trace(msg)
+        log.trace(exc)
 
         raise exc
 
-    saved_comics: list[xkcd_mod.XKCDComic] = []
-    for c in comics:
-        comic_saved: bool = save_img(comic=c, output_filename=f"{c.num}.png")
-        if comic_saved:
-            saved_comics.append(c)
+    log.info("<< End multiple comic pipeline")
 
-    return saved_comics
+    return comics
 
 
 def pipeline_scrape_missing_comics(
-    cache_transport: hishel.CacheTransport = None, request_sleep: int = 5
-) -> list[xkcd_mod.XKCDComic] | None:
-    assert cache_transport, ValueError("Missing cache transport  for request client")
+    cache_transport: hishel.CacheTransport = None,
+    overwrite_serialized_comic: bool = False,
+    request_sleep: int = 5,
+    max_list_size: int = 50,
+    loop_limit: int | None = None,
+) -> list[XKCDComic]:
+    """Pipeline to find & download missing comic images.
 
-    log.info(f"Getting current XKCD comic number")
+    Todo:
+        Configurable scrape limits, like a maximum list size.
+
+    """
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+
+    log.info(">> Start scrape missing comics pipeline")
+
     try:
-        current_comic: xkcd_mod.XKCDComic = pipeline_get_current_comic(
-            cache_transport=cache_transport
+        scraped_comics: list[XKCDComic] = xkcd_comic.comic.scrape_missing_comics(
+            cache_transport=cache_transport,
+            request_sleep=request_sleep,
+            max_list_size=max_list_size,
+            loop_limit=loop_limit,
+            overwrite_serialized_comic=overwrite_serialized_comic,
         )
+
     except Exception as exc:
-        msg = Exception(f"Unhandled exception getting current comic. Details: {exc}")
+        msg = Exception(f"Unhandled exception scraping missing comics. Details: {exc}")
         log.error(msg)
         log.trace(exc)
 
         raise exc
 
-    # try:
-    #     current_comic: xkcd_mod.XKCDComic = _get_current(
-    #         cache_transport=cache_transport, force_live_request=True
-    #     )
-    #     log.debug(f"Current XKCD comic: #{current_comic.num}")
-    # except Exception as exc:
-
-    try:
-        missing_comic_imgs: list[int] = _list_missing_comic_imgs(
-            current_comic_num=current_comic.num
-        )
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception getting list of missing comic image numbers. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        raise exc
-
-    if not missing_comic_imgs:
-        log.warning(
-            f"Did not find any missing comic images. Either an error occurred, or all comic images have been downloaded."
-        )
-
-        return None
-
-    if len(missing_comic_imgs) > 1:
-        log.debug(f"Scraping [{len(missing_comic_imgs)}] missing comic(s)")
-    else:
-        log.debug(f"Scraping 1 comic: {missing_comic_imgs[0]}")
-
-    scraped_comics: list[xkcd_mod.XKCDComic] = pipeline_get_multiple_comics(
-        cache_transport=cache_transport,
-        comic_nums=missing_comic_imgs,
-        request_sleep=request_sleep,
-    )
-    if scraped_comics is None or len(scraped_comics) == 0:
-        log.warning(f"No comics were scraped. Have all comic images been downloaded?")
-
-        return
-
-    log.debug(f"Scraped [{len(scraped_comics)}] comic(s)")
+    log.info("<< End scrape missing comics pipeline")
 
     return scraped_comics
