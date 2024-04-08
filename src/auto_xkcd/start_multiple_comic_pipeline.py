@@ -1,3 +1,10 @@
+"""Entrypoint for the pipeline that requests multiple XKCD comics in a group.
+
+!!! warning
+
+    Make sure you configure a `request_sleep` limit for this pipeline. It's rude to spam XKCD's API!
+"""
+
 import typing as t
 from pathlib import Path
 
@@ -33,6 +40,19 @@ def run_pipeline(
     overwrite_serialized_comic: bool = False,
     request_sleep: int = 5,
 ) -> XKCDComic:
+    """Start the pipeline to download multiple XKCD comics.
+
+    Params:
+        cache_transport (hishel.CacheTransport): The cache transport for the request client.
+        comic_nums (list[int]): A list of `int` values representing XKCD comic numbers.
+        request_sleep (int): Number of seconds to sleep between requests.
+        overwrite_serialized_comic (bool): If `True`, functions that request a comic will overwrite saved
+            serialized data, if it exists.
+
+    Returns:
+        (list[XKCDComic]): A list of `XKCDComic` objects.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
     comic_nums = validate_comic_nums_lst(comic_nums=comic_nums)
 

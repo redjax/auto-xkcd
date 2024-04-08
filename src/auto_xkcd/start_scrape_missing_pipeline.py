@@ -1,3 +1,10 @@
+"""Entrypoint for the pipeline that scrapes XKCD's API for missing comics.
+
+!!! warning
+
+    Make sure you configure a `request_sleep` limit for this pipeline. It's rude to spam XKCD's API!
+"""
+
 import typing as t
 from pathlib import Path
 
@@ -34,6 +41,21 @@ def run_pipeline(
     max_list_size: int = 50,
     loop_limit: int | None = None,
 ) -> list[XKCDComic]:
+    """Start the pipeline to scrape for missing XKCD comics.
+
+    Params:
+        cache_transport (hishel.CacheTransport): The cache transport for the request client.
+        request_sleep (int): Number of seconds to sleep between requests.
+        overwrite_serialized_comic (bool): If `True`, functions that request a comic will overwrite saved
+            serialized data, if it exists.
+        max_list_size (int): [Default: 50] If the list of missing comics exceeds `max_list_size`, list will be
+            broken into smaller "chunks," where each new list will be smaller in size than `max_list_size`.
+        loop_limit (int|None): If set to an integer value, scraping will be limited to the number of loops defined in `loop_limit`.
+
+    Returns:
+        (list[XKCDComic]): A list of `XKCDComic` objects.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     scraped_comics: list[XKCDComic] = comic_pipelines.pipeline_scrape_missing_comics(

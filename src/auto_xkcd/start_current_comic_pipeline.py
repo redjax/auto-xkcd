@@ -1,3 +1,9 @@
+"""Entrypoint for the pipeline that requests the current XKCD comic.
+
+If the current XKCD comic has been requested recently, re-use the response until it is "stale."
+
+"""
+
 import typing as t
 from pathlib import Path
 
@@ -28,6 +34,15 @@ import msgpack
 
 
 def run_pipeline(cache_transport: hishel.CacheTransport = None) -> XKCDComic:
+    """Run the pipeline that requests the current XKCD comic.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+
+    Returns:
+        (XKCDComic): An `XKCDComic` object of the current live XKCD comic.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(

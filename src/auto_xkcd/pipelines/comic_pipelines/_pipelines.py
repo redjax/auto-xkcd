@@ -62,6 +62,7 @@ def pipeline_multiple_comics(
     overwrite_serialized_comic: bool = False,
     request_sleep: int = 5,
 ) -> list[XKCDComic]:
+    """Pipeline to request multiple comics at once."""
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
     comic_nums = validate_comic_nums_lst(comic_nums=comic_nums)
 
