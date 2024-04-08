@@ -86,11 +86,39 @@ def pipeline_multiple_comics(
     return comics
 
 
-def pipeline_missing_comics(
+def pipeline_scrape_missing_comics(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,
     request_sleep: int = 5,
-):
+    max_list_size: int = 50,
+    loop_limit: int | None = None,
+) -> list[XKCDComic]:
+    """Pipeline to find & download missing comic images.
+
+    Todo:
+        Configurable scrape limits, like a maximum list size.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
-    pass
+    log.info(">> Start scrape missing comics pipeline")
+
+    try:
+        scraped_comics: list[XKCDComic] = xkcd_comic.comic.scrape_missing_comics(
+            cache_transport=cache_transport,
+            request_sleep=request_sleep,
+            max_list_size=max_list_size,
+            loop_limit=loop_limit,
+            overwrite_serialized_comic=overwrite_serialized_comic,
+        )
+
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception scraping missing comics. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    log.info("<< End scrape missing comics pipeline")
+
+    return scraped_comics

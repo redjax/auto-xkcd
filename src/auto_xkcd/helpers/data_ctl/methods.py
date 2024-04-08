@@ -52,7 +52,7 @@ def update_comic_nums_file(
         comic_nums.append(comic_num)
 
     comic_nums.sort()
-    log.debug(f"Comic nums: {comic_nums}")
+    # log.debug(f"Comic nums: {comic_nums}")
 
     with open(file, "w") as f:
         for num in comic_nums:
