@@ -7,8 +7,9 @@ from core.paths import (
     SERIALIZE_COMIC_OBJECTS_DIR,
     SERIALIZE_COMIC_RESPONSES_DIR,
 )
-from domain.xkcd.comic import XKCDComic
+from domain.xkcd.comic import XKCDComic, CurrentComicMeta
 from utils import serialize_utils
+from helpers import data_ctl
 
 import hishel
 import httpx
@@ -165,3 +166,38 @@ def save_serialize_comic_object(
         log.trace(exc)
 
         raise exc
+
+
+def list_missing_nums():
+    try:
+        current_comic_meta: CurrentComicMeta = data_ctl.read_current_comic_meta()
+        current_comic_num: int = current_comic_meta.comic_num
+        # log.debug(f"Current comic number: {current_comic_num}")
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception reading current comic metadata. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    all_comic_nums: list[int] = list(range(1, current_comic_num))
+
+    try:
+        saved_comic_nums: list[int] = data_ctl.get_saved_imgs()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading saved comic numbers. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    missing_comic_nums: list[int] = [
+        num for num in all_comic_nums if num not in saved_comic_nums
+    ]
+    log.debug(f"Found [{len(missing_comic_nums)}] missing comic number(s)")
+
+    return missing_comic_nums

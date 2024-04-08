@@ -30,10 +30,11 @@ import msgpack
 def main(cache_transport: hishel.CacheTransport = None):
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
-    comic: XKCDComic = xkcd_comic.get_current_comic(
-        cache_transport=cache_transport, overwrite_serialized_comic=True
-    )
-    log.debug(f"Comic: {comic}")
+    # comic: XKCDComic = xkcd_comic.get_current_comic(
+    #     cache_transport=cache_transport, overwrite_serialized_comic=True
+    # )
+    # log.debug(f"Comic: {comic}")
+
     # deserialized_comic: XKCDComic | None = xkcd_mod.load_serialized_comic(
     #     comic_num=comic.num
     # )
@@ -54,6 +55,10 @@ def main(cache_transport: hishel.CacheTransport = None):
     #     comic_nums=[1, 24, 86, 92, 320, 500, 555, 615, 645, 720, 732],
     #     request_sleep=5,
     # )
+
+    scraped_comics: list[XKCDComic] | None = xkcd_comic.scrape_missing_comics(
+        cache_transport=cache_transport, request_sleep=5
+    )
 
 
 if __name__ == "__main__":

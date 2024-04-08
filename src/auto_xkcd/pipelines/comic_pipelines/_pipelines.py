@@ -84,3 +84,13 @@ def pipeline_multiple_comics(
     log.info("<< End multiple comic pipeline")
 
     return comics
+
+
+def pipeline_missing_comics(
+    cache_transport: hishel.CacheTransport = None,
+    overwrite_serialized_comic: bool = False,
+    request_sleep: int = 5,
+):
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+
+    pass
