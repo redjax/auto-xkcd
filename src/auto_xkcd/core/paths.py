@@ -1,3 +1,11 @@
+"""Pre-defined paths for the app.
+
+Also includes a list of `Path`s called `ENSURE_DIRS`. Directories in this list
+will be created at app startup.
+"""
+
+from __future__ import annotations
+
 from pathlib import Path
 
 DATA_DIR: Path = Path(".data")

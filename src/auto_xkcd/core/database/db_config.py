@@ -1,3 +1,9 @@
+"""Contained database configuration class.
+
+The `DBSettings` defined in `core.config` is generic. The `DBSettings` defined
+in this module can be configured/tweaked for this specific project.
+"""
+
 from __future__ import annotations
 
 from contextlib import contextmanager
@@ -10,6 +16,21 @@ import sqlalchemy.orm as so
 
 @dataclass
 class DBSettings:
+    """Store configuration for a database.
+
+    Params:
+        drivername (str): The `sqlalchemy` driver name, i.e. `'sqlite+pysqlite'`.
+        user (str|None): The database user's username.
+        password (str|None): The database user's password.
+        host (str|None): The database host address.
+        port (str|int|None): The database host's port.
+        database (str): The name of the database to connect to. For SQLite, use the path to the file,
+            i.e. `db/app.sqlite`.
+        echo (bool): If `True`, the SQLAlchemy `Engine` will echo SQL queries to the CLI, and will create tables
+            that do not exist (if possible).
+
+    """
+
     drivername: str = field(default="sqlite+pysqlite")
     user: str | None = field(default=None)
     password: str | None = field(default=None)
@@ -55,6 +76,12 @@ class DBSettings:
                 self.database: str = f"{self.database}"
 
     def get_db_uri(self) -> sa.URL:
+        """Construct a SQLAlchemy `URL` from class params.
+
+        Returns:
+            (sqlalchemy.URL): An initialized database connection URL.
+
+        """
         try:
             _uri: sa.URL = sa.URL.create(
                 drivername=self.drivername,
@@ -74,6 +101,12 @@ class DBSettings:
             raise msg
 
     def get_engine(self) -> sa.Engine:
+        """Build & return a SQLAlchemy `Engine`.
+
+        Returns:
+            `sqlalchemy.Engine`: A SQLAlchemy `Engine` instance.
+
+        """
         assert self.get_db_uri() is not None, ValueError("db_uri is not None")
         assert isinstance(self.get_db_uri(), sa.URL), TypeError(
             f"db_uri must be of type sqlalchemy.URL. Got type: ({type(self.db_uri)})"
@@ -94,6 +127,12 @@ class DBSettings:
             raise msg
 
     def get_session_pool(self) -> so.sessionmaker[so.Session]:
+        """Configure a session pool using class's SQLAlchemy `Engine`.
+
+        Returns:
+            (sqlalchemy.orm.sessionmaker): A SQLAlchemy `Session` pool for database connections.
+
+        """
         engine: sa.Engine = self.get_engine()
         assert engine is not None, ValueError("engine cannot be None")
         assert isinstance(engine, sa.Engine), TypeError(
@@ -106,19 +145,18 @@ class DBSettings:
 
     @contextmanager
     def get_db(self) -> t.Generator[so.Session, t.Any, None]:
-        """Return a SQLAlchemy Session pool.
+        """Context manager class to handle a SQLAlchemy Session pool.
 
         Usage:
 
-            ```py title="get_db() dependency usage" linenums="1"
+        ```py title="get_db() dependency usage" linenums="1"
 
-            from core.dependencies import get_db
+        ## Assumes `db_settings` is an initialized instance of `DBSettings`.
+        with db_settings.get_db() as session:
+            repo = someRepoClass(session)
 
-            with get_db() as session:
-                repo = someRepoClass(session)
-
-                all = repo.get_all()
-            ```
+            all = repo.get_all()
+        ```
         """
         db: so.Session = self.get_session_pool()
 

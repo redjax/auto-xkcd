@@ -1,27 +1,34 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
 
-from pendulum import DateTime
+from pathlib import Path
+import typing as t
 
 from core import request_client
-from modules import xkcd_mod, requests_prefab
+from domain.xkcd import CurrentComicMeta, XKCDComic
 from helpers import data_ctl
-from utils import serialize_utils
 from helpers.validators import validate_hishel_cachetransport
-from domain.xkcd import XKCDComic, CurrentComicMeta
-
-
 import hishel
 import httpx
-import msgpack
 from loguru import logger as log
+from modules import requests_prefab, xkcd_mod
+import msgpack
+from pendulum import DateTime
 from red_utils.ext import time_utils
+from utils import serialize_utils
 
 
 def _request_current_comic_res(
     cache_transport: hishel.CacheTransport = None,
 ) -> httpx.Response:
-    """Make request for current XKCD comic."""
+    """Make request for current XKCD comic.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport to use for the request client.
+
+    Returns:
+        (httpx.Response): The current comic `Response`.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     try:
@@ -73,7 +80,16 @@ def get_current_comic(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,
 ) -> XKCDComic:
-    """Run through operations to get the current XKCD comic."""
+    """Run through operations to get the current XKCD comic.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        overwrite_serialized_comic (bool): [Default: `False`] If `True`, overwrites serialized comic if it exists.
+
+    Returns:
+        (XKCDComic): An instance of `XKCDComic`, with params filled by response data.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     ## Get comic Response

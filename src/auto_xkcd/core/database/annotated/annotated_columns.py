@@ -1,3 +1,12 @@
+"""Define `Annotated` columns for SQLAlchemy models.
+
+Examples:
+    * `INT_PK`: An auto-incrementing, primary key integer value.
+    * `STR_10`: A `VARCHAR(10)` column.
+    * `STR_255`: A `VARCHAR(255)` column.
+
+"""
+
 from __future__ import annotations
 
 import sqlalchemy as sa

@@ -1,3 +1,5 @@
+"""Define the SQLAlchemy `DeclarativeBase` object."""
+
 from __future__ import annotations
 
 import sqlalchemy as sa
@@ -8,5 +10,13 @@ METADATA: sa.MetaData = sa.MetaData()
 
 
 class Base(so.DeclarativeBase):
-    registry = REGISTRY
-    metadata = METADATA
+    """Initialize a SQLAlchemy `DeclarativeBase` instance.
+
+    Params:
+        registry (sqalchemy.orm.registry): <Not documented>
+        metadata (sqlalchemy.MetaData): <Not documented>
+
+    """
+
+    registry: so.registry = REGISTRY
+    metadata: sa.MetaData = METADATA

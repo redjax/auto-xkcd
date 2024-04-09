@@ -11,6 +11,17 @@ def get_db_uri(
     port: int | None = None,
     database: str = "demo.sqlite",
 ) -> sa.URL:
+    """Construct a SQLAlchemy `URL` for a database connection.
+
+    Params:
+        drivername (str): The SQLAlchemy drivername value, i.e. `sqlite+pysqlite`.
+        username (str|None): The username for database auth.
+        password (str|None): The password for database auth.
+        host (str|None): The database server host address.
+        port (int|None): The database server port.
+        database (str): The database to connect to. For SQLite, use a file path, i.e. `path/to/app.sqlite`.
+
+    """
     assert drivername is not None, ValueError("drivername cannot be None")
     assert isinstance(drivername, str), TypeError(
         f"drivername must be of type str. Got type: ({type(drivername)})"
@@ -56,6 +67,16 @@ def get_db_uri(
 
 
 def get_engine(db_uri: sa.URL = None, echo: bool = False) -> sa.Engine:
+    """Get a SQLAlchemy `Engine` instance.
+
+    Params:
+        db_uri (sqlalchemy.URL): A database connection string.
+        echo (bool): If `True`, engine will echo SQL output to CLI.
+
+    Returns:
+        (sqlalchemy.Engine): An initialized SQLAlchemy `Engine`.
+
+    """
     assert db_uri is not None, ValueError("db_uri is not None")
     assert isinstance(db_uri, sa.URL), TypeError(
         f"db_uri must be of type sqlalchemy.URL. Got type: ({type(db_uri)})"
@@ -72,6 +93,15 @@ def get_engine(db_uri: sa.URL = None, echo: bool = False) -> sa.Engine:
 
 
 def get_session_pool(engine: sa.Engine = None) -> so.sessionmaker[so.Session]:
+    """Return a SQLAlchemy session pool.
+
+    Params:
+        engine (sqlalchemy.Engine): A SQLAlchemy `Engine` to use for database connections.
+
+    Returns:
+        (sqlalchemy.orm.sessionmaker): A SQLAlchemy `Session` pool for database connections.
+
+    """
     assert engine is not None, ValueError("engine cannot be None")
     assert isinstance(engine, sa.Engine), TypeError(
         f"engine must be of type sqlalchemy.Engine. Got type: ({type(engine)})"
@@ -85,7 +115,11 @@ def get_session_pool(engine: sa.Engine = None) -> so.sessionmaker[so.Session]:
 def create_base_metadata(
     base: so.DeclarativeBase = None, engine: sa.Engine = None
 ) -> None:
-    """Create a SQLAlchemy base object's table metadata."""
+    """Create a SQLAlchemy base object's table metadata.
+
+    Params:
+        base (sqlalchemy.orm.DeclarativeBase): A SQLAlchemy `DeclarativeBase` object to use for creating metadata.
+    """
     assert base is not None, ValueError("base cannot be None")
     # assert isinstance(base, so.DeclarativeBase), TypeError(
     #     f"base must be of type sqlalchemy.orm.DeclarativeBase. Got type: ({type(base)})"

@@ -1,10 +1,16 @@
+"""Classes & models for XKCD comic data."""
+
+from __future__ import annotations
+
 from .comic import (
-    XKCDComic,
-    XKCDComicOut,
-    XKCDSentComic,
-    XKCDSentComicOut,
     ComicNumCSVData,
     CurrentComicMeta,
+    XKCDComic,
+    XKCDComicModel,
+    XKCDComicOut,
+    XKCDComicRepository,
+    XKCDSentComic,
+    XKCDSentComicModel,
+    XKCDSentComicOut,
+    XKCDSentComicRepository,
 )
-from .comic import XKCDSentComicModel, XKCDComicModel
-from .comic import XKCDComicRepository, XKCDSentComicRepository

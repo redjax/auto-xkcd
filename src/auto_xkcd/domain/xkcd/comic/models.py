@@ -1,3 +1,5 @@
+"""SQLAlchemy table classes for XKCD comics."""
+
 from __future__ import annotations
 
 import abc
@@ -7,8 +9,23 @@ from core.database import INT_PK, Base, TableNameMixin, TimestampMixin
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
-
 class XKCDComicModel(Base):
+    """Table model for XKCD comics.
+
+    Params:
+        year (str): Published year
+        month (str): Published month
+        day (str): Published day
+        comic_num (int): Comic number
+        link (str|None): Link to comic.
+        title (str): Comic title.
+        transcript (str|None): Comic transcript.
+        alt_text (str): Comic alt text.
+        img_url (str): Link to comic image.
+        img (bytes): Image bytestring.
+
+    """
+
     __tablename__ = "xkcd_comic"
     __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
 
@@ -27,6 +44,8 @@ class XKCDComicModel(Base):
 
 
 class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
+    """Base database repository class for XKCDComic."""
+
     @abc.abstractmethod
     def add(self, entity: XKCDComicModel):
         """Add new entity to repository."""
@@ -44,6 +63,14 @@ class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
 
 
 class XKCDSentComicModel(Base):
+    """Metadata about comics sent via Telegram.
+
+    Params:
+        sent_comic_id (INT_PK): Primary key for sent comic.
+        comic_num (int): Comic's number.
+        date_sent (date): Day the comic was sent on Telegram.
+    """
+
     __tablename__ = "xkcd_sent_comic"
     __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
 
@@ -53,6 +80,8 @@ class XKCDSentComicModel(Base):
 
 
 class XKCDSentComicRepositoryBase(metaclass=abc.ABCMeta):
+    """Base database repository for XKCDSentComic."""
+
     @abc.abstractmethod
     def add(self, entity: XKCDSentComicModel):
         """Add new entity to repository."""

@@ -144,6 +144,18 @@ def export_requirements(session: nox.Session, pdm_ver: str):
         "--without-hashes",
     )
 
+    print("Exporting docs requirements")
+    session.run(
+        "pdm",
+        "export",
+        "-G",
+        "docs",
+        "--no-default",
+        "-o",
+        "docs/requirements.txt",
+        "--without-hashes",
+    )
+
     # print("Exporting CI requirements")
     # session.run(
     #     "pdm",

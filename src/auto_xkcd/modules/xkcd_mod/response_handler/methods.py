@@ -1,16 +1,14 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from core import request_client
-from core.paths import SERIALIZE_COMIC_RESPONSES_DIR, SERIALIZE_COMIC_OBJECTS_DIR
+from core.paths import SERIALIZE_COMIC_OBJECTS_DIR, SERIALIZE_COMIC_RESPONSES_DIR
 from domain.xkcd import XKCDComic
-from core import request_client
-
 import httpx
 from loguru import logger as log
-
 from utils import serialize_utils
-
 
 def convert_response_to_dict(res: httpx.Response = None) -> dict:
     """Attempt to decode an `httpx.Response` into a dict."""

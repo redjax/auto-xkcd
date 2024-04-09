@@ -1,8 +1,9 @@
-import typing as t
+from __future__ import annotations
+
 from itertools import chain
+import typing as t
 
 from loguru import logger as log
-
 
 def join_list_of_lists(list_of_lists: list[list[t.Any]] = None) -> list[t.Any]:
     """Join a list of other lists into a single list."""
