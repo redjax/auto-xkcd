@@ -21,11 +21,52 @@ from helpers.validators import validate_hishel_cachetransport
 import hishel
 import httpx
 from loguru import logger as log
-from modules import requests_prefab, xkcd_mod
+from modules import requests_prefab, xkcd_mod, data_mod
 import msgpack
 from packages import xkcd_comic
 from pipelines import comic_pipelines
 from utils import serialize_utils
+
+import pandas as pd
+
+
+def test_deserialize_to_df():
+    files: list[Path] = []
+    deser_dicts: list[dict] = []
+    dfs: list[pd.DataFrame] = []
+
+    log.info(f"Scanning path: '{SERIALIZE_COMIC_OBJECTS_DIR}'")
+    for f in SERIALIZE_COMIC_OBJECTS_DIR.glob("**/*.msgpack"):
+        files.append(f)
+
+        with open(f, "rb") as fp:
+            data = fp.read()
+            _deser: dict = msgpack.unpackb(data)
+            deser_dicts.append(_deser)
+            _df: pd.DataFrame = pd.DataFrame([_deser])
+            dfs.append(_df)
+
+    _sample = deser_dicts[0]
+    # log.debug(f"Example dict ({type(_sample)}): {_sample}")
+    _sampled_comic: XKCDComic = XKCDComic.model_validate(_sample)
+    log.debug(f"Sampled comic: {_sampled_comic}")
+
+    log.debug(f"Joining [{len(dfs)}] DataFrame(s)")
+    df: pd.DataFrame = pd.concat(dfs)
+    log.debug(f"DataFrame:\n{df.head(5)}")
+
+    pq_file = Path("test_pq.parquet")
+    log.info(f"Saving DataFrame to '{pq_file}'")
+    try:
+        df.to_parquet(pq_file, engine="fastparquet")
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving DataFrame to file '{pq_file}'. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
 
 
 def main(cache_transport: hishel.CacheTransport = None):
@@ -57,9 +98,9 @@ def main(cache_transport: hishel.CacheTransport = None):
     #     request_sleep=5,
     # )
 
-    scraped_comics: list[XKCDComic] | None = xkcd_comic.scrape_missing_comics(
-        cache_transport=cache_transport, request_sleep=5
-    )
+    # scraped_comics: list[XKCDComic] | None = xkcd_comic.scrape_missing_comics(
+    #     cache_transport=cache_transport, request_sleep=5
+    # )
 
 
 if __name__ == "__main__":
@@ -73,4 +114,12 @@ if __name__ == "__main__":
     # )
     # log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
 
-    main(cache_transport=CACHE_TRANSPORT)
+    # main(cache_transport=CACHE_TRANSPORT)
+
+    # test_deserialize_to_df()
+    all_requested_comics_df: pd.DataFrame = data_mod.deserialize_to_df(
+        scan_path=SERIALIZE_COMIC_OBJECTS_DIR
+    )
+    log.debug(f"DataFrame shape: ({all_requested_comics_df.shape[0]})")
+    log.debug(f"Columns: {all_requested_comics_df.columns}")
+    log.debug(f"First 5: {all_requested_comics_df.head(5)}")
