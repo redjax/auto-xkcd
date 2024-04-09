@@ -1,3 +1,5 @@
+"""A temporary testing ground for new features. New pipelines are created from the starting point here. This file will eventually be removed."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -24,6 +26,7 @@ import msgpack
 from packages import xkcd_comic
 from pipelines import comic_pipelines
 from utils import serialize_utils
+
 
 def main(cache_transport: hishel.CacheTransport = None):
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
