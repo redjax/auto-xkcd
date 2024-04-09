@@ -11,17 +11,34 @@ from loguru import logger as log
 import pendulum
 from red_utils.std import path_utils
 
-def get_ts(as_str: bool = False) -> t.Union[str, pendulum.DateTime]:
+
+def get_ts(
+    as_str: bool = False, ts_format: str = "YYYY-MM-DD_HH:mm:ss"
+) -> t.Union[str, pendulum.DateTime]:
+    """Return a `pendulum.DateTime` or timestamp string.
+
+    Params:
+        as_str (bool): [Default: False] If `True`, return timestamp as a string.
+        ts_format (str): Format the timestamp.
+
+    """
     ts: pendulum.DateTime = pendulum.now()
 
     if as_str:
-        ts: str = ts.format("YYYY-MM-DD_HH:mm:ss")
+        ts: str = ts.format(ts_format)
 
     return ts
 
 
 class SavedImgsController(AbstractContextManager):
-    def __init__(self, img_dir: t.Union[str, Path] = COMIC_IMG_DIR):
+    """Context manager to load all filenames (i.e. comic numbers) from images in the `img_dir` directory.
+
+    Params:
+        img_dir (str|Path): Path to the directory containing comic images.
+
+    """
+
+    def __init__(self, img_dir: t.Union[str, Path] = COMIC_IMG_DIR):  # noqa: D107
         assert img_dir, ValueError("Missing an img_dir")
         assert isinstance(img_dir, str) or isinstance(img_dir, Path), TypeError(
             f"img_dir must be of type str or Path. Got type: ({type(img_dir)})"
@@ -37,7 +54,7 @@ class SavedImgsController(AbstractContextManager):
         self.comic_nums: list[int] = None
         self.comic_imgs: list[Path] = None
 
-    def __enter__(self):
+    def __enter__(self):  # noqa: D105
         _imgs: list[Path] = []
         _img_nums: list[int] = []
 
@@ -68,7 +85,7 @@ class SavedImgsController(AbstractContextManager):
 
             raise exc
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):  # noqa: D105
         if exc_type:
             log.error(f"({exc_type}): {exc_value}")
             log.trace(traceback)
@@ -77,7 +94,15 @@ class SavedImgsController(AbstractContextManager):
 
 
 class CurrentComicController(AbstractContextManager):
-    def __init__(
+    """Handler for the current_comic.json file.
+
+    Params:
+        current_comic_file (str|Path): Path to the `current_comic.json` file.
+        mode (str): [Default: "r"] The file mode for opening the `current_comic.json` file.
+
+    """
+
+    def __init__(  # noqa: D107
         self,
         current_comic_file: t.Union[str, Path] = CURRENT_COMIC_FILE,
         mode: str = "r",
@@ -100,12 +125,12 @@ class CurrentComicController(AbstractContextManager):
             "last_updated": None,
         }
 
-    def __enter__(self):
+    def __enter__(self):  # noqa: D105
         self.file = open(self.current_comic_file, self.mode)
 
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):  # noqa: D105
         if exc_type:
             log.error(f"({exc_type}): {exc_value}")
             log.trace(traceback)
@@ -115,15 +140,19 @@ class CurrentComicController(AbstractContextManager):
         if self.file:
             self.file.close()
 
-    def read(self):
+    def read(self) -> dict:
+        """Read the file contents and load into a dict."""
         if self.mode != "r":
             raise ValueError(
                 f"File not opened in read mode. Opened with mode: {self.mode}"
             )
 
-        return json.load(self.file)
+        data: dict = json.load(self.file)
 
-    def write(self, data):
+        return data
+
+    def write(self, data) -> None:
+        """Write data dict to JSON file."""
         if self.mode != "w":
             raise ValueError(
                 f"File not opened in write mode. Opened with mode: {self.mode}"

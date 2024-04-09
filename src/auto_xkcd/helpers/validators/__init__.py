@@ -1,3 +1,5 @@
+"""Validator methods for the app."""
+
 from __future__ import annotations
 
 from .path_validators import validate_path

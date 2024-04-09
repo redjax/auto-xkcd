@@ -1,3 +1,8 @@
+"""Data control methods/context managers.
+
+Responsible for things like creating/updating a running list of comic numbers successfully requested.
+"""
+
 from __future__ import annotations
 
 from .context_managers.file import CurrentComicController, SavedImgsController

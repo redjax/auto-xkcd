@@ -12,10 +12,11 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
-class XKCDComicRepository(XKCDComicRepositoryBase):
-    """Database repository for handling XKCDComic models."""
 
-    def __init__(self, session: so.Session) -> None:
+class XKCDComicRepository(XKCDComicRepositoryBase):
+    """Database repository for handling XKCDComic entities."""
+
+    def __init__(self, session: so.Session) -> None:  # noqa: D107
         assert session is not None, ValueError("session cannot be None")
         assert isinstance(session, so.Session), TypeError(
             f"session must be of type sqlalchemy.orm.Session. Got type: ({type(session)})"
@@ -24,6 +25,7 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
         self.session: so.Session = session
 
     def add(self, entity: XKCDComicModel) -> None:
+        """Add new entity to the database."""
         try:
             self.session.add(instance=entity)
             self.session.commit()
@@ -42,6 +44,7 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
             raise msg
 
     def remove(self, entity: XKCDComicModel) -> None:
+        """Remove existing entity from the database."""
         try:
             self.session.delete(instance=entity)
             self.session.commit()
@@ -101,7 +104,7 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
 class XKCDSentComicRepository(XKCDSentComicRepositoryBase):
     """Database repository for handling XKCDSentComic models."""
 
-    def __init__(self, session: so.Session) -> None:
+    def __init__(self, session: so.Session) -> None:  # noqa: D107
         assert session is not None, ValueError("session cannot be None")
         assert isinstance(session, so.Session), TypeError(
             f"session must be of type sqlalchemy.orm.Session. Got type: ({type(session)})"
@@ -175,6 +178,7 @@ class XKCDSentComicRepository(XKCDSentComicRepositoryBase):
             raise msg
 
     def get_by_id(self, sent_comic_id: int) -> XKCDSentComicModel:
+        """Get an entity from the database by ID."""
         try:
             return self.session.query(XKCDSentComicModel).get(sent_comic_id)
         except Exception as exc:

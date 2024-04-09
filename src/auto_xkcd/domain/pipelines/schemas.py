@@ -13,6 +13,7 @@ from pydantic import (
     field_validator,
 )
 
+
 class PipelineLoopConfigBase(BaseModel):
     loop: bool = Field(default=False, description="Apply loop configuration if True")
     loop_pause: t.Union[int, float] = Field(
@@ -26,6 +27,17 @@ class PipelineLoopConfigBase(BaseModel):
 
 
 class PipelineLoopConfig(PipelineLoopConfigBase):
+    """Configuration for a pipeline's looping functionality.
+
+    THIS CLASS IS NOT READY FOR USE.
+
+    Params:
+        loop (bool): [Default: `False`] If `True`, apply loop configurations to the pipeline.
+        loop_pause (int|float): Time (in seconds) to wait/pause between loops.
+        max_loops (int|None): [Default: None] If set, pipeline will loop numer of times defined.
+        continue_on_error (bool): If `True`, pipeline loop will continue passed errored loops instead of exiting.
+    """
+
     pass
 
 
@@ -38,4 +50,12 @@ class PipelineConfigBase(BaseModel):
 
 
 class PipelineConfig(PipelineConfigBase):
+    """Store configuration for a pipeline.
+
+    Params:
+        name (str): Name for the pipeline
+        loop_settings (PipelineeLoopConfig): Configurations for looping, if pipeline supports loops.
+
+    """
+
     pass

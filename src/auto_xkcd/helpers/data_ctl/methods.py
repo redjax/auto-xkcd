@@ -10,9 +10,17 @@ from domain.xkcd import CurrentComicMeta
 from loguru import logger as log
 from red_utils.std import path_utils
 
+
 def update_comic_nums_file(
     file: t.Union[str, Path] = Path(f"{DATA_DIR}/comic_nums.txt"), comic_num: int = None
-):
+) -> None:
+    """Update/add to a `.txt` file tracking XKCD comics successfully requested.
+
+    Params:
+        file (str|Path): Path to a `comic_nums.txt` file to update.
+        comic_num (int): The comic number to add (if it does not exist).
+
+    """
     assert comic_num is not None, ValueError("Missing comic number")
     assert isinstance(comic_num, int), TypeError(f"comic_num must be an integer")
 
@@ -38,11 +46,11 @@ def update_comic_nums_file(
     if not file.exists():
         file.touch()
 
-    with open(file, "r") as f:
-        lines = f.readlines()
-        comic_nums = []
+    with open(file=file, mode="r") as f:
+        lines: list[str] = f.readlines()
+        comic_nums: list[int] = []
         for line in lines:
-            stripped_line = line.strip()
+            stripped_line: str = line.strip()
             if stripped_line:
                 comic_nums.append(int(stripped_line))
 
@@ -60,6 +68,17 @@ def update_comic_nums_file(
 def get_saved_imgs(
     comic_img_dir: t.Union[str, Path] = COMIC_IMG_DIR, as_int: bool = True
 ) -> list[str] | list[int]:
+    """Loop over comic images saved in `comic_img_dir` and extract comic number from filename.
+
+    Params:
+        comic_img_dir (str|Path): Path to a directory containing XKCD comic `.png`s.
+        as_int (bool): Return list of integers if `True`.
+
+    Returns:
+        (list[str]): If `as_int = False`
+        (list[int]): If `as_int = True`
+
+    """
     assert comic_img_dir, ValueError("Missing comic_img_dir")
     assert isinstance(comic_img_dir, str) or isinstance(comic_img_dir, Path), TypeError(
         f"comic_img_dir must be a string or Path. Got type: ({type(comic_img_dir)})"
@@ -96,6 +115,12 @@ def get_saved_imgs(
 
 
 def validate_current_comic_file(current_comic_file: t.Union[str, Path] = None) -> Path:
+    """Validate the current_comic.json file. Create template file, if current_comic.json does not exist.
+
+    Params:
+        current_comic_file (str|Path): Path to the `current_comic.json` file.
+
+    """
     assert current_comic_file, ValueError("Missing current comic details file")
     assert isinstance(current_comic_file, str) or isinstance(
         current_comic_file, Path
@@ -135,7 +160,12 @@ def validate_current_comic_file(current_comic_file: t.Union[str, Path] = None) -
 def read_current_comic_meta(
     current_comic_file: t.Union[str, Path] = CURRENT_COMIC_FILE
 ) -> CurrentComicMeta:
+    """Read the contents of the `current_comic.json` file.
 
+    Params:
+        current_comic_file (str|Path): Path to the `current_comic.json` file.
+
+    """
     try:
         current_comic_file = validate_current_comic_file(current_comic_file)
     except Exception as exc:
@@ -184,7 +214,17 @@ def update_current_comic_meta(
     current_comic_file: t.Union[str, Path] = CURRENT_COMIC_FILE,
     current_comic: CurrentComicMeta = None,
 ) -> bool:
-    current_comic_file = validate_current_comic_file(current_comic_file)
+    """Update the `current_comic.json` file with new data.
+
+    Params:
+        current_comic_file (str|Path): Path to the `current_comic.json` file.
+        current_comic (CurrentComicMeta): A `CurrentComicMeta` object containing comic metadata, like comic number and a bool
+            indicating whether the comic's image has been downloaded.
+
+    """
+    current_comic_file = validate_current_comic_file(
+        current_comic_file=current_comic_file
+    )
     assert current_comic, ValueError("Missing CurrentComicMeta object")
 
     current_comic.overwrite_last_updated()
