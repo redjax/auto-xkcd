@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import typing as t
+import time
 
 from _setup import base_app_setup
 from core import (
@@ -32,12 +33,14 @@ from packages import xkcd_comic
 from pipelines import comic_pipelines
 from utils import serialize_utils
 
+
 def run_pipeline(
     cache_transport: hishel.CacheTransport = None,
     request_sleep: int = 5,
     overwrite_serialized_comic: bool = False,
     max_list_size: int = 50,
     loop_limit: int | None = None,
+    loop_pause: int = 10,
 ) -> list[XKCDComic]:
     """Start the pipeline to scrape for missing XKCD comics.
 
@@ -48,7 +51,8 @@ def run_pipeline(
             serialized data, if it exists.
         max_list_size (int): [Default: 50] If the list of missing comics exceeds `max_list_size`, list will be
             broken into smaller "chunks," where each new list will be smaller in size than `max_list_size`.
-        loop_limit (int|None): If set to an integer value, scraping will be limited to the number of loops defined in `loop_limit`.
+        loop_limit (int|None): [Default: None] Number of times to loop request. `None` will loop once and return, `0` will loop indefinitely.
+        loop_pause (int): [Default: 21600 (6 hours)] Number of seconds to pause between loops.
 
     Returns:
         (list[XKCDComic]): A list of `XKCDComic` objects.
@@ -56,13 +60,66 @@ def run_pipeline(
     """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
-    scraped_comics: list[XKCDComic] = comic_pipelines.pipeline_scrape_missing_comics(
-        cache_transport=cache_transport,
-        request_sleep=request_sleep,
-        overwrite_serialized_comic=overwrite_serialized_comic,
-        max_list_size=max_list_size,
-        loop_limit=loop_limit,
-    )
+    LOOP_COUNT: int = 1
+    CONTINUE_LOOP: bool = True
+
+    if loop_limit is None:
+        log.debug(f"Running scrape for missing comics 1 time")
+        scraped_comics: list[XKCDComic] = (
+            comic_pipelines.pipeline_scrape_missing_comics(
+                cache_transport=cache_transport,
+                request_sleep=request_sleep,
+                overwrite_serialized_comic=overwrite_serialized_comic,
+                max_list_size=max_list_size,
+                loop_limit=loop_limit,
+            )
+        )
+
+        return scraped_comics
+
+    if loop_limit == 0:
+        log.debug(f"Looping scraper indefinitely.")
+        ## No loop limit, continue looping indefinitely
+        scraped_comics: list[XKCDComic] = (
+            comic_pipelines.pipeline_scrape_missing_comics(
+                cache_transport=cache_transport,
+                request_sleep=request_sleep,
+                overwrite_serialized_comic=overwrite_serialized_comic,
+                max_list_size=max_list_size,
+                loop_limit=loop_limit,
+            )
+        )
+
+        log.info(f"Pause [{loop_pause}] second(s) between scrape loops ...")
+        time.sleep(loop_pause)
+
+    else:
+        ## Maximum number of loops is specified, loop until threshold reached.
+        log.debug(f"Looping scraper [{loop_limit}] time(s).")
+        while CONTINUE_LOOP:
+            if LOOP_COUNT >= loop_limit:
+                CONTINUE_LOOP = False
+
+                continue
+
+            else:
+                scraped_comics: list[XKCDComic] = (
+                    comic_pipelines.pipeline_scrape_missing_comics(
+                        cache_transport=cache_transport,
+                        request_sleep=request_sleep,
+                        overwrite_serialized_comic=overwrite_serialized_comic,
+                        max_list_size=max_list_size,
+                        loop_limit=loop_limit,
+                    )
+                )
+
+            LOOP_COUNT += 1
+            log.info(
+                f"Pause for [{loop_pause}] second(s) between current comic requests..."
+            )
+            time.sleep(loop_pause)
+
+        log.info(f"Looped [{LOOP_COUNT}/{loop_limit}] time(s).")
 
     return scraped_comics
 
@@ -77,4 +134,6 @@ if __name__ == "__main__":
         cache_transport=CACHE_TRANSPORT,
         request_sleep=5,
         overwrite_serialized_comic=False,
+        loop_limit=10,
+        loop_pause=30,
     )
