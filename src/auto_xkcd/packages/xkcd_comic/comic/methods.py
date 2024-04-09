@@ -17,10 +17,21 @@ from pendulum import DateTime
 from red_utils.ext import time_utils
 from utils import serialize_utils
 
+
 def _request_comic_res(
     cache_transport: hishel.CacheTransport = None, comic_num: int = 0
 ) -> httpx.Response:
-    """Make request for XKCD comic."""
+    """Make request for XKCD comic.
+
+    This function is not importable, but is meant to be called by other methods in this module.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+
+    Returns:
+        (httpx.Response): The API's response.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     try:
@@ -66,6 +77,16 @@ def get_single_comic(
     comic_num: int = None,
     overwrite_serialized_comic: bool = False,
 ) -> XKCDComic:
+    """Request a single XKCD comic by its comic number.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        comic_num (int): The number of the XKCD comic strip to request.
+
+    Returns:
+        (XKCDComic): The specified XKCD comic.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     if comic_num in IGNORE_COMIC_NUMS:
@@ -152,6 +173,18 @@ def get_multiple_comics(
     overwrite_serialized_comic: bool = False,
     request_sleep: int = 5,
 ) -> list[XKCDComic]:
+    """Request multiple comics, with a configurable delay between requests.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        comic_nums (list[int]): A list of XKCD comic numbers to request.
+        overwrite_serialized_comic (bool): If `True`, overwrite existing serialized file with data from request.
+        request_sleep (int): [Default: 5] Number of seconds to sleep between requests.
+
+    Returns:
+        (list[XKCDComic]): A list of `XKCDComic` objects.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     saved_comic_nums: list[int] = data_ctl.get_saved_imgs()

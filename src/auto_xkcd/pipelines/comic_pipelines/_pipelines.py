@@ -1,3 +1,5 @@
+"""Comic pipelines for interacting with the XKCD API & handling the response."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -24,11 +26,21 @@ import msgpack
 from packages import xkcd_comic
 from utils import serialize_utils
 
+
 def pipeline_current_comic(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,
 ) -> XKCDComic:
-    """Pipeline to request & process the current XKCD comic."""
+    """Pipeline to request & process the current XKCD comic.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        overwrite_serialized_comic (bool): If `True`, overwrite existing serialized file with data from request.
+
+    Returns:
+        (XKCDComic): The current XKCD comic.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     log.info(">> Start current XKCD comic pipeline")
@@ -60,7 +72,18 @@ def pipeline_multiple_comics(
     overwrite_serialized_comic: bool = False,
     request_sleep: int = 5,
 ) -> list[XKCDComic]:
-    """Pipeline to request multiple comics at once."""
+    """Pipeline to request multiple comics at once.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        comic_nums (list[int]): A list of comic numbers to download/process.
+        overwrite_serialized_comic (bool): If `True`, overwrite existing serialized file with data from request.
+        request_sleep (int): [Default: 5] Number of seconds to sleep between requests.
+
+    Returns:
+        (list[XKCDComic]): A list of the requested XKCD comics.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
     comic_nums = validate_comic_nums_lst(comic_nums=comic_nums)
 
@@ -96,6 +119,14 @@ def pipeline_scrape_missing_comics(
 
     Todo:
         Configurable scrape limits, like a maximum list size.
+
+    Params:
+        cache_transport(hishel.CacheTransport): A cache transport for the request client.
+        overwrite_serialized_comic (bool): If `True`, overwrite existing serialized file with data from request.
+        request_sleep (int): [Default: 5] Number of seconds to sleep between requests.
+        max_list_size (int): [Default: 50] If list size exceeds `max_list_size`, break list into smaller "chunks,"
+            then return a "list of lists", where each inner list is a "chunk" of 50 comic images.
+        loop_limit (int|None): [Default: None] Maximum number of times to loop, regardless of total number of missing comics.
 
     """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)

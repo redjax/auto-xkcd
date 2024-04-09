@@ -1,3 +1,5 @@
+"""Handle scraping the XKCD API for missing comics."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -24,6 +26,7 @@ from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 from utils import list_utils
 
+
 def scrape_missing_comics(
     cache_transport: hishel.CacheTransport = None,
     request_sleep: int = 5,
@@ -31,6 +34,20 @@ def scrape_missing_comics(
     loop_limit: int | None = None,
     overwrite_serialized_comic: bool = False,
 ) -> list[XKCDComic] | None:
+    """Compile a list of missing comic numbers from saved comic images, then request those missing comics.
+
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        request_sleep (int): [Default: 5] Number of seconds to sleep between requests.
+        max_list_size (int): [Default: 50] If list size exceeds `max_list_size`, break list into smaller "chunks,"
+            then return a "list of lists", where each inner list is a "chunk" of 50 comic images.
+        loop_limit (int|None): [Default: None] Maximum number of times to loop, regardless of total number of missing comics.
+        overwrite_serialized_comic (bool): If `True`, overwrite existing serialized file with data from request.
+
+    Returns:
+        (list[XKCDComic]): A list of scraped XKCDComic objects.
+
+    """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     ## Flip to True is list becomes chunked
