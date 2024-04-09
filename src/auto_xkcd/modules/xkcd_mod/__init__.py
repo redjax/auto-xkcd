@@ -1,3 +1,5 @@
+"""Modules for XKCD comics, meant to be imported & used in packages/pipelines."""
+
 from __future__ import annotations
 
 from . import response_handler

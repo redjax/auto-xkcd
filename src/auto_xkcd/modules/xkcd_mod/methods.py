@@ -17,13 +17,23 @@ from loguru import logger as log
 import msgpack
 from utils import serialize_utils
 
+
 def request_and_save_comic_img(
     comic: XKCDComic = None,
     cache_transport: hishel.CacheTransport = None,
     output_dir: t.Union[str, Path] = COMIC_IMG_DIR,
 ) -> XKCDComic:
+    """Request a specific comic's image given an input `XKCDComic` object.
 
+    Params:
+        comic (XKCDComic): An initialized `XKCDComic` object.
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        output_dir (str|Path): Path to the directory where comic image will be saved.
+
+    """
+    ## Extract image URL
     img_url: str = comic.img_url
+    ## Build request for image
     img_req: httpx.Request = request_client.build_request(url=img_url)
 
     img_bytes_filename: str = f"{comic.num}.png"
@@ -86,6 +96,13 @@ def load_serialized_comic(
     serialize_dir: t.Union[str, Path] = SERIALIZE_COMIC_OBJECTS_DIR,
     comic_num: int = None,
 ) -> XKCDComic | None:
+    """Load a serialized XKCDComic object from a file.
+
+    Params:
+        serialize_dir (str|Path): Path to directory containing serialized XKCDComic objects.
+        comic_num (int): Number of comic to load.
+
+    """
     serialized_comic_filename: str = f"{comic_num}.msgpack"
     serialized_comic_path: Path = Path(f"{serialize_dir}/{serialized_comic_filename}")
 
@@ -135,6 +152,15 @@ def save_serialize_comic_object(
     output_dir: t.Union[str, Path] = SERIALIZE_COMIC_OBJECTS_DIR,
     overwrite: bool = False,
 ) -> None:
+    """Save an `XKCDComic` object to a `.msgpack` file.
+
+    Params:
+        comic (XKCDComic): An instantiated `XKCDComic` object.
+        output_dir (str|Path): The directory where the serialized file will be saved. Note: the filename will be generated
+            during function execution, you should not include the filename in this path.
+        overwrite (bool): If `True`, file will be overwritten if it already exists.
+
+    """
     serialized_filename = f"{comic.num}.msgpack"
     output_filepath: Path = Path(f"{output_dir}/{serialized_filename}")
 
@@ -148,6 +174,7 @@ def save_serialize_comic_object(
 
         else:
             log.warning(f"overwrite=False, skipping.")
+
             return
 
     try:
@@ -168,7 +195,8 @@ def save_serialize_comic_object(
         raise exc
 
 
-def list_missing_nums():
+def list_missing_nums() -> list[int]:
+    """Compile a list of missing XKCD comic numbers."""
     try:
         current_comic_meta: CurrentComicMeta = data_ctl.read_current_comic_meta()
         current_comic_num: int = current_comic_meta.comic_num
