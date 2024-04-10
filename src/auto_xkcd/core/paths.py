@@ -30,3 +30,4 @@ ENSURE_DIRS: list[Path] = [
 ]
 
 CURRENT_COMIC_FILE: Path = Path(f"{DATA_DIR}/current_comic.json")
+COMICS_PQ_FILE: Path = Path(f"{PQ_DIR}/comics.parquet")

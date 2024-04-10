@@ -32,3 +32,4 @@ from .paths import (
     SERIALIZE_COMIC_RESPONSES_DIR,
     SERIALIZE_DIR,
 )
+from .paths import CURRENT_COMIC_FILE, COMICS_PQ_FILE

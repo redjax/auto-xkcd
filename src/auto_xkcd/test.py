@@ -28,6 +28,7 @@ from pipelines import comic_pipelines
 from utils import serialize_utils
 
 import pandas as pd
+import ibis
 
 
 def test_deserialize_to_df():
@@ -117,7 +118,7 @@ if __name__ == "__main__":
     # main(cache_transport=CACHE_TRANSPORT)
 
     # test_deserialize_to_df()
-    all_requested_comics_df: pd.DataFrame = data_mod.deserialize_to_df(
+    all_requested_comics_df: pd.DataFrame = data_mod.deserialize_comics_to_df(
         scan_path=SERIALIZE_COMIC_OBJECTS_DIR
     )
     log.debug(f"DataFrame shape: ({all_requested_comics_df.shape[0]})")

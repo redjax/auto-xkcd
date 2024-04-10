@@ -1,6 +1,7 @@
 import typing as t
 from pathlib import Path
 
+from core.paths import COMICS_PQ_FILE
 from domain.xkcd import XKCDComic
 
 from loguru import logger as log
@@ -8,8 +9,10 @@ import pandas as pd
 import msgpack
 
 
-def deserialize_to_df(
-    scan_path: t.Union[str, Path] = None, filetype_filter: str = ".msgpack"
+def deserialize_comics_to_df(
+    scan_path: t.Union[str, Path] = None,
+    output_file: t.Union[str, Path] = None,
+    filetype_filter: str = ".msgpack",
 ) -> pd.DataFrame:
     files: list[Path] = []
     deser_dicts: list[dict] = []
@@ -35,13 +38,12 @@ def deserialize_to_df(
     df: pd.DataFrame = pd.concat(dfs)
     log.debug(f"DataFrame:\n{df.head(5)}")
 
-    pq_file = Path("test_pq.parquet")
-    log.info(f"Saving DataFrame to '{pq_file}'")
+    log.info(f"Saving DataFrame to '{COMICS_PQ_FILE}'")
     try:
-        df.to_parquet(pq_file, engine="fastparquet")
+        df.to_parquet(COMICS_PQ_FILE, engine="fastparquet")
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception saving DataFrame to file '{pq_file}'. Details: {exc}"
+            f"Unhandled exception saving DataFrame to file '{COMICS_PQ_FILE}'. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)

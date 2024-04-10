@@ -24,7 +24,7 @@ DEFAULT_LOGGING_SINKS: list = [
 ]
 
 
-def logging_setup(
+def setup_logging(
     settings: AppSettings = settings, sinks: list = DEFAULT_LOGGING_SINKS
 ) -> None:
     """Initialize app logging (with Loguru).
@@ -80,5 +80,5 @@ def base_app_setup(
         f"ensure_dirs must be a list of Path objects"
     )
 
-    logging_setup(settings=settings)
+    setup_logging(settings=settings)
     setup_ensure_dirs(ensure_dirs=ensure_dirs)
