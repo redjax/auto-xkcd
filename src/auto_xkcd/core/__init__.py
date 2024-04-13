@@ -13,11 +13,12 @@ from .constants import (
     IGNORE_COMIC_NUMS,
     XKCD_URL_BASE,
     XKCD_URL_POSTFIX,
+    PQ_ENGINE,
 )
 from .dependencies import (
     db_settings,
     get_db,
-    minio_settings,
+    # minio_settings,
     settings,
     telegram_settings,
 )

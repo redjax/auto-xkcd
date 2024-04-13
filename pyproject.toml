@@ -60,3 +60,14 @@ dockerctl = { shell = "python dockerctl.py" }
 # compose-run-main-d = { shell = "./scripts/compose_run.sh" }
 # compose-down-main-d = { shell = "./scripts/compose_down.sh" }
 # compose-logs-main-d = { shell = "./scripts/compose_logs.sh" }
+
+# [tool.pixi.project]
+# channels = ["conda-forge"]
+# platforms = ["linux-64"]
+
+# [tool.pixi.pypi-dependencies]
+# auto-xkcd = { path = ".", editable = true }
+
+# [tool.pixi.environments]
+# default = { solve-group = "default" }
+# docs = { features = ["docs"], solve-group = "default" }

@@ -1,6 +1,7 @@
 import typing as t
 from pathlib import Path
 
+from core.constants import PQ_ENGINE
 from core.paths import COMICS_PQ_FILE
 from domain.xkcd import XKCDComic
 
@@ -11,7 +12,7 @@ import msgpack
 
 def deserialize_comics_to_df(
     scan_path: t.Union[str, Path] = None,
-    output_file: t.Union[str, Path] = None,
+    # output_file: t.Union[str, Path] = None,
     filetype_filter: str = ".msgpack",
 ) -> pd.DataFrame:
     files: list[Path] = []
@@ -51,3 +52,24 @@ def deserialize_comics_to_df(
         raise exc
 
     return df
+
+
+def load_pq_to_df(
+    comics_pq_file: t.Union[str, Path] = None, pq_engine: str = PQ_ENGINE
+) -> pd.DataFrame:
+    assert comics_pq_file, ValueError("Missing comics_pq_file path")
+    comics_pq_file: Path = Path(f"{comics_pq_file}")
+    if "~" in f"{comics_pq_file}":
+        comics_pq_file = comics_pq_file.expanduser()
+
+    try:
+        _df: pd.DataFrame = pd.read_parquet(path=comics_pq_file, engine=pq_engine)
+        return _df
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading parquet file '{comics_pq_file}' into Pandas DataFrame. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc

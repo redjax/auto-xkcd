@@ -14,6 +14,7 @@ from core.paths import ENSURE_DIRS
 from loguru import logger as log
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
+import ibis
 
 ## Default loguru sinks
 DEFAULT_LOGGING_SINKS: list = [
@@ -60,6 +61,10 @@ def setup_ensure_dirs(ensure_dirs: list[Path] = ENSURE_DIRS) -> None:
         raise exc
 
 
+def setup_ibis_interactive(interactive: bool = True):
+    ibis.options.interactive = True
+
+
 def base_app_setup(
     settings: AppSettings = settings, ensure_dirs: list[Path] = ENSURE_DIRS
 ) -> None:
@@ -82,3 +87,9 @@ def base_app_setup(
 
     setup_logging(settings=settings)
     setup_ensure_dirs(ensure_dirs=ensure_dirs)
+
+    match settings.env:
+        case ["dev", "notebook"]:
+            setup_ibis_interactive(interactive=True)
+        case "prod":
+            setup_ibis_interactive(interactive=False)

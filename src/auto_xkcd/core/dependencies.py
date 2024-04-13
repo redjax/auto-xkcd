@@ -23,12 +23,16 @@ DYNACONF_SETTINGS: Dynaconf = Dynaconf(
     envvar_prefix="DYNACONF",
     settings_files=["settings.toml", ".secrets.toml"],
 )
-DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(environments=True, envvar_prefix="DB")
-DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
+DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(
     environments=True,
-    envvar_prefix="MINIO",
-    settings_files=["minio/settings.toml", "minio/.secrets.toml"],
+    envvar_prefix="DB",
+    settings_files=["db/settings.toml", "db/.secrets.toml"],
 )
+# DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
+#     environments=True,
+#     envvar_prefix="MINIO",
+#     settings_files=["minio/settings.toml", "minio/.secrets.toml"],
+# )
 
 settings: AppSettings = AppSettings(
     env=DYNACONF_SETTINGS.ENV,
@@ -37,17 +41,28 @@ settings: AppSettings = AppSettings(
     logs_dir=DYNACONF_SETTINGS.LOGS_DIR,
 )
 
-db_settings: DBSettings = DBSettings()
-telegram_settings: TelegramSettings = TelegramSettings()
-minio_settings: MinioSettings = MinioSettings(
-    address=DYNACONF_MINIO_SETTINGS.MINIO_ADDRESS,
-    port=DYNACONF_MINIO_SETTINGS.MINIO_PORT,
-    secure=DYNACONF_MINIO_SETTINGS.MINIO_HTTPS,
-    username=DYNACONF_MINIO_SETTINGS.MINIO_USERNAME,
-    password=DYNACONF_MINIO_SETTINGS.MINIO_PASSWORD,
-    access_key=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_KEY,
-    access_secret=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_SECRET,
+db_settings: DBSettings = DBSettings(
+    type=DYNACONF_DB_SETTINGS.DB_TYPE,
+    drivername=DYNACONF_DB_SETTINGS.DB_DRIVERNAME,
+    username=DYNACONF_DB_SETTINGS.DB_USERNAME,
+    password=DYNACONF_DB_SETTINGS.DB_PASSWORD,
+    host=DYNACONF_DB_SETTINGS.DB_HOST,
+    port=DYNACONF_DB_SETTINGS.DB_PORT,
+    database=DYNACONF_DB_SETTINGS.DB_DATABASE,
 )
+
+telegram_settings: TelegramSettings = TelegramSettings()
+
+# minio_settings: MinioSettings = MinioSettings(
+#     address=DYNACONF_MINIO_SETTINGS.MINIO_ADDRESS,
+#     port=DYNACONF_MINIO_SETTINGS.MINIO_PORT,
+#     secure=DYNACONF_MINIO_SETTINGS.MINIO_HTTPS,
+#     username=DYNACONF_MINIO_SETTINGS.MINIO_USERNAME,
+#     password=DYNACONF_MINIO_SETTINGS.MINIO_PASSWORD,
+#     access_key=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_KEY,
+#     access_secret=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_SECRET,
+#     echo=DYNACONF_DB_SETTINGS.DB_ECHO,
+# )
 
 DB_URI: sa.URL = db_settings.get_db_uri()
 ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)
