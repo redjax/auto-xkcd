@@ -95,7 +95,7 @@ def pipeline_save_serialized_comics_to_db(
         )
         ## Save DataFrame to .parquet file
         try:
-            comics_df.to_parquet(pq_output_file, engine=pq_engine)
+            comics_df.to_parquet(pq_output_file, engine=PQ_ENGINE)
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception saving XKCD comics DataFrame to Parquet file '{pq_output_file}'. Details: {exc}"

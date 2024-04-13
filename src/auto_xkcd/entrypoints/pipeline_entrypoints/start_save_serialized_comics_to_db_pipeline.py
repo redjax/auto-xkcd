@@ -49,7 +49,7 @@ def run_pipeline(
             db_settings=db_settings,
             save_parquet=save_parquet,
             pq_output_file=pq_output_file,
-            pq_engine=pq_engine,
+            pq_engine=PQ_ENGINE,
         )
     except Exception as exc:
         msg = Exception(
