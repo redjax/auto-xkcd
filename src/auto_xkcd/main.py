@@ -12,24 +12,19 @@ import hishel
 import httpx
 
 
-def main(cache_transport: hishel.CacheTransport = None, pq_engine: str = PQ_ENGINE):
-    current_comic: XKCDComic = (
-        pipeline_entrypoints.start_current_comic_pipeline.run_pipeline(
-            cache_transport=CACHE_TRANSPORT, overwrite_serialized_comic=True
-        )
-    )
-    log.debug(f"Current comic: {current_comic}")
+def execute_pipelines(pipelines_list: list[dict] = None):
+    for _pipeline in pipelines_list:
+        log.debug(f"Pipeline: {_pipeline}")
+        log.info(f"Running '{_pipeline['name']}")
 
-    pipeline_entrypoints.start_save_serialized_comics_to_db_pipeline.run_pipeline(
-        db_settings=db_settings,
-        sqla_base=database.Base,
-        serialized_comics_dir=paths.SERIALIZE_COMIC_OBJECTS_DIR,
-        db_comics_tbl_name="xkcd_comic",
-        if_exists_strategy="replace",
-        save_parquet=True,
-        pq_output_file=paths.COMICS_PQ_FILE,
-        pq_engine=pq_engine,
-    )
+        try:
+            _pipeline["method"](**_pipeline["args"])
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception running '{_pipeline['name']}'. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
 
 
 if __name__ == "__main__":
@@ -37,4 +32,44 @@ if __name__ == "__main__":
 
     CACHE_TRANSPORT = request_client.get_cache_transport()
 
-    main(cache_transport=CACHE_TRANSPORT)
+    PIPELINE_CONF_CURRENT_COMIC = {
+        "name": "get_current_comic",
+        "method": pipeline_entrypoints.start_current_comic_pipeline.run_pipeline,
+        "args": {"cache_transport": CACHE_TRANSPORT},
+    }
+    PIPELINE_CONF_SAVE_SERIALIZED_TO_DB = {
+        "name": "save_serialized_comics_to_db",
+        "method": pipeline_entrypoints.start_save_serialized_comics_to_db_pipeline.run_pipeline,
+        "args": {
+            "db_settings": db_settings,
+            "sqla_base": database.Base,
+            "db_comics_tbl_name": "xkcd_comic",
+            "if_exists_strategy": "replace",
+            "include_df_index": False,
+            "save_parquet": True,
+            "pq_output_file": paths.COMICS_PQ_FILE,
+            "pq_engine": PQ_ENGINE,
+        },
+    }
+    PIPELINE_CONF_SCRAPE_MISSING_COMICS = {
+        "name": "scrape_missing_comics",
+        "method": pipeline_entrypoints.start_scrape_missing_pipeline.run_pipeline,
+        "args": {
+            "cache_transport": CACHE_TRANSPORT,
+            "request_sleep": 5,
+            "overwrite_serialized_comic": True,
+            "max_list_size": 50,
+            "loop_limit": None,
+            "loop_pause": 10,
+        },
+    }
+
+    RUN_PIPELINES: list[dict] = [
+        PIPELINE_CONF_CURRENT_COMIC,
+        PIPELINE_CONF_SAVE_SERIALIZED_TO_DB,
+    ]
+
+    execute_pipelines(pipelines_list=RUN_PIPELINES)
+
+    execute_pipelines(pipelines_list=[PIPELINE_CONF_SCRAPE_MISSING_COMICS])
+    execute_pipelines(pipelines_list=[PIPELINE_CONF_SAVE_SERIALIZED_TO_DB])
