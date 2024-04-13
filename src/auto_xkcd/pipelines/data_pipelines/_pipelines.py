@@ -9,6 +9,7 @@ from core.paths import (
     CURRENT_COMIC_FILE,
 )
 from core.dependencies import settings, db_settings
+from core.constants import PQ_ENGINE
 from core.config import AppSettings, DBSettings
 from domain.xkcd.comic import XKCDComic
 from helpers.validators import (
@@ -42,9 +43,16 @@ def pipeline_save_serialized_comics_to_db(
     if_exists: str = "replace",
     index: bool = False,
     db_settings: DBSettings = db_settings,
+    save_parquet: bool = True,
+    pq_output_file: t.Union[str, Path] = COMICS_PQ_FILE,
+    pq_engine: str = PQ_ENGINE,
 ):
     log.info(">> Start save serialized XKCD comics to database pipieline")
 
+    log.info(
+        f"Loading .msgpack file(s) in path  '{serialized_dir}' into Pandas DataFrame."
+    )
+    ## Load .msgpack serialized XKCDComic objects into a DataFrame
     try:
         comics_df: pd.DataFrame = data_mod.deserialize_comics_to_df(
             scan_path=serialized_dir
@@ -58,6 +66,8 @@ def pipeline_save_serialized_comics_to_db(
 
         raise exc
 
+    log.info(f"Saving {comics_df.shape[0]} to database")
+    ## Save DataFrame to SQLite database using SQLAlchemy engine
     try:
         comics_df.to_sql(
             name=tbl_name,
@@ -74,5 +84,25 @@ def pipeline_save_serialized_comics_to_db(
         log.trace(exc)
 
         raise exc
+
+    if save_parquet:
+        assert pq_output_file, ValueError(
+            "save_parquet=True, but no pq_output_file detected."
+        )
+
+        log.info(
+            f"Saving [{comics_df.shape[0]}] XKCD comic(s) to Parquet file '{pq_output_file}'"
+        )
+        ## Save DataFrame to .parquet file
+        try:
+            comics_df.to_parquet(pq_output_file, engine=pq_engine)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception saving XKCD comics DataFrame to Parquet file '{pq_output_file}'. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            log.warning(f"Did not save comics to Parquet file.")
 
     log.info(">> End save serialized XKCD comics to database pipieline")

@@ -1,17 +1,34 @@
+import typing as t
+from pathlib import Path
+
 from core import database
+from core.config import DBSettings
+from core.paths import SERIALIZE_COMIC_OBJECTS_DIR, COMICS_PQ_FILE
+from core.constants import PQ_ENGINE
 from _setup import base_app_setup
 from core.dependencies import db_settings
 from pipelines import data_pipelines
 
 from loguru import logger as log
+import sqlalchemy as sa
+import sqlalchemy.orm as so
 
-if __name__ == "__main__":
-    base_app_setup()
+
+def run_pipeline(
+    db_settings: DBSettings = db_settings,
+    sqla_base: so.DeclarativeBase = database.Base,
+    serialized_comics_dir: t.Union[str, Path] = SERIALIZE_COMIC_OBJECTS_DIR,
+    db_comics_tbl_name: str = "xkcd_comic",
+    if_exists_strategy: str = "replace",
+    include_df_index: bool = False,
+    save_parquet: bool = True,
+    pq_output_file: t.Union[str, Path] = COMICS_PQ_FILE,
+    pq_engine: str = PQ_ENGINE,
+):
+    db_engine: sa.Engine = db_settings.get_engine()
 
     try:
-        database.create_base_metadata(
-            base=database.Base, engine=db_settings.get_engine()
-        )
+        database.create_base_metadata(base=sqla_base, engine=db_engine)
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception creating SQLAlchemy Base metadata. Details: {exc}"
@@ -24,7 +41,16 @@ if __name__ == "__main__":
         )
 
     try:
-        data_pipelines.pipeline_save_serialized_comics_to_db()
+        data_pipelines.pipeline_save_serialized_comics_to_db(
+            serialized_dir=serialized_comics_dir,
+            tbl_name=db_comics_tbl_name,
+            if_exists=if_exists_strategy,
+            index=include_df_index,
+            db_settings=db_settings,
+            save_parquet=save_parquet,
+            pq_output_file=pq_output_file,
+            pq_engine=pq_engine,
+        )
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception running pipeline to save serialized XKCDComic objects to database. Details: {exc}"
@@ -33,3 +59,9 @@ if __name__ == "__main__":
         log.trace(exc)
 
         raise exc
+
+
+if __name__ == "__main__":
+    base_app_setup()
+
+    run_pipeline()
