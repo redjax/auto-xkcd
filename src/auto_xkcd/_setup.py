@@ -8,9 +8,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from core import database
 from core.config import AppSettings, DBSettings
 from core.dependencies import settings
 from core.paths import ENSURE_DIRS
+from helpers import cli_helpers
 from loguru import logger as log
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
@@ -65,6 +67,21 @@ def setup_ibis_interactive(interactive: bool = True):
     ibis.options.interactive = True
 
 
+def setup_database(db_settings: DBSettings = None):
+    db_settings.echo = True
+
+    try:
+        database.create_base_metadata(
+            base=database.Base, engine=db_settings.get_engine()
+        )
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception creating Base metadata. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+
 def base_app_setup(
     settings: AppSettings = settings, ensure_dirs: list[Path] = ENSURE_DIRS
 ) -> None:
@@ -99,11 +116,10 @@ def cli_app_setup(
     _settings: AppSettings = None,
     db_settings: DBSettings = None,
     ensure_dirs: list[Path] = ENSURE_DIRS,
+    log_level: str = "ERROR",
 ):
-    _settings.env = "cli"
-    _settings.log_level = "ERROR"
-
-    db_settings.echo = False
+    # _settings.env = "cli"
+    _settings.log_level = log_level
 
     cli_logger_sinks: list = [
         sinks.LoguruSinkStdErr(level=settings.log_level).as_dict(),
@@ -115,4 +131,12 @@ def cli_app_setup(
     init_logger(sinks=cli_logger_sinks)
     log.info(f"Logging initialized")
 
-    setup_ensure_dirs()
+    setup_ensure_dirs(ensure_dirs=ensure_dirs)
+
+    setup_database(db_settings=db_settings)
+
+    ## Set echo to False after database initialization
+    db_settings.echo = False
+
+    ## Clear screen
+    cli_helpers.clear()

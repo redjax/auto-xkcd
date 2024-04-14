@@ -133,6 +133,11 @@ def pipeline_scrape_missing_comics(
 
     log.info(">> Start scrape missing comics pipeline")
 
+    ## Request current comic to ensure pipeline runs.
+    current_comic: XKCDComic = xkcd_comic.get_current_comic(
+        cache_transport=cache_transport, overwrite_serialized_comic=True
+    )
+
     try:
         scraped_comics: list[XKCDComic] = xkcd_comic.comic.scrape_missing_comics(
             cache_transport=cache_transport,
