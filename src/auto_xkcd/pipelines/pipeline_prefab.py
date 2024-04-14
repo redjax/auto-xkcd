@@ -1,9 +1,10 @@
 """Pre-made `PipelineHandler` class instances, which can be imported & passed to methods that make use of a `PipelineHandler`."""
 
-from domain.pipelines import PipelineHandler
-from core.dependencies import CACHE_TRANSPORT, db_settings
-from core import paths, database, PQ_ENGINE
+from __future__ import annotations
 
+from core import PQ_ENGINE, database, paths
+from core.dependencies import CACHE_TRANSPORT, db_settings
+from domain.pipelines import PipelineHandler
 from entrypoints.pipeline_entrypoints import (
     start_current_comic_pipeline,
     start_multiple_comic_pipeline,
@@ -11,7 +12,6 @@ from entrypoints.pipeline_entrypoints import (
     start_scrape_missing_pipeline,
 )
 from loguru import logger as log
-
 
 ## Current comic pipeline
 PIPELINE_CONF_CURRENT_COMIC: PipelineHandler = PipelineHandler(

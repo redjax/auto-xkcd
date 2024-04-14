@@ -10,7 +10,6 @@ from domain.xkcd import CurrentComicMeta
 from loguru import logger as log
 from red_utils.std import path_utils
 
-
 def update_comic_nums_file(
     file: t.Union[str, Path] = Path(f"{DATA_DIR}/comic_nums.txt"), comic_num: int = None
 ) -> None:

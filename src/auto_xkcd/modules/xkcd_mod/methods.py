@@ -17,7 +17,6 @@ from loguru import logger as log
 import msgpack
 from utils import serialize_utils
 
-
 def request_and_save_comic_img(
     comic: XKCDComic = None,
     cache_transport: hishel.CacheTransport = None,

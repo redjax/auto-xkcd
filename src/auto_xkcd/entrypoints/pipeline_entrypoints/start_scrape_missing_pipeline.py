@@ -8,8 +8,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-import typing as t
 import time
+import typing as t
 
 from _setup import base_app_setup
 from core import (
@@ -32,7 +32,6 @@ import msgpack
 from packages import xkcd_comic
 from pipelines import comic_pipelines
 from utils import serialize_utils
-
 
 def run_pipeline(
     cache_transport: hishel.CacheTransport = None,

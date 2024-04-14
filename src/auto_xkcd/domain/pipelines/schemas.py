@@ -13,7 +13,6 @@ from pydantic import (
     field_validator,
 )
 
-
 class PipelineLoopConfigBase(BaseModel):
     loop: bool = Field(default=False, description="Apply loop configuration if True")
     loop_pause: t.Union[int, float] = Field(

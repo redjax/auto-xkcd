@@ -11,9 +11,9 @@ from __future__ import annotations
 from .constants import (
     CURRENT_XKCD_URL,
     IGNORE_COMIC_NUMS,
+    PQ_ENGINE,
     XKCD_URL_BASE,
     XKCD_URL_POSTFIX,
-    PQ_ENGINE,
 )
 from .dependencies import (
     db_settings,
@@ -26,6 +26,8 @@ from .paths import (
     BACKUP_DIR,
     CACHE_DIR,
     COMIC_IMG_DIR,
+    COMICS_PQ_FILE,
+    CURRENT_COMIC_FILE,
     DATA_DIR,
     ENSURE_DIRS,
     PQ_DIR,
@@ -33,4 +35,3 @@ from .paths import (
     SERIALIZE_COMIC_RESPONSES_DIR,
     SERIALIZE_DIR,
 )
-from .paths import CURRENT_COMIC_FILE, COMICS_PQ_FILE

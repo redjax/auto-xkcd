@@ -1,6 +1,7 @@
-from domain.pipelines import PipelineHandler, ExecutePipelineReport
-from loguru import logger as log
+from __future__ import annotations
 
+from domain.pipelines import ExecutePipelineReport, PipelineHandler
+from loguru import logger as log
 
 def execute_pipelines(
     pipelines_list: list[PipelineHandler] = None,

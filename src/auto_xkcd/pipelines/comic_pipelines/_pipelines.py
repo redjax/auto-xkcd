@@ -26,7 +26,6 @@ import msgpack
 from packages import xkcd_comic
 from utils import serialize_utils
 
-
 def pipeline_current_comic(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,

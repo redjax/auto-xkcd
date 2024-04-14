@@ -1,14 +1,14 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from core.constants import PQ_ENGINE
 from core.paths import COMICS_PQ_FILE
 from domain.xkcd import XKCDComic
-
 from loguru import logger as log
-import pandas as pd
 import msgpack
-
+import pandas as pd
 
 def deserialize_comics_to_df(
     scan_path: t.Union[str, Path] = None,

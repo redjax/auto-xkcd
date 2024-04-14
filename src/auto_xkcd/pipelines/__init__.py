@@ -8,4 +8,6 @@ Pipeline examples:
 
 """
 
+from __future__ import annotations
+
 from .methods import execute_pipelines

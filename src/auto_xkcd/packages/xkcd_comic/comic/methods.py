@@ -17,7 +17,6 @@ from pendulum import DateTime
 from red_utils.ext import time_utils
 from utils import serialize_utils
 
-
 def _request_comic_res(
     cache_transport: hishel.CacheTransport = None, comic_num: int = 0
 ) -> httpx.Response:

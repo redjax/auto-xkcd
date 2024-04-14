@@ -1,18 +1,18 @@
-import typing as t
-from pathlib import Path
+from __future__ import annotations
 
+from pathlib import Path
+import typing as t
+
+from _setup import base_app_setup
 from core import database
 from core.config import DBSettings
-from core.paths import SERIALIZE_COMIC_OBJECTS_DIR, COMICS_PQ_FILE
 from core.constants import PQ_ENGINE
-from _setup import base_app_setup
 from core.dependencies import db_settings
-from pipelines import data_pipelines
-
+from core.paths import COMICS_PQ_FILE, SERIALIZE_COMIC_OBJECTS_DIR
 from loguru import logger as log
+from pipelines import data_pipelines
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-
 
 def run_pipeline(
     db_settings: DBSettings = db_settings,

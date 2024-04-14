@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ._pipelines import (
     pipeline_ingest_data_bronze,
     pipeline_process_data_bronze,

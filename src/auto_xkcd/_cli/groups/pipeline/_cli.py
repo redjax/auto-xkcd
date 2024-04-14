@@ -1,13 +1,14 @@
+from __future__ import annotations
+
 from .commands import (
-    list_pipelines,
     get_current_comic,
+    list_pipelines,
     scrape_missing_comics,
     update_database,
 )
 
 import click
 from loguru import logger as log
-
 
 @click.group("pipelines")
 @click.pass_context

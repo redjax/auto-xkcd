@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 from pathlib import Path
 import typing as t
 
+from core.config import AppSettings, DBSettings
+from core.constants import PQ_ENGINE
+from core.dependencies import db_settings, settings
 from core.paths import (
     COMIC_IMG_DIR,
-    SERIALIZE_COMIC_OBJECTS_DIR,
-    SERIALIZE_COMIC_RESPONSES_DIR,
     COMICS_PQ_FILE,
     CURRENT_COMIC_FILE,
+    SERIALIZE_COMIC_OBJECTS_DIR,
+    SERIALIZE_COMIC_RESPONSES_DIR,
 )
-from core.dependencies import settings, db_settings
-from core.constants import PQ_ENGINE
-from core.config import AppSettings, DBSettings
 from domain.xkcd.comic import XKCDComic
 from helpers.validators import (
     validate_comic_nums_lst,
@@ -20,12 +22,11 @@ from helpers.validators import (
 import hishel
 import httpx
 from loguru import logger as log
-from modules import requests_prefab, xkcd_mod, data_mod
+from modules import data_mod, requests_prefab, xkcd_mod
 import msgpack
 from packages import xkcd_comic
-from utils import serialize_utils
 import pandas as pd
-
+from utils import serialize_utils
 
 def pipeline_ingest_data_bronze():
     """Open raw inputs (.msgpack, .txt, .csv, .json, etc) and load into database and/or Parquet file."""

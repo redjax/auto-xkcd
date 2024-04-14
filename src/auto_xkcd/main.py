@@ -1,19 +1,19 @@
+from __future__ import annotations
+
 import typing as t
 
+from _setup import base_app_setup
+from core import database, paths, request_client
+from core.constants import PQ_ENGINE
+from core.dependencies import db_settings, settings
+from domain.pipelines import ExecutePipelineReport, PipelineHandler
 from domain.xkcd.comic.schemas import XKCDComic
 from entrypoints import pipeline_entrypoints
-from domain.pipelines import PipelineHandler, ExecutePipelineReport
-from _setup import base_app_setup
-from core.dependencies import settings, db_settings
-from core import request_client, database, paths
-from core.constants import PQ_ENGINE
-from modules import xkcd_mod, data_mod
-from pipelines import pipeline_prefab, execute_pipelines
-
-from loguru import logger as log
 import hishel
 import httpx
-
+from loguru import logger as log
+from modules import data_mod, xkcd_mod
+from pipelines import execute_pipelines, pipeline_prefab
 
 if __name__ == "__main__":
     base_app_setup()

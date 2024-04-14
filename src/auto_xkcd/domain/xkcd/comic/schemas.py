@@ -16,7 +16,6 @@ from pydantic import (
 from red_utils.ext import time_utils
 from red_utils.std import hash_utils
 
-
 class ComicNumCSVData(BaseModel):
     """Store metadata about a comic number, like if the image has been saved.
 

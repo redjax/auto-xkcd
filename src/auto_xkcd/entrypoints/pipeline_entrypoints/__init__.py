@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from . import (
     start_current_comic_pipeline,
     start_multiple_comic_pipeline,

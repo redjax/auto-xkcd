@@ -1,14 +1,15 @@
+from __future__ import annotations
+
 import time
 
+import click
 from core import request_client
 from domain.pipelines import PipelineHandler
 from domain.xkcd import XKCDComic
 from entrypoints import pipeline_entrypoints
-from pipelines import pipeline_prefab
-
-import click
-from loguru import logger as log
 import hishel
+from loguru import logger as log
+from pipelines import pipeline_prefab
 from rich.console import Console
 
 console = Console()
