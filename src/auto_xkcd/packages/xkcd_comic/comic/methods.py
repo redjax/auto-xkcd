@@ -197,10 +197,12 @@ def get_multiple_comics(
             log.warning(f"Comic #{comic_num} is in list of ignored comics. Skipping")
 
             continue
+            # pass
 
         if comic_num in saved_comic_nums:
             log.warning(f"Comic #{comic_num} has already been downloaded. Skipping.")
             continue
+            # pass
 
         try:
             _comic: XKCDComic = get_single_comic(
