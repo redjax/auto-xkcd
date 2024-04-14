@@ -16,6 +16,7 @@ from pydantic import (
 from red_utils.ext import time_utils
 from red_utils.std import hash_utils
 
+
 class ComicNumCSVData(BaseModel):
     """Store metadata about a comic number, like if the image has been saved.
 
@@ -116,8 +117,9 @@ class XKCDComicBase(BaseModel):
     @property
     def telegram_msg(self) -> str:
         """Return a formatted message string for Telegram messages."""
-        msg: str = f"""XKCD Comic for {self.month}-{self.day}-{self.year}
+        msg: str = f"""Current XKCD Comic
 
+Date: {self.month}-{self.day}-{self.year}
 Title: {self.title}
 Comic Number: {self.num}
 Transcript: {self.transcript}

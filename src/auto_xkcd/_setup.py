@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from core.config import AppSettings
+from core.config import AppSettings, DBSettings
 from core.dependencies import settings
 from core.paths import ENSURE_DIRS
 from loguru import logger as log
@@ -93,3 +93,26 @@ def base_app_setup(
             setup_ibis_interactive(interactive=True)
         case "prod":
             setup_ibis_interactive(interactive=False)
+
+
+def cli_app_setup(
+    _settings: AppSettings = None,
+    db_settings: DBSettings = None,
+    ensure_dirs: list[Path] = ENSURE_DIRS,
+):
+    _settings.env = "cli"
+    _settings.log_level = "ERROR"
+
+    db_settings.echo = False
+
+    cli_logger_sinks: list = [
+        sinks.LoguruSinkStdErr(level=settings.log_level).as_dict(),
+        sinks.LoguruSinkAppFile(sink=f"{settings.logs_dir}/cli/app.log").as_dict(),
+        sinks.LoguruSinkErrFile(sink=f"{settings.logs_dir}/cli/err.log").as_dict(),
+        sinks.LoguruSinkTraceFile(sink=f"{settings.logs_dir}/cli/trace.log").as_dict(),
+    ]
+
+    init_logger(sinks=cli_logger_sinks)
+    log.info(f"Logging initialized")
+
+    setup_ensure_dirs()

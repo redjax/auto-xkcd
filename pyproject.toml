@@ -18,6 +18,7 @@ dependencies = [
     "minio>=7.2.5",
     "chardet>=5.2.0",
     "fastparquet>=2024.2.0",
+    "click>=8.1.7",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
