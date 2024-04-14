@@ -11,6 +11,7 @@ import typing as t
 
 from core import database, request_client
 from core.config import AppSettings, DBSettings, MinioSettings, TelegramSettings
+from core.config import settings, db_settings, telegram_settings
 from dynaconf import Dynaconf
 import hishel
 import httpx
@@ -18,51 +19,6 @@ from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
-DYNACONF_SETTINGS: Dynaconf = Dynaconf(
-    environments=True,
-    envvar_prefix="DYNACONF",
-    settings_files=["settings.toml", ".secrets.toml"],
-)
-DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(
-    environments=True,
-    envvar_prefix="DB",
-    settings_files=["db/settings.toml", "db/.secrets.toml"],
-)
-# DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
-#     environments=True,
-#     envvar_prefix="MINIO",
-#     settings_files=["minio/settings.toml", "minio/.secrets.toml"],
-# )
-
-settings: AppSettings = AppSettings(
-    env=DYNACONF_SETTINGS.ENV,
-    container_env=DYNACONF_SETTINGS.CONTAINER_ENV,
-    log_level=DYNACONF_SETTINGS.LOG_LEVEL,
-    logs_dir=DYNACONF_SETTINGS.LOGS_DIR,
-)
-
-db_settings: DBSettings = DBSettings(
-    type=DYNACONF_DB_SETTINGS.DB_TYPE,
-    drivername=DYNACONF_DB_SETTINGS.DB_DRIVERNAME,
-    username=DYNACONF_DB_SETTINGS.DB_USERNAME,
-    password=DYNACONF_DB_SETTINGS.DB_PASSWORD,
-    host=DYNACONF_DB_SETTINGS.DB_HOST,
-    port=DYNACONF_DB_SETTINGS.DB_PORT,
-    database=DYNACONF_DB_SETTINGS.DB_DATABASE,
-)
-
-telegram_settings: TelegramSettings = TelegramSettings()
-
-# minio_settings: MinioSettings = MinioSettings(
-#     address=DYNACONF_MINIO_SETTINGS.MINIO_ADDRESS,
-#     port=DYNACONF_MINIO_SETTINGS.MINIO_PORT,
-#     secure=DYNACONF_MINIO_SETTINGS.MINIO_HTTPS,
-#     username=DYNACONF_MINIO_SETTINGS.MINIO_USERNAME,
-#     password=DYNACONF_MINIO_SETTINGS.MINIO_PASSWORD,
-#     access_key=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_KEY,
-#     access_secret=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_SECRET,
-#     echo=DYNACONF_DB_SETTINGS.DB_ECHO,
-# )
 
 DB_URI: sa.URL = db_settings.get_db_uri()
 ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)

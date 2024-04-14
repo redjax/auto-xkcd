@@ -16,12 +16,15 @@ from .constants import (
     XKCD_URL_POSTFIX,
 )
 from .dependencies import (
-    db_settings,
     get_db,
+)
+from .config import (
+    db_settings,
     # minio_settings,
     settings,
     telegram_settings,
 )
+from .config import AppSettings, DBSettings, MinioSettings, TelegramSettings
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,

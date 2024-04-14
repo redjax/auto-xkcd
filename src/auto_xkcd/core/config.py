@@ -10,8 +10,26 @@ from pydantic_settings import BaseSettings
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
+from dynaconf import Dynaconf
+
 ## Uncomment if adding a database config
 valid_db_types: list[str] = ["sqlite", "postgres", "mssql"]
+
+DYNACONF_SETTINGS: Dynaconf = Dynaconf(
+    environments=True,
+    envvar_prefix="DYNACONF",
+    settings_files=["settings.toml", ".secrets.toml"],
+)
+DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(
+    environments=True,
+    envvar_prefix="DB",
+    settings_files=["db/settings.toml", "db/.secrets.toml"],
+)
+# DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
+#     environments=True,
+#     envvar_prefix="MINIO",
+#     settings_files=["minio/settings.toml", "minio/.secrets.toml"],
+# )
 
 
 class AppSettings(BaseSettings):
@@ -26,10 +44,14 @@ class AppSettings(BaseSettings):
         logs_dir (str|Path): The directory where logs will be stored, if file logging is enabled.
     """
 
-    env: str = Field(default="prod", env="ENV")
-    container_env: bool = Field(default=False, env="CONTAINER_ENV")
-    log_level: str = Field(default="INFO", env="LOG_LEVEL")
-    logs_dir: t.Union[str, Path] = Field(default="logs", env="LOGS_DIR")
+    env: str = Field(default=DYNACONF_SETTINGS.ENV, env="ENV")
+    container_env: bool = Field(
+        default=DYNACONF_SETTINGS.CONTAINER_ENV, env="CONTAINER_ENV"
+    )
+    log_level: str = Field(default=DYNACONF_SETTINGS.LOG_LEVEL, env="LOG_LEVEL")
+    logs_dir: t.Union[str, Path] = Field(
+        default=DYNACONF_SETTINGS.LOGS_DIR, env="LOGS_DIR"
+    )
 
     @field_validator("logs_dir")
     def validate_logs_dir(cls, v) -> Path:
@@ -74,41 +96,43 @@ class DBSettings(BaseSettings):
     """
 
     type: str = Field(
-        default="sqlite",
+        default=DYNACONF_DB_SETTINGS.DB_TYPE,
         description="The type of database this configuration defines.",
         env="DB_TYPE",
     )
     drivername: str = Field(
-        default="sqlite+pysqlite",
+        default=DYNACONF_DB_SETTINGS.DB_DRIVERNAME,
         description="The SQLAlchemy drivername string.",
         env="DB_DRIVERNAME",
     )
     username: str | None = Field(
-        default=None,
+        default=DYNACONF_DB_SETTINGS.DB_USERNAME,
         description="The username for database authentication.",
         env="DB_USERNAME",
     )
     password: str | None = Field(
-        default=None,
+        default=DYNACONF_DB_SETTINGS.DB_PASSWORD,
         description="The pasword for database authentication.",
         env="DB_PASSWORD",
         repr=False,
     )
     host: str | None = Field(
-        default=None,
+        default=DYNACONF_DB_SETTINGS.DB_HOST,
         description="The host address of the database server.",
         env="DB_HOST",
     )
     port: t.Union[str, int, None] = Field(
-        default=None, description="The port of the database server.", env="DB_PORT"
+        default=DYNACONF_DB_SETTINGS.DB_PORT,
+        description="The port of the database server.",
+        env="DB_PORT",
     )
     database: str = Field(
-        default="auto-xkcd.sqlite",
+        default=DYNACONF_DB_SETTINGS.DB_DATABASE,
         description="The database to connect to.",
         env="DB_DATABASE",
     )
     echo: bool = Field(
-        default=True,
+        default=DYNACONF_DB_SETTINGS.DB_ECHO,
         description="Configure the SQLAlchemy `Engine`'s echo truthiness.",
         env="DB_ECHO",
     )
@@ -223,3 +247,21 @@ class TelegramSettings(BaseSettings):
 
     bot_token: str | None = Field(default=None, env="TELEGRAM_BOT_TOKEN")
     bot_username: str | None = Field(default=None, env="TELEGRAM_BOT_USERNAME")
+
+
+settings: AppSettings = AppSettings()
+
+db_settings: DBSettings = DBSettings()
+
+telegram_settings: TelegramSettings = TelegramSettings()
+
+# minio_settings: MinioSettings = MinioSettings(
+#     address=DYNACONF_MINIO_SETTINGS.MINIO_ADDRESS,
+#     port=DYNACONF_MINIO_SETTINGS.MINIO_PORT,
+#     secure=DYNACONF_MINIO_SETTINGS.MINIO_HTTPS,
+#     username=DYNACONF_MINIO_SETTINGS.MINIO_USERNAME,
+#     password=DYNACONF_MINIO_SETTINGS.MINIO_PASSWORD,
+#     access_key=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_KEY,
+#     access_secret=DYNACONF_MINIO_SETTINGS.MINIO_ACCESS_SECRET,
+#     echo=DYNACONF_DB_SETTINGS.DB_ECHO,
+# )
