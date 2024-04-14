@@ -1,6 +1,6 @@
-"""Pre-made `PipelineConfig` class instances, which can be imported & passed to methods that make use of a `PipelineConfig`."""
+"""Pre-made `PipelineHandler` class instances, which can be imported & passed to methods that make use of a `PipelineHandler`."""
 
-from pipelines.pipeline_config._config import PipelineConfig
+from domain.pipelines import PipelineHandler
 from core.dependencies import CACHE_TRANSPORT, db_settings
 from core import paths, database, PQ_ENGINE
 
@@ -13,7 +13,7 @@ from entrypoints.pipeline_entrypoints import (
 from loguru import logger as log
 
 ## Current comic pipeline
-PIPELINE_CONF_CURRENT_COMIC: PipelineConfig = PipelineConfig(
+PIPELINE_CONF_CURRENT_COMIC: PipelineHandler = PipelineHandler(
     name="get_current_comic",
     descripton="Run through operations to get, serialize, convert, & return the current XKCDComic.",
     method=start_current_comic_pipeline.run_pipeline,
@@ -21,7 +21,7 @@ PIPELINE_CONF_CURRENT_COMIC: PipelineConfig = PipelineConfig(
 )
 
 ## Load serialized, save to db pipeline
-PIPELINE_CONF_SAVE_SERIALIZED_TO_DB: PipelineConfig = PipelineConfig(
+PIPELINE_CONF_SAVE_SERIALIZED_TO_DB: PipelineHandler = PipelineHandler(
     name="save_serialized_comics_to_db",
     description="Iterate over serialized comic .msgpack files, load into a DataFrame, & save to the xkcd_comic DB table.",
     method=start_save_serialized_comics_to_db_pipeline.run_pipeline,
@@ -38,7 +38,7 @@ PIPELINE_CONF_SAVE_SERIALIZED_TO_DB: PipelineConfig = PipelineConfig(
 )
 
 ## Scrape missing comics pipeline
-PIPELINE_CONF_SCRAPE_MISSING_COMICS: PipelineConfig = PipelineConfig(
+PIPELINE_CONF_SCRAPE_MISSING_COMICS: PipelineHandler = PipelineHandler(
     name="scrape_missing_comics",
     description="Iterate over comic numbers from 1 to the current number, requesting & saving each comic.",
     method=start_scrape_missing_pipeline.run_pipeline,

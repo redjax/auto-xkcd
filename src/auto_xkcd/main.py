@@ -2,46 +2,25 @@ import typing as t
 
 from domain.xkcd.comic.schemas import XKCDComic
 from entrypoints import pipeline_entrypoints
-from pipelines import PipelineConfig, pipeline_config
+from domain.pipelines import PipelineHandler, ExecutePipelineReport
 from _setup import base_app_setup
 from core.dependencies import settings, db_settings
 from core import request_client, database, paths
 from core.constants import PQ_ENGINE
 from modules import xkcd_mod, data_mod
+from pipelines import pipeline_prefab
 
 from loguru import logger as log
 import hishel
 import httpx
 
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    ValidationError,
-    ConfigDict,
-    computed_field,
-)
-
-from pipelines import pipeline_prefab
-
-
-class ExecutePipelineReport(BaseModel):
-    pipeline_execution_count: int = Field(default=0)
-    success: list[PipelineConfig] | None = Field(default_factory=[])
-    fail: list[PipelineConfig] | None = Field(default_factory=[])
-
-    @computed_field
-    @property
-    def results_str(self) -> str:
-        return f"[Total Pipelines Executed: {self.pipeline_execution_count}] | [SUCCESS:{len(self.success)}] [FAIL:{len(self.fail)}]"
-
 
 def execute_pipelines(
-    pipelines_list: list[PipelineConfig] = None,
+    pipelines_list: list[PipelineHandler] = None,
 ) -> ExecutePipelineReport:
 
-    success: list[PipelineConfig] = []
-    fail: list[PipelineConfig] = []
+    success: list[PipelineHandler] = []
+    fail: list[PipelineHandler] = []
 
     pipeline_execute_count: int = 0
 
@@ -83,7 +62,7 @@ if __name__ == "__main__":
         "Main entrypoint, running sequence to get current comic, then scrape for missing comics, finally saving all comics to the database."
     )
 
-    RUN_PIPELINES: list[PipelineConfig] = [
+    RUN_PIPELINES: list[PipelineHandler] = [
         pipeline_prefab.PIPELINE_CONF_CURRENT_COMIC,
         pipeline_prefab.PIPELINE_CONF_SAVE_SERIALIZED_TO_DB,
     ]
