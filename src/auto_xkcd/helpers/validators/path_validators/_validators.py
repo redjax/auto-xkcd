@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
-
 def validate_path(p: t.Union[str, Path] = None, must_exist: bool = False) -> Path:
     """Validate an input path.
 

@@ -17,7 +17,6 @@ from pendulum import DateTime
 from red_utils.ext import time_utils
 from utils import serialize_utils
 
-
 def _request_comic_res(
     cache_transport: hishel.CacheTransport = None, comic_num: int = 0
 ) -> httpx.Response:
@@ -197,10 +196,12 @@ def get_multiple_comics(
             log.warning(f"Comic #{comic_num} is in list of ignored comics. Skipping")
 
             continue
+            # pass
 
         if comic_num in saved_comic_nums:
             log.warning(f"Comic #{comic_num} has already been downloaded. Skipping.")
             continue
+            # pass
 
         try:
             _comic: XKCDComic = get_single_comic(

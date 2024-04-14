@@ -129,10 +129,11 @@ class ComposeCLIContext(AbstractContextManager):
             )
 
             print("")
+            print("a: attach (for viewing live CLI of container)")
             print("d: docker compose down")
             print("q: quit")
 
-        valid_choices: list[str] = ["1", "2", "3", "4", "5", "6", "d"]
+        valid_choices: list[str] = ["1", "2", "3", "4", "5", "6", "a", "d"]
 
         clear()
 
@@ -181,6 +182,11 @@ class ComposeCLIContext(AbstractContextManager):
 
         return cmd
 
+    def _attach(self) -> None:
+        cmd: list[str] = ["docker", "attach", self.container_name]
+
+        return cmd
+
     def _down(self) -> list[str]:
         cmd: list[str] = self.compose_meta.cmd_str_prefix() + ["down"]
 
@@ -205,6 +211,10 @@ class ComposeCLIContext(AbstractContextManager):
                     self.container_name = input("Enter container name: ")
                 command = self._up(build=True)
                 command = self._logs()
+            case "a":
+                if not hasattr(self, "container_name"):
+                    self.container_name = input("Enter container name: ")
+                command = self._attach()
             case "d":
                 command = self._down()
             case _:

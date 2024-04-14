@@ -116,8 +116,9 @@ class XKCDComicBase(BaseModel):
     @property
     def telegram_msg(self) -> str:
         """Return a formatted message string for Telegram messages."""
-        msg: str = f"""XKCD Comic for {self.month}-{self.day}-{self.year}
+        msg: str = f"""Current XKCD Comic
 
+Date: {self.month}-{self.day}-{self.year}
 Title: {self.title}
 Comic Number: {self.num}
 Transcript: {self.transcript}

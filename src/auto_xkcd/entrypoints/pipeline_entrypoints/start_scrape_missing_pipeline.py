@@ -1,14 +1,15 @@
-"""Entrypoint for the pipeline that requests the current XKCD comic.
+"""Entrypoint for the pipeline that scrapes XKCD's API for missing comics.
 
-If the current XKCD comic has been requested recently, re-use the response until it is "stale."
+!!! warning
 
+    Make sure you configure a `request_sleep` limit for this pipeline. It's rude to spam XKCD's API!
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-import typing as t
 import time
+import typing as t
 
 from _setup import base_app_setup
 from core import (
@@ -32,17 +33,19 @@ from packages import xkcd_comic
 from pipelines import comic_pipelines
 from utils import serialize_utils
 
-
 def run_pipeline(
     cache_transport: hishel.CacheTransport = None,
+    request_sleep: int = 5,
     overwrite_serialized_comic: bool = False,
+    max_list_size: int = 50,
     loop_limit: int | None = None,
-    loop_pause: int = 21600,
-) -> XKCDComic:
-    """Run the pipeline that requests the current XKCD comic.
+    loop_pause: int = 10,
+) -> list[XKCDComic]:
+    """Start the pipeline to scrape for missing XKCD comics.
 
     Params:
-        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        cache_transport (hishel.CacheTransport): The cache transport for the request client.
+        request_sleep (int): Number of seconds to sleep between requests.
         overwrite_serialized_comic (bool): If `True`, functions that request a comic will overwrite saved
             serialized data, if it exists.
         max_list_size (int): [Default: 50] If the list of missing comics exceeds `max_list_size`, list will be
@@ -51,7 +54,7 @@ def run_pipeline(
         loop_pause (int): [Default: 21600 (6 hours)] Number of seconds to pause between loops.
 
     Returns:
-        (XKCDComic): An `XKCDComic` object of the current live XKCD comic.
+        (list[XKCDComic]): A list of `XKCDComic` objects.
 
     """
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
@@ -60,34 +63,38 @@ def run_pipeline(
     CONTINUE_LOOP: bool = True
 
     if loop_limit is None:
-        log.debug(f"Getting current comic.")
-
-        current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
-            cache_transport=cache_transport,
-            overwrite_serialized_comic=overwrite_serialized_comic,
+        log.debug(f"Running scrape for missing comics 1 time")
+        scraped_comics: list[XKCDComic] = (
+            comic_pipelines.pipeline_scrape_missing_comics(
+                cache_transport=cache_transport,
+                request_sleep=request_sleep,
+                overwrite_serialized_comic=overwrite_serialized_comic,
+                max_list_size=max_list_size,
+                loop_limit=loop_limit,
+            )
         )
-        log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
 
-        return current_comic
+        return scraped_comics
 
     if loop_limit == 0:
-        log.debug(f"Looping current comic request indefinitely.")
+        log.debug(f"Looping scraper indefinitely.")
         ## No loop limit, continue looping indefinitely
-
-        current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
-            cache_transport=cache_transport,
-            overwrite_serialized_comic=overwrite_serialized_comic,
+        scraped_comics: list[XKCDComic] = (
+            comic_pipelines.pipeline_scrape_missing_comics(
+                cache_transport=cache_transport,
+                request_sleep=request_sleep,
+                overwrite_serialized_comic=overwrite_serialized_comic,
+                max_list_size=max_list_size,
+                loop_limit=loop_limit,
+            )
         )
-        log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
 
-        log.info(
-            f"Pause for [{loop_pause}] second(s) between current comic requests..."
-        )
+        log.info(f"Pause [{loop_pause}] second(s) between scrape loops ...")
         time.sleep(loop_pause)
 
     else:
         ## Maximum number of loops is specified, loop until threshold reached.
-        log.debug(f"Looping current comic request [{loop_limit}] time(s).")
+        log.debug(f"Looping scraper [{loop_limit}] time(s).")
         while CONTINUE_LOOP:
             if LOOP_COUNT >= loop_limit:
                 CONTINUE_LOOP = False
@@ -95,11 +102,15 @@ def run_pipeline(
                 continue
 
             else:
-                current_comic: XKCDComic = comic_pipelines.pipeline_current_comic(
-                    cache_transport=cache_transport,
-                    overwrite_serialized_comic=overwrite_serialized_comic,
+                scraped_comics: list[XKCDComic] = (
+                    comic_pipelines.pipeline_scrape_missing_comics(
+                        cache_transport=cache_transport,
+                        request_sleep=request_sleep,
+                        overwrite_serialized_comic=overwrite_serialized_comic,
+                        max_list_size=max_list_size,
+                        loop_limit=loop_limit,
+                    )
                 )
-                log.debug(f"Current comic ({type(current_comic)}): {current_comic}")
 
             LOOP_COUNT += 1
             log.info(
@@ -109,17 +120,19 @@ def run_pipeline(
 
         log.info(f"Looped [{LOOP_COUNT}/{loop_limit}] time(s).")
 
-    return current_comic
+    return scraped_comics
 
 
 if __name__ == "__main__":
     base_app_setup(settings=settings)
-    log.info(
-        f"[env:{settings.env}|container:{settings.container_env}] CURRENT COMIC PIPELINE"
-    )
+    log.info(f"[TEST][env:{settings.env}|container:{settings.container_env}] App Start")
 
     CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
 
-    current_comic: XKCDComic = run_pipeline(
-        cache_transport=CACHE_TRANSPORT, loop_limit=0
+    run_pipeline(
+        cache_transport=CACHE_TRANSPORT,
+        request_sleep=5,
+        overwrite_serialized_comic=False,
+        loop_limit=10,
+        loop_pause=30,
     )

@@ -26,7 +26,6 @@ from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 from utils import list_utils
 
-
 def scrape_missing_comics(
     cache_transport: hishel.CacheTransport = None,
     request_sleep: int = 5,

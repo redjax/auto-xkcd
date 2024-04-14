@@ -26,7 +26,6 @@ import msgpack
 from packages import xkcd_comic
 from utils import serialize_utils
 
-
 def pipeline_current_comic(
     cache_transport: hishel.CacheTransport = None,
     overwrite_serialized_comic: bool = False,
@@ -132,6 +131,11 @@ def pipeline_scrape_missing_comics(
     cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
 
     log.info(">> Start scrape missing comics pipeline")
+
+    ## Request current comic to ensure pipeline runs.
+    current_comic: XKCDComic = xkcd_comic.get_current_comic(
+        cache_transport=cache_transport, overwrite_serialized_comic=True
+    )
 
     try:
         scraped_comics: list[XKCDComic] = xkcd_comic.comic.scrape_missing_comics(
