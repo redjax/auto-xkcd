@@ -7,3 +7,5 @@ Pipeline examples:
 * `pipeline_multiple_comics`: A pipeline to loop over a list of comic numbers & download/save each one.
 
 """
+
+from .methods import execute_pipelines

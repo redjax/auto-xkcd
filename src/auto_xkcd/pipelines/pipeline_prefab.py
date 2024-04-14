@@ -12,6 +12,7 @@ from entrypoints.pipeline_entrypoints import (
 )
 from loguru import logger as log
 
+
 ## Current comic pipeline
 PIPELINE_CONF_CURRENT_COMIC: PipelineHandler = PipelineHandler(
     name="get_current_comic",

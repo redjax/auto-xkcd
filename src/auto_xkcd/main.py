@@ -8,49 +8,11 @@ from core.dependencies import settings, db_settings
 from core import request_client, database, paths
 from core.constants import PQ_ENGINE
 from modules import xkcd_mod, data_mod
-from pipelines import pipeline_prefab
+from pipelines import pipeline_prefab, execute_pipelines
 
 from loguru import logger as log
 import hishel
 import httpx
-
-
-def execute_pipelines(
-    pipelines_list: list[PipelineHandler] = None,
-) -> ExecutePipelineReport:
-
-    success: list[PipelineHandler] = []
-    fail: list[PipelineHandler] = []
-
-    pipeline_execute_count: int = 0
-
-    for _pipeline in pipelines_list:
-        log.debug(f"Pipeline: {_pipeline}")
-
-        try:
-            _pipeline.start()
-            success.append(_pipeline)
-
-            pipeline_execute_count += 1
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception executing pipeline '{_pipeline.name}'. Details: {exc}"
-            )
-            log.error(msg)
-            log.trace(exc)
-
-            fail.append(_pipeline)
-
-            pipeline_execute_count += 1
-
-            continue
-
-    ## Create pipeline execution report
-    REPORT: ExecutePipelineReport = ExecutePipelineReport(
-        pipeline_execution_count=pipeline_execute_count, success=success, fail=fail
-    )
-
-    return REPORT
 
 
 if __name__ == "__main__":
