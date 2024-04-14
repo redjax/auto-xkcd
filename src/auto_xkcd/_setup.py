@@ -7,6 +7,7 @@ Handle setup tasks, like creating directories that must exist, initializing logg
 from __future__ import annotations
 
 from pathlib import Path
+from sqlite3 import OperationalError
 
 from core import database
 from core.config import AppSettings, DBSettings
@@ -51,6 +52,7 @@ def setup_ensure_dirs(ensure_dirs: list[Path] = ENSURE_DIRS) -> None:
     Params:
         ensure_dirs (list[Path]): A list of `Path` values to loop over & create, if they do not exist.
     """
+    log.debug(f"Creating base directory/ies")
     try:
         path_utils.ensure_dirs_exist(ensure_dirs=ensure_dirs)
     except Exception as exc:
@@ -64,16 +66,36 @@ def setup_ensure_dirs(ensure_dirs: list[Path] = ENSURE_DIRS) -> None:
 
 
 def setup_ibis_interactive(interactive: bool = True):
+    log.debug(f"Setting ibis.options.interactive to '{interactive}'.")
     ibis.options.interactive = True
 
 
 def setup_database(db_settings: DBSettings = None):
     db_settings.echo = True
 
+    log.debug(f"DB setting: {db_settings}")
+
+    log.info("Creating Base metadata")
     try:
         database.create_base_metadata(
             base=database.Base, engine=db_settings.get_engine()
         )
+    except PermissionError as perm_exc:
+        msg = Exception(
+            f"Permission denied creating Base metadata. Details: {perm_exc}"
+        )
+        log.error(msg)
+        log.trace(perm_exc)
+
+        raise perm_exc
+    except OperationalError as op_err:
+        msg = Exception(
+            f"SQLite operational error occurred while creating Base metadata. Details: {op_err}"
+        )
+        log.error(msg)
+        log.trace(op_err)
+
+        raise op_err
     except Exception as exc:
         msg = Exception(f"Unhandled exception creating Base metadata. Details: {exc}")
         log.error(msg)
@@ -122,7 +144,8 @@ def cli_app_setup(
     _settings.log_level = log_level
 
     cli_logger_sinks: list = [
-        sinks.LoguruSinkStdErr(level=settings.log_level).as_dict(),
+        # sinks.LoguruSinkStdErr(level=settings.log_level).as_dict(),
+        sinks.LoguruSinkStdOut(level=settings.log_level).as_dict(),
         sinks.LoguruSinkAppFile(sink=f"{settings.logs_dir}/cli/app.log").as_dict(),
         sinks.LoguruSinkErrFile(sink=f"{settings.logs_dir}/cli/err.log").as_dict(),
         sinks.LoguruSinkTraceFile(sink=f"{settings.logs_dir}/cli/trace.log").as_dict(),

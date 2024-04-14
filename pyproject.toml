@@ -19,6 +19,7 @@ dependencies = [
     "chardet>=5.2.0",
     "fastparquet>=2024.2.0",
     "click>=8.1.7",
+    "ibis[duckdb,pandas]>=3.3.0",
 ]
 requires-python = ">=3.11"
 readme = "README.md"

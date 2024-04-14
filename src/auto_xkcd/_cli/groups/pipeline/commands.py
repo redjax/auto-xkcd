@@ -167,7 +167,8 @@ def scrape_missing_comics(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport()
 
     def start_scrape() -> list[XKCDComic]:
-        with console.status(status="Scraping missing comics ..."):
+        _status = "Scraping missing comics"
+        with console.status(status=f"{_status} ..."):
             scraped_comics: list[XKCDComic] = (
                 pipeline_entrypoints.start_scrape_missing_pipeline.run_pipeline(
                     cache_transport=cache_transport,
@@ -264,7 +265,9 @@ def update_database(ctx, overwrite_serial, continuous, loop_timeout) -> None:
     def start_update_db():
         click.echo(message="Updating database from serialized XKCDComic objects")
 
-        with console.status(status="Deserializing comics & saving to database ..."):
+        _status = "Deserializing comics & saving to database"
+        log.debug(f"Status")
+        with console.status(status=f"{_status} ..."):
             pipeline_entrypoints.start_save_serialized_comics_to_db_pipeline.run_pipeline()
 
         click.echo(message="Database updated.")
