@@ -3,7 +3,7 @@
 
 services:
   # autoxkcd:
-  #   container_name: auto-xkcd-p
+  #   container_name: autoxkcd-p
   #   build:
   #     context: ..
   #     dockerfile: containers/auto-xkcd/Dockerfile
@@ -11,7 +11,7 @@ services:
   #   env_file:
   #     - env_files/prod.env
   #   working_dir: /app
-  #   command: ["python", "src/auto_xkcd/main.py"]
+  #   command: ["python", "src/auto_xkcd/demo.py"]
 
   #   ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
   #   # entrypoint: ["pwd"]
@@ -25,7 +25,7 @@ services:
   #     ENV_FOR_DYNACONF: prod
   #     DYNACONF_ENV: prod
   #     DYNACONF_CONTAINER_ENV: true
-  #     DYNACONF_LOG_LEVEL: "INFO"
+  #     DYNACONF_LOG_LEVEL: "DEBUG"
   #     DYNACONF_LOGS_DIR: "logs/prod"
 
   #     DYNACONF_MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}
@@ -37,7 +37,9 @@ services:
   #     DYNACONF_MINIO_ACCESS_SECRET: ${AUTOXKCD_MINIO_ACCESS_SECRET:-""}
 
   autoxkcd-scraper:
-    container_name: auto-xkcd-scraper-p
+    container_name: autoxkcd-scraper-p
+    ## Enable rich printing
+    tty: true
     build:
       context: ..
       dockerfile: containers/auto-xkcd/Dockerfile
@@ -45,7 +47,7 @@ services:
     env_file:
       - env_files/prod.env
     working_dir: /app
-    command: ["python", "src/auto_xkcd/start_comic_scraper.py"]
+    command: ["python", "-u", "src/auto_xkcd/cli.py", "pipelines", "scrape", "--overwrite-serial", "--loop-requests", "--max-loops", "0"]
 
     ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
     # entrypoint: ["pwd"]
@@ -56,11 +58,119 @@ services:
       - ${AUTOXKCD_DATA_DIR:-./container_data/prod/auto-xkcd/data}:/app/.data
       - ${AUTOXKCD_LOGS_DIR:-./container_data/prod/auto-xkcd/logs}:/app/logs
     environment:
+      TERM: xterm-256color
+      PYTHONUNBUFFERED: 1
+
       ENV_FOR_DYNACONF: prod
       DYNACONF_ENV: prod
       DYNACONF_CONTAINER_ENV: true
-      DYNACONF_LOG_LEVEL: "INFO"
+      DYNACONF_LOG_LEVEL: "DEBUG"
       DYNACONF_LOGS_DIR: "logs/prod"
+
+      DYNACONF_DB_TYPE: ${DB_TYPE:-sqlite}
+      DYNACONF_DB_DRIVERNAME: ${DB_DRIVERNAME:-sqlite+pysqlite}
+      DYNACONF_DB_USERNAME: ${DB_USERNAME}
+      DYNACONF_DB_PASSWORD: ${DB_PASSWORD}
+      DYNACONF_DB_HOST: ${DB_HOST}
+      DYNACONF_DB_PORT: ${DB_PORT}
+      DYNACONF_DB_DATABASE: ${DB_DATABASE:-/app/.data/auto-xkcd.sqlite}
+      DYNACONF_DB_ECHO: ${DB_ECHO:-true}
+
+      DYNACONF_MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}
+      DYNACONF_MINIO_PORT: ${AUTOXKCD_MINIO_PORT:-9000}
+      DYNACONF_MINIO_HTTPS: ${AUTOXKCD_MINIO_HTTPS:-true}
+      DYNACONF_MINIO_USERNAME: ${AUTOXKCD_MINIO_USERNAME:-auto-xkcd}
+      DYNACONF_MINIO_PASSWORD: ${AUTOXKCD_MINIO_PASSWORD:-""}
+      DYNACONF_MINIO_ACCESS_KEY: ${AUTOXKCD_MINIO_ACCESS_KEY:-""}
+      DYNACONF_MINIO_ACCESS_SECRET: ${AUTOXKCD_MINIO_ACCESS_SECRET:-""}
+
+  autoxkcd-dbupdate:
+    container_name: autoxkcd-dbupdate-p
+    ## Enable rich printing
+    tty: true
+    build:
+      context: ..
+      dockerfile: containers/auto-xkcd/Dockerfile
+      target: prod
+    env_file:
+      - env_files/prod.env
+    working_dir: /app
+    command: ["python", "-u", "src/auto_xkcd/cli.py", "pipelines", "update-db", "--overwrite-serial", "--continuous", "--loop-timeout", "3600"]
+
+    ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
+    # entrypoint: ["pwd"]
+    # entrypoint: ["ls", "-la", "."]
+    # entrypoint: ["ls", "-la", "/app"]
+    volumes:
+      - ../src:/app/src
+      - ${AUTOXKCD_DATA_DIR:-./container_data/prod/auto-xkcd/data}:/app/.data
+      - ${AUTOXKCD_LOGS_DIR:-./container_data/prod/auto-xkcd/logs}:/app/logs
+    environment:
+      TERM: xterm-256color
+      PYTHONUNBUFFERED: 1
+
+      ENV_FOR_DYNACONF: prod
+      DYNACONF_ENV: prod
+      DYNACONF_CONTAINER_ENV: true
+      DYNACONF_LOG_LEVEL: "DEBUG"
+      DYNACONF_LOGS_DIR: "logs/prod"
+
+      DYNACONF_DB_TYPE: ${DB_TYPE:-sqlite}
+      DYNACONF_DB_DRIVERNAME: ${DB_DRIVERNAME:-sqlite+pysqlite}
+      DYNACONF_DB_USERNAME: ${DB_USERNAME}
+      DYNACONF_DB_PASSWORD: ${DB_PASSWORD}
+      DYNACONF_DB_HOST: ${DB_HOST}
+      DYNACONF_DB_PORT: ${DB_PORT}
+      DYNACONF_DB_DATABASE: ${DB_DATABASE:-/app/.data/auto-xkcd.sqlite}
+      DYNACONF_DB_ECHO: ${DB_ECHO:-true}
+
+      DYNACONF_MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}
+      DYNACONF_MINIO_PORT: ${AUTOXKCD_MINIO_PORT:-9000}
+      DYNACONF_MINIO_HTTPS: ${AUTOXKCD_MINIO_HTTPS:-true}
+      DYNACONF_MINIO_USERNAME: ${AUTOXKCD_MINIO_USERNAME:-auto-xkcd}
+      DYNACONF_MINIO_PASSWORD: ${AUTOXKCD_MINIO_PASSWORD:-""}
+      DYNACONF_MINIO_ACCESS_KEY: ${AUTOXKCD_MINIO_ACCESS_KEY:-""}
+      DYNACONF_MINIO_ACCESS_SECRET: ${AUTOXKCD_MINIO_ACCESS_SECRET:-""}
+
+  autoxkcd-currentcomic:
+    container_name: autoxkcd-currentcomic-p
+    ## Enable rich printing
+    tty: true
+    build:
+      context: ..
+      dockerfile: containers/auto-xkcd/Dockerfile
+      target: prod
+    env_file:
+      - env_files/prod.env
+    working_dir: /app
+    command: ["python", "-u", "src/auto_xkcd/cli.py", "pipelines", "get-current", "--overwrite-serial", "--continuous", "--loop-timeout", "3600"]
+
+    ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
+    # entrypoint: ["pwd"]
+    # entrypoint: ["ls", "-la", "."]
+    # entrypoint: ["ls", "-la", "/app"]
+    volumes:
+      - ../src:/app/src
+      - ${AUTOXKCD_DATA_DIR:-./container_data/prod/auto-xkcd/data}:/app/.data
+      - ${AUTOXKCD_LOGS_DIR:-./container_data/prod/auto-xkcd/logs}:/app/logs
+    environment:
+      TERM: xterm-256color
+      PYTHONUNBUFFERED: 1
+
+      ENV_FOR_DYNACONF: prod
+      DYNACONF_ENV: prod
+      DYNACONF_CONTAINER_ENV: true
+      DYNACONF_LOG_LEVEL: "DEBUG"
+      DYNACONF_LOGS_DIR: "logs/prod"
+
+      DYNACONF_DB_TYPE: ${DB_TYPE:-sqlite}
+      DYNACONF_DB_DRIVERNAME: ${DB_DRIVERNAME:-sqlite+pysqlite}
+      DYNACONF_DB_USERNAME: ${DB_USERNAME}
+      DYNACONF_DB_PASSWORD: ${DB_PASSWORD}
+      DYNACONF_DB_HOST: ${DB_HOST}
+      DYNACONF_DB_PORT: ${DB_PORT}
+      DYNACONF_DB_DATABASE: ${DB_DATABASE:-/app/.data/auto-xkcd.sqlite}
+      DYNACONF_DB_ECHO: ${DB_ECHO:-true}
 
       DYNACONF_MINIO_ADDRESS: ${AUTOXKCD_MINIO_ADDRESS:-""}
       DYNACONF_MINIO_PORT: ${AUTOXKCD_MINIO_PORT:-9000}
