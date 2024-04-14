@@ -49,6 +49,18 @@ dev = ["black>=24.3.0", "ruff>=0.3.4", "pytest-xdist>=3.5.0", "nox>=2024.3.2"]
 
 [tool.pdm.scripts]
 
+start-scrape = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "prod" } }
+start-scrape-dev = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+get-current = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "prod" } }
+get-current-dev = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+update-db = { cmd = "python src/auto_xkcd/cli.py pipelines update-db", env = { "ENV_FOR_DYNACONF" = "prod" } }
+update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+loop-update-db = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c", env = { "ENV_FOR_DYNACONF" = "prod" } }
+loop-update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
 lint = { cmd = "ruff check ./ --config ruff.ci.toml --fix" }
 
 docker-build-main = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile ." }

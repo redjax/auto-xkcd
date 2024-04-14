@@ -61,6 +61,7 @@ Pipeline kwargs: {_pipeline.kwargs}
     show_default=True,
 )
 def get_current_comic(ctx, overwrite_serial: bool, continuous, loop_timeout) -> None:
+    loop_timeout: int = int(loop_timeout)
     pipeline_prefab.PIPELINE_CONF_CURRENT_COMIC
     if continuous:
         _loops: int = 1
@@ -159,6 +160,10 @@ def scrape_missing_comics(
     loop_pause,
     max_loops,
 ) -> None:
+    request_timeout: int = int(request_timeout)
+    loop_pause: int = int(loop_pause)
+    max_loops: int = int(max_loops)
+
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport()
 
     def start_scrape() -> list[XKCDComic]:
@@ -233,10 +238,48 @@ def scrape_missing_comics(
     default=False,
     show_default=True,
 )
-def update_database(ctx, overwrite_serial) -> None:
-    click.echo(message="Updating database from serialized XKCDComic objects")
+@click.option(
+    "-c",
+    "--continuous",
+    is_flag=True,
+    help="If True, continuously loop request on an interval.",
+    default=False,
+    show_default=True,
+)
+@click.option(
+    "-t",
+    "--loop-timeout",
+    help="Time (in seconds) to pause between loops. Default: 3600 (1 hour).",
+    default=3600,
+    show_default=True,
+)
+def update_database(ctx, overwrite_serial, continuous, loop_timeout) -> None:
+    loop_timeout: int = int(loop_timeout)
 
-    with console.status(status="Deserializing comics & saving to database ..."):
-        pipeline_entrypoints.start_save_serialized_comics_to_db_pipeline.run_pipeline()
+    if continuous:
+        _loops: int = 1
+    else:
+        _loops: int = None
 
-    click.echo(message="Database updated.")
+    def start_update_db():
+        click.echo(message="Updating database from serialized XKCDComic objects")
+
+        with console.status(status="Deserializing comics & saving to database ..."):
+            pipeline_entrypoints.start_save_serialized_comics_to_db_pipeline.run_pipeline()
+
+        click.echo(message="Database updated.")
+
+    if not continuous:
+        start_update_db()
+    else:
+        CONTINUE_LOOP: bool = True
+
+        while CONTINUE_LOOP:
+            start_update_db()
+
+            with console.status(
+                status=f"Waiting [{loop_timeout}] second(s) between DB updates ..."
+            ):
+                time.sleep(loop_timeout)
+
+            continue
