@@ -1,3 +1,5 @@
+"""Entrypoints for app pipelines, i.e. requesting the current comic."""
+
 from __future__ import annotations
 
 from . import (

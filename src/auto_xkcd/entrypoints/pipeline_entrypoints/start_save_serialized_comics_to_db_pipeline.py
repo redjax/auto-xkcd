@@ -1,3 +1,9 @@
+"""Pipeline for saving retrieved comics to the database.
+
+Loops over serialized XKCDComic `.msgpack` files, deserializing them into a Pandas `DataFrame`
+and saving the DataFrame using the app's SQLAlchemy connection.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,6 +20,7 @@ from pipelines import data_pipelines
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
+
 def run_pipeline(
     db_settings: DBSettings = db_settings,
     sqla_base: so.DeclarativeBase = database.Base,
@@ -25,6 +32,19 @@ def run_pipeline(
     pq_output_file: t.Union[str, Path] = COMICS_PQ_FILE,
     pq_engine: str = PQ_ENGINE,
 ):
+    """Entrypoint to start the pipeline.
+
+    Params:
+        db_settings (DBSettings): Initialized instance of `DBSettings` class.
+        sqla_base (sqlalchemy.orm.DeclarativeBase): The `SQLAlchemy` `DeclarativeBase` object for the app's table classes.
+        serialized_comics_dir (str|Path): Path to directory where `.msgpack`-serialized XKCDComics are saved.
+        db_comics_tbl_name (str): Database table name for comics saved using this pipeline.
+        if_exists_strategy (str): The Pandas strategy for handling entities that already exist in the database. `Default: 'replace'`
+        include_df_index (bool): When `True`, includes the Pandas `DataFrame` index as a column. `Default: False`
+        save_parquet (bool): When `True`, saves the `DataFrame` as a `.parquet` file. `Default: True`
+        pq_output_file (str|Path): Path to the `.parquet` file where `DataFrame` will be saved. Only used if `save_parquet=True`.
+        pq_engine (str): The parquet package to use for saving, i.e. `pyarrow` or `fastparquet`. `Default: <defined in core.constants.PQ_ENGINE>`
+    """
     db_engine: sa.Engine = db_settings.get_engine()
 
     try:
