@@ -1,3 +1,8 @@
+"""Provide configurations for the app.
+
+Configurations are loaded from `Dynaconf`
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

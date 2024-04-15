@@ -1,3 +1,5 @@
+"""Initialize the `pipeline` click group."""
+
 from __future__ import annotations
 
 from .commands import (
@@ -10,9 +12,11 @@ from .commands import (
 import click
 from loguru import logger as log
 
-@click.group("pipelines")
+
+@click.group(name="pipelines")
 @click.pass_context
 def pipelines_cli(ctx):
+    """Entrypoint for the `pipelines` command group."""
     pass
 
 
