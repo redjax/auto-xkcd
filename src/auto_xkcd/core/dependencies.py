@@ -10,15 +10,21 @@ from contextlib import contextmanager
 import typing as t
 
 from core import database, request_client
-from core.config import AppSettings, DBSettings, MinioSettings, TelegramSettings
-from core.config import settings, db_settings, telegram_settings
+from core.config import (
+    AppSettings,
+    DBSettings,
+    MinioSettings,
+    TelegramSettings,
+    db_settings,
+    settings,
+    telegram_settings,
+)
 from dynaconf import Dynaconf
 import hishel
 import httpx
 from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-
 
 DB_URI: sa.URL = db_settings.get_db_uri()
 ENGINE: sa.Engine = database.get_engine(db_uri=DB_URI, echo=db_settings.echo)

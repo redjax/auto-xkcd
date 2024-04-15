@@ -8,14 +8,13 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
+from dynaconf import Dynaconf
 from pydantic import Field, ValidationError, computed_field, field_validator
 from pydantic_settings import BaseSettings
 
 ## Uncomment if adding a database config
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-
-from dynaconf import Dynaconf
 
 ## Uncomment if adding a database config
 valid_db_types: list[str] = ["sqlite", "postgres", "mssql"]

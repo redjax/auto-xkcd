@@ -20,7 +20,6 @@ from pipelines import data_pipelines
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
-
 def run_pipeline(
     db_settings: DBSettings = db_settings,
     sqla_base: so.DeclarativeBase = database.Base,

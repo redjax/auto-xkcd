@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:6151ae2f1d94182f3ac16fd7eb969ff8f6ee27abcc887944b2bf61736d19debd"
+content_hash = "sha256:396579d024186ce054019e2301e67f3ec08b6326f46dabd0ffe5aa790631986d"
 
 [[package]]
 name = "annotated-types"
@@ -1327,6 +1327,20 @@ groups = ["default"]
 files = [
     {file = "python-dotenv-1.0.1.tar.gz", hash = "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca"},
     {file = "python_dotenv-1.0.1-py3-none-any.whl", hash = "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"},
+]
+
+[[package]]
+name = "python-telegram-bot"
+version = "21.1"
+requires_python = ">=3.8"
+summary = "We have made you a wrapper you can't refuse"
+groups = ["default"]
+dependencies = [
+    "httpx~=0.27",
+]
+files = [
+    {file = "python-telegram-bot-21.1.tar.gz", hash = "sha256:e42d5cfec69d64fd921a41ff56215f92a48b8ddb5500235798c2bd3d9eb7242e"},
+    {file = "python_telegram_bot-21.1-py3-none-any.whl", hash = "sha256:72e27445633a6339eacd2a9ebecec1eeb44b627056f84c2c2b907b448860cb62"},
 ]
 
 [[package]]
