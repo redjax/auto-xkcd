@@ -5,8 +5,10 @@ import typing as t
 
 from core import request_client
 from core.constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
+from core.config import telegram_settings, TelegramSettings
 import httpx
 from loguru import logger as log
+
 
 def current_comic_req() -> httpx.Request:
     """Build an `httpx.Request` object for the current XKCD comic.
@@ -61,3 +63,11 @@ def comic_num_req(comic_num: t.Union[int, str] = None) -> httpx.Request:
         log.error(msg)
 
         raise msg
+
+
+def telegram_chatid_req(bot_token: str = None):
+    _url: str = f"https://api.telegram.org/bot{bot_token}/getUpdates"
+
+    req: httpx.Request = request_client.build_request(url=_url)
+
+    return req

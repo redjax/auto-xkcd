@@ -29,6 +29,11 @@ DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(
     envvar_prefix="DB",
     settings_files=["db/settings.toml", "db/.secrets.toml"],
 )
+DYNACONF_TELEGRAM_SETTINGS: Dynaconf = Dynaconf(
+    environments=True,
+    envvar_prefix="TELEGRAM",
+    settings_files=["telegram/settings.toml", "telegram/.secrets.toml"],
+)
 # DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
 #     environments=True,
 #     envvar_prefix="MINIO",
@@ -249,8 +254,15 @@ class TelegramSettings(BaseSettings):
         bot_username( str): The Telegram bot's username.
     """
 
-    bot_token: str | None = Field(default=None, env="TELEGRAM_BOT_TOKEN")
-    bot_username: str | None = Field(default=None, env="TELEGRAM_BOT_USERNAME")
+    bot_token: str | None = Field(
+        default=DYNACONF_TELEGRAM_SETTINGS.TELEGRAM_BOT_TOKEN,
+        env="TELEGRAM_BOT_TOKEN",
+        repr=False,
+    )
+    bot_username: str | None = Field(
+        default=DYNACONF_TELEGRAM_SETTINGS.TELEGRAM_BOT_USERNAME,
+        env="TELEGRAM_BOT_USERNAME",
+    )
 
 
 settings: AppSettings = AppSettings()

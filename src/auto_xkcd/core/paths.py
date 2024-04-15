@@ -18,11 +18,14 @@ COMIC_IMG_DIR: Path = Path(f"{DATA_DIR}/comic_imgs")
 SERIALIZE_COMIC_RESPONSES_DIR: Path = Path(f"{SERIALIZE_DIR}/comic_responses")
 SERIALIZE_COMIC_OBJECTS_DIR: Path = Path(f"{SERIALIZE_DIR}/xkcdcomic_objects")
 
+SERIALIZE_TELEGRAM_DIR: Path = Path(f"{SERIALIZE_DIR}/telegram")
+
 ENSURE_DIRS: list[Path] = [
     DATA_DIR,
     SERIALIZE_DIR,
     SERIALIZE_COMIC_RESPONSES_DIR,
     SERIALIZE_COMIC_OBJECTS_DIR,
+    SERIALIZE_TELEGRAM_DIR,
     PQ_DIR,
     BACKUP_DIR,
     CACHE_DIR,
@@ -31,3 +34,4 @@ ENSURE_DIRS: list[Path] = [
 
 CURRENT_COMIC_FILE: Path = Path(f"{DATA_DIR}/current_comic.json")
 COMICS_PQ_FILE: Path = Path(f"{PQ_DIR}/comics.parquet")
+TELEGRAM_CHAT_ID_FILE: Path = Path(f"{SERIALIZE_TELEGRAM_DIR}/chat_id")
