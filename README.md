@@ -6,6 +6,38 @@ Query the [XKCD API](https://xkcd.com/json.html).
 - [minio-py examples](https://github.com/minio/minio-py/tree/master/examples)
 - [minio Python API client reference](https://min.io/docs/minio/linux/developers/python/API.html)
 
+## Usage
+
+### pdm scripts
+
+```toml
+[tool.pdm.scripts]
+
+start-scrape = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "prod" } }
+
+start-scrape-dev = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+get-current = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "prod" } }
+
+get-current-dev = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+update-db = { cmd = "python src/auto_xkcd/cli.py pipelines update-db", env = { "ENV_FOR_DYNACONF" = "prod" } }
+
+update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+loop-update-db = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c", env = { "ENV_FOR_DYNACONF" = "prod" } }
+
+loop-update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+lint = { cmd = "ruff check ./ --config ruff.ci.toml --fix" }
+
+docker-build-main = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile ." }
+
+docker-build-main-nocache = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile . --no-cache" }
+
+dockerctl = { shell = "python dockerctl.py" }
+```
+
 ## Planned Features
 
 - Validators
