@@ -1,4 +1,4 @@
-from api.api_config import api_settings, APISettings
+from api._config import api_settings, APISettings
 from api.routers import api_v1_router
 
 from fastapi import FastAPI, APIRouter

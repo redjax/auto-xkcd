@@ -1,5 +1,5 @@
 from core.config import db_settings, settings
-from api.api_config import APISettings, UvicornSettings, api_settings, uvicorn_settings
+from api._config import APISettings, UvicornSettings, api_settings, uvicorn_settings
 from _setup import api_setup
 from loguru import logger as log
 from pydantic import BaseModel

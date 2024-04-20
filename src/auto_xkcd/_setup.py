@@ -12,7 +12,7 @@ from sqlite3 import OperationalError
 from core import database
 from core.config import AppSettings, DBSettings
 from core.dependencies import settings, db_settings
-from api.api_config import APISettings, api_settings, UvicornSettings, uvicorn_settings
+from api._config import APISettings, api_settings, UvicornSettings, uvicorn_settings
 from core.paths import ENSURE_DIRS
 from helpers import cli_helpers
 import ibis

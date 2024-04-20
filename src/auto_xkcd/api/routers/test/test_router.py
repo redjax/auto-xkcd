@@ -1,14 +1,14 @@
 import typing as t
-from api.api_config import api_settings
+from api._config import api_settings
+from api._responses import API_RESPONSES_DICT
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from loguru import logger as log
 
 prefix: str = "/testing"
-responses: dict = {404: {"description": "Not found"}}
 tags: list[str] = ["testing"]
 
-router: APIRouter = APIRouter(prefix=prefix, responses=responses, tags=tags)
+router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=tags)
 
 
 @router.get("/")
