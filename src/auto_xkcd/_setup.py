@@ -11,7 +11,8 @@ from sqlite3 import OperationalError
 
 from core import database
 from core.config import AppSettings, DBSettings
-from core.dependencies import settings
+from core.dependencies import settings, db_settings
+from api.api_config import APISettings, api_settings, UvicornSettings, uvicorn_settings
 from core.paths import ENSURE_DIRS
 from helpers import cli_helpers
 import ibis
@@ -163,3 +164,30 @@ def cli_app_setup(
 
     ## Clear screen
     cli_helpers.clear()
+
+
+def api_setup(
+    settings: AppSettings = settings,
+    api_settings: APISettings = api_settings,
+    db_settings: DBSettings = db_settings,
+    ensure_dirs: list[Path] = ENSURE_DIRS,
+) -> None:
+    """Run setup methods.
+
+    Params:
+        settings (AppSettings): An initialized instance of AppSettings.
+        ensure_dirs (list[Path]): A list of `Path` values to loop over and create, if they do not exist.
+
+    """
+    assert settings, ValueError("Missing AppSettings object")
+    assert isinstance(settings, AppSettings), TypeError(
+        f"settings must be of type AppSettings. Got type: ({type(settings)})"
+    )
+
+    assert ensure_dirs, ValueError("Missing list of directories to ensure existence")
+    assert isinstance(ensure_dirs, list), TypeError(
+        f"ensure_dirs must be a list of Path objects"
+    )
+
+    setup_logging(settings=settings)
+    setup_ensure_dirs(ensure_dirs=ensure_dirs)
