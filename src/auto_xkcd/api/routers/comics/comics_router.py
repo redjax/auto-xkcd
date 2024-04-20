@@ -1,8 +1,10 @@
 import typing as t
 
 from api._responses import API_RESPONSES_DICT
+from api._depends import cache_transport_dependency, db_dependency
 from core import request_client
-from domain.xkcd.comic.schemas import XKCDComic
+from domain.xkcd import comic
+from helpers import data_ctl
 from modules import data_mod, xkcd_mod, msg_mod
 from packages import xkcd_comic, data_tools, msg
 from core.config import settings, db_settings
@@ -22,50 +24,73 @@ router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=
 
 
 @router.get("/current")
-def current_comic() -> JSONResponse:
-    CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
+def current_comic(
+    cache_transport: cache_transport_dependency, db_session: db_dependency
+) -> JSONResponse:
 
-    try:
-        current_comic: XKCDComic = xkcd_comic.get_current_comic(
-            cache_transport=CACHE_TRANSPORT, overwrite_serialized_comic=True
-        )
+    with data_ctl.CurrentComicController() as current_comic_ctl:
+        _current_comic_dict = current_comic_ctl.read()
 
-        res = JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=current_comic.model_dump(exclude={"img_bytes"}),
-        )
+        current_comic_num = _current_comic_dict["comic_num"]
 
-        return res
+    with db_session as session:
+        repo = comic.XKCDComicRepository(session=session)
 
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception getting current XKCD comic. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
+        try:
+            current_comic = repo.get_by_num(current_comic_num)
+            log.debug(
+                f"Retrieved current comic ({type(current_comic)}): {current_comic}"
+            )
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception getting current comic from database. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
 
-        res: JSONResponse = JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"error": "Internal Server Error while getting current XKCD comic"},
-        )
+            raise exc
 
-        return res
+    # try:
+    #     current_comic: comic.XKCDComic = xkcd_comic.get_current_comic(
+    #         cache_transport=cache_transport, overwrite_serialized_comic=True
+    #     )
+
+    #     res = JSONResponse(
+    #         status_code=status.HTTP_200_OK,
+    #         content=current_comic.model_dump(exclude={"img_bytes"}),
+    #     )
+
+    #     return res
+
+    # except Exception as exc:
+    #     msg = Exception(
+    #         f"Unhandled exception getting current XKCD comic. Details: {exc}"
+    #     )
+    #     log.error(msg)
+    #     log.trace(exc)
+
+    #     res: JSONResponse = JSONResponse(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         content={"error": "Internal Server Error while getting current XKCD comic"},
+    #     )
+
+    #     return res
 
 
 @router.get("/comic/{comic_num}")
-def specific_comic(comic_num: int) -> JSONResponse:
-    CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
-
+def specific_comic(
+    comic_num: int, cache_transport: cache_transport_dependency
+) -> JSONResponse:
     try:
-        comic = xkcd_comic.get_single_comic(
-            cache_transport=CACHE_TRANSPORT,
+        _comic: comic.XKCDComic = xkcd_comic.get_single_comic(
+            cache_transport=cache_transport,
             comic_num=comic_num,
             overwrite_serialized_comic=True,
         )
 
         res = JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=comic.model_dump(exclude={"img_bytes"}),
+            content=_comic.model_dump(exclude={"img_bytes"}),
         )
 
         return res
