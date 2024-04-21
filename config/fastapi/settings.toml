@@ -1,0 +1,21 @@
+[default]
+
+FASTAPI_DEBUG = false
+FASTAPI_TITLE = "auto-xkcd"
+FASTAPI_SUMMARY = "An overengineered app to get XKCD comics"
+FASTAPI_DESCRIPTION = "API for getting XKCD comics. This is a learning project, and intentionally over-engineered as a result."
+FASTAPI_VERSION = "0.1.0"
+FASTAPI_OPENAPI_URL = "/openapi.json"
+FASTAPI_REDIRECT_SLASHES = true
+FASTAPI_DOCS_URL = "/docs"
+FASTAPI_REDOC_URL = "/redoc"
+FASTAPI_OPENAPI_PREFIX = ""
+FASTAPI_ROOT_PATH = ""
+FASTAPI_ROOT_PATH_IN_SERVERS = true
+
+[dev]
+
+FASTAPI_DEBUG = true
+FASTAPI_TITLE = "[DEV] auto-xkcd"
+
+[prod]

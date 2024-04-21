@@ -105,13 +105,14 @@ class XKCDComicBase(BaseModel):
     year: str = Field(default=None)
     month: str = Field(default=None)
     day: str = Field(default=None)
-    num: int = Field(default=None, alias="num")
+    comic_num: int = Field(default=None, alias="num")
     # link: str | None = Field(default=None)
     title: str = Field(default=None)
     transcript: str | None = Field(default=None)
     alt_text: str = Field(default=None, alias="alt")
     img_url: str = Field(default=None, alias="img")
-    img_bytes: bytes | None = Field(default=None, repr=False)
+    # img_bytes: bytes | None = Field(default=None, repr=False)
+    img_saved: bool | None = Field(default=False)
 
     @property
     def telegram_msg(self) -> str:
@@ -120,7 +121,7 @@ class XKCDComicBase(BaseModel):
 
 Date: {self.month}-{self.day}-{self.year}
 Title: {self.title}
-Comic Number: {self.num}
+Comic Number: {self.comic_num}
 Transcript: {self.transcript}
 Alt: {self.alt_text}
 Link: {self.img_url}
@@ -131,7 +132,7 @@ Link: {self.img_url}
     @computed_field
     @property
     def link(self) -> str:
-        _link: str = f"{XKCD_URL_BASE}/{self.num}"
+        _link: str = f"{XKCD_URL_BASE}/{self.comic_num}"
 
         return _link
 
@@ -139,12 +140,12 @@ Link: {self.img_url}
     @property
     def comic_num_hash(self) -> str:
         try:
-            _hash: str = hash_utils.get_hash_from_str(input_str=str(self.num))
+            _hash: str = hash_utils.get_hash_from_str(input_str=str(self.comic_num))
 
             return _hash
         except Exception as exc:
             msg = Exception(
-                f"Unhandled exception getting hash from comic num ({type(self.num)}): {self.num}. Details: {exc}"
+                f"Unhandled exception getting hash from comic num ({type(self.comic_num)}): {self.comic_num}. Details: {exc}"
             )
 
             raise msg
@@ -157,15 +158,29 @@ class XKCDComic(XKCDComicBase):
         year (str): Published year
         month (str): Published month
         day (str): Published day
-        num (int): XKCD comic number
+        comic_num (int): XKCD comic number
         title (str): XKCD comic title
         transcript (str): XKCD comic transcript
         alt_text (str): XKCD comic alt text
         img_url (str): XKCD comic's image URL
-        img_bytes (bytes): XKCD comic image bytes. Initialized as `None` and populated once the image is requested.
+        [DISABLED] img_bytes (bytes): XKCD comic image bytes. Initialized as `None` and populated once the image is requested.
 
     """
 
+    pass
+
+
+class XKCDComicImageBase(BaseModel):
+
+    comic_num: int = Field(default=None)
+    img: bytes = Field(default=None)
+
+
+class XKCDComicImage(XKCDComicImageBase):
+    pass
+
+
+class XKCDComicImageOut(XKCDComicImageBase):
     pass
 
 

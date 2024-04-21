@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from datetime import date
+from datetime import date, datetime
 
 from core.database import INT_PK, Base, TableNameMixin, TimestampMixin
 import sqlalchemy as sa
@@ -40,7 +40,9 @@ class XKCDComicModel(Base):
     transcript: so.Mapped[str | None] = so.mapped_column(sa.VARCHAR(255))
     alt_text: so.Mapped[str] = so.mapped_column(__name_pos=sa.VARCHAR(255))
     img_url: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
-    img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+    img_saved: so.Mapped[bool] = so.mapped_column(sa.BOOLEAN, default=False)
+    # img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+    comic_num_hash: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
 
 
 class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
@@ -58,6 +60,64 @@ class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_by_id(self, comic_id: int) -> XKCDComicModel:
+        """Retrieve entity from repository by its ID."""
+        raise NotImplementedError()
+
+
+class CurrentComicMetaModel(Base):
+    __tablename__ = "xkcd_current_comic_meta"
+    __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
+
+    current_comic_id: so.Mapped[INT_PK]
+
+    comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
+    last_updated: so.Mapped[datetime] = so.mapped_column(sa.DateTime)
+
+
+class CurrentComicMetaRepositoryBase(metaclass=abc.ABCMeta):
+    """Base database repository class for XKCDCurrentComicMeta."""
+
+    @abc.abstractmethod
+    def add(self, entity: CurrentComicMetaModel):
+        """Add new entity to repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def remove(self, entity: CurrentComicMetaModel):
+        """Remove existing entity from repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_by_id(self, comic_id: int) -> CurrentComicMetaModel:
+        """Retrieve entity from repository by its ID."""
+        raise NotImplementedError()
+
+
+class XKCDComicImageModel(Base):
+    __tablename__ = "xkcd_comic_img"
+    __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
+
+    comic_img_id: so.Mapped[INT_PK]
+
+    comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
+    img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+
+
+class XKCDComicImageRepositoryBase(metaclass=abc.ABCMeta):
+    """Base database repository for XKCDComicImage."""
+
+    @abc.abstractmethod
+    def add(self, entity: XKCDComicImageModel):
+        """Add new entity to repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def remove(self, entity: XKCDComicImageModel):
+        """Remove existing entity from repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_by_id(self, comic_id: int) -> XKCDComicImageModel:
         """Retrieve entity from repository by its ID."""
         raise NotImplementedError()
 

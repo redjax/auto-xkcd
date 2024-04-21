@@ -19,7 +19,10 @@ dependencies = [
     "chardet>=5.2.0",
     "fastparquet>=2024.2.0",
     "click>=8.1.7",
-    "ibis[duckdb,pandas]>=3.3.0",
+    "python-telegram-bot>=21.1",
+    "ibis-framework[duckdb,pandas]>=8.0.0",
+    "fastapi>=0.110.2",
+    "uvicorn[standard]>=0.29.0",
 ]
 requires-python = ">=3.11"
 readme = "README.md"

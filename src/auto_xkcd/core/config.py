@@ -8,14 +8,13 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
+from dynaconf import Dynaconf
 from pydantic import Field, ValidationError, computed_field, field_validator
 from pydantic_settings import BaseSettings
 
 ## Uncomment if adding a database config
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-
-from dynaconf import Dynaconf
 
 ## Uncomment if adding a database config
 valid_db_types: list[str] = ["sqlite", "postgres", "mssql"]
@@ -29,6 +28,11 @@ DYNACONF_DB_SETTINGS: Dynaconf = Dynaconf(
     environments=True,
     envvar_prefix="DB",
     settings_files=["db/settings.toml", "db/.secrets.toml"],
+)
+DYNACONF_TELEGRAM_SETTINGS: Dynaconf = Dynaconf(
+    environments=True,
+    envvar_prefix="TELEGRAM",
+    settings_files=["telegram/settings.toml", "telegram/.secrets.toml"],
 )
 # DYNACONF_MINIO_SETTINGS: Dynaconf = Dynaconf(
 #     environments=True,
@@ -250,8 +254,15 @@ class TelegramSettings(BaseSettings):
         bot_username( str): The Telegram bot's username.
     """
 
-    bot_token: str | None = Field(default=None, env="TELEGRAM_BOT_TOKEN")
-    bot_username: str | None = Field(default=None, env="TELEGRAM_BOT_USERNAME")
+    bot_token: str | None = Field(
+        default=DYNACONF_TELEGRAM_SETTINGS.TELEGRAM_BOT_TOKEN,
+        env="TELEGRAM_BOT_TOKEN",
+        repr=False,
+    )
+    bot_username: str | None = Field(
+        default=DYNACONF_TELEGRAM_SETTINGS.TELEGRAM_BOT_USERNAME,
+        env="TELEGRAM_BOT_USERNAME",
+    )
 
 
 settings: AppSettings = AppSettings()

@@ -5,6 +5,7 @@ Responsible for things like creating/updating a running list of comic numbers su
 
 from __future__ import annotations
 
+from .context_managers.df import DuckDBController, IbisDuckDBController
 from .context_managers.file import CurrentComicController, SavedImgsController
 from .methods import (
     get_saved_imgs,

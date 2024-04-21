@@ -1,81 +1,28 @@
 from __future__ import annotations
 
 from pathlib import Path
-import time
+import sqlite3 as sqlite
 import typing as t
 
-from core import IGNORE_COMIC_NUMS, request_client
-from domain.xkcd import XKCDComic
+from core import IGNORE_COMIC_NUMS, database, paths, request_client
+from core.config import db_settings, settings
+from core.dependencies import get_db
+from domain.xkcd import comic
 from helpers import data_ctl
-from helpers.validators import validate_comic_nums_lst, validate_hishel_cachetransport
+from helpers.validators import validate_hishel_cachetransport
 import hishel
 import httpx
 from loguru import logger as log
-from modules import requests_prefab, xkcd_mod
-import msgpack
-from pendulum import DateTime
-from red_utils.ext import time_utils
-from utils import serialize_utils
-
-def _request_comic_res(
-    cache_transport: hishel.CacheTransport = None, comic_num: int = 0
-) -> httpx.Response:
-    """Make request for XKCD comic.
-
-    This function is not importable, but is meant to be called by other methods in this module.
-
-    Params:
-        cache_transport (hishel.CacheTransport): A cache transport for the request client.
-
-    Returns:
-        (httpx.Response): The API's response.
-
-    """
-    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
-
-    try:
-        comic_req: httpx.Request = requests_prefab.comic_num_req(comic_num=comic_num)
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        raise exc
-
-    try:
-        with request_client.HTTPXController(transport=cache_transport) as httpx_ctl:
-            res: httpx.Response = httpx_ctl.send_request(request=comic_req)
-
-            if not res.status_code == 200:
-                log.warning(
-                    f"Non-200 status code for comic #{comic_num}: [{res.status_code}: {res.reason_phrase}]: {res.text}"
-                )
-
-                raise NotImplementedError(
-                    f"Error handling for non-200 status codes not yet implemented."
-                )
-
-        log.success(f"Requested XKCD comic #{comic_num}")
-        return res
-
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        raise exc
-
+from modules import data_mod, requests_prefab, xkcd_mod
+from red_utils.ext.time_utils import get_ts
+from sqlalchemy.exc import IntegrityError
 
 def get_single_comic(
-    cache_transport: hishel.CacheTransport = None,
+    cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     comic_num: int = None,
-    overwrite_serialized_comic: bool = False,
-) -> XKCDComic:
+    save_serial: bool = True,
+    overwrite: bool = True,
+) -> comic.XKCDComic:
     """Request a single XKCD comic by its comic number.
 
     Params:
@@ -93,10 +40,12 @@ def get_single_comic(
 
         return None
 
+    req: httpx.Request = requests_prefab.comic_num_req(comic_num=comic_num)
+
     ## Get comic Response
     try:
-        comic_res: httpx.Response = _request_comic_res(
-            cache_transport=cache_transport, comic_num=comic_num
+        comic_res: httpx.Response = xkcd_mod.make_comic_request(
+            cache_transport=cache_transport, request=req
         )
     except Exception as exc:
         msg = Exception(
@@ -109,8 +58,10 @@ def get_single_comic(
 
     ## Convert httpx.Response into XKCDComic object
     try:
-        comic = xkcd_mod.response_handler.convert_comic_response_to_xkcdcomic(
-            comic_res=comic_res
+        comic_obj: comic.XKCDComic = (
+            xkcd_mod.response_handler.convert_comic_response_to_xkcdcomic(
+                comic_res=comic_res
+            )
         )
     except Exception as exc:
         msg = Exception(
@@ -121,41 +72,24 @@ def get_single_comic(
 
         raise exc
 
-    ## Save comic image
-    try:
-        comic: XKCDComic = xkcd_mod.request_and_save_comic_img(
-            comic=comic, cache_transport=cache_transport
-        )
-        log.success(f"Comic #{comic.num} image saved.")
-
-        SERIALIZE_COMIC: bool = True
-    except Exception as exc:
-        msg = Exception(f"Unhandled exception saving comic image. Details: {exc}")
-        log.error(msg)
-        log.trace(exc)
-
-        SERIALIZE_COMIC: bool = False
-
-    if SERIALIZE_COMIC:
-        log.info(f"Serializing XKCDComic object for comic #{comic.num}")
-
-        ## Serialize XKCDComic object
+    if save_serial:
+        ## Serialize comic object
         try:
-            xkcd_mod.save_serialize_comic_object(
-                comic=comic, overwrite=overwrite_serialized_comic
-            )
-            log.success(f"Serialized XKCDComic object to file")
+            xkcd_mod.save_serialize_comic_object(comic=comic_obj, overwrite=overwrite)
+            log.success(f"Serialized XKCD comic #{comic_obj.comic_num}")
         except Exception as exc:
             msg = Exception(
-                f"Unhandled exception saving XKCDComic to serialized file. Details: {exc}"
+                f"Unhandled exception serializing XKCD comic #{comic_obj.comic_num}. Details: {exc}"
             )
             log.error(msg)
             log.trace(exc)
 
+            raise exc
+
     ## Update comic_nums.txt file
     log.debug(f"Updating comic_nums.txt file")
     try:
-        data_ctl.update_comic_nums_file(comic_num=comic.num)
+        data_ctl.update_comic_nums_file(comic_num=comic_obj.comic_num)
     except Exception as exc:
         msg = Exception(f"Unhandled exception updating comic_nums file. Details: {exc}")
         log.error(msg)
@@ -163,68 +97,52 @@ def get_single_comic(
 
         raise exc
 
-    return comic
+    ## Save comic image to file
+    try:
+        comic_image: comic.XKCDComicImage = xkcd_mod.save_comic_img(
+            cache_transport=cache_transport, comic_obj=comic_obj
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving image for XKCD comic #{comic_obj.comic_num}. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+        log.warning(f"Did not save image for XKCD comic #{comic_obj.comic_num}")
 
+    ## Save comic image to db
+    try:
+        db_comic_image: comic.XKCDComicImage = xkcd_mod.save_comic_img_to_db(
+            comic_img=comic_image
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving image for comic #{comic_obj.comic_num} to database. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+        log.warning(f"Did not save image to database for comic #{comic_obj.comic_num}")
 
-def get_multiple_comics(
-    cache_transport: hishel.CacheTransport = None,
-    comic_nums: list[int] = None,
-    overwrite_serialized_comic: bool = False,
-    request_sleep: int = 5,
-) -> list[XKCDComic]:
-    """Request multiple comics, with a configurable delay between requests.
+    ## Save comic to database
+    try:
+        comic_obj = xkcd_mod.save_comic_to_db(comic_obj=comic_obj)
+    except IntegrityError as integ_err:
+        msg = Exception(f"Comic #{comic_obj.comic_num} already exists in database.")
+        log.warning(msg)
 
-    Params:
-        cache_transport (hishel.CacheTransport): A cache transport for the request client.
-        comic_nums (list[int]): A list of XKCD comic numbers to request.
-        overwrite_serialized_comic (bool): If `True`, overwrite existing serialized file with data from request.
-        request_sleep (int): [Default: 5] Number of seconds to sleep between requests.
-
-    Returns:
-        (list[XKCDComic]): A list of `XKCDComic` objects.
-
-    """
-    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
-
-    saved_comic_nums: list[int] = data_ctl.get_saved_imgs()
-    saved_comic_nums = validate_comic_nums_lst(comic_nums=saved_comic_nums)
-
-    comics: list[XKCDComic] = []
-
-    for comic_num in comic_nums:
-        if comic_num in IGNORE_COMIC_NUMS:
-            log.warning(f"Comic #{comic_num} is in list of ignored comics. Skipping")
-
-            continue
-            # pass
-
-        if comic_num in saved_comic_nums:
-            log.warning(f"Comic #{comic_num} has already been downloaded. Skipping.")
-            continue
-            # pass
-
-        try:
-            _comic: XKCDComic = get_single_comic(
-                cache_transport=cache_transport,
-                comic_num=comic_num,
-                overwrite_serialized_comic=overwrite_serialized_comic,
-            )
-            comics.append(_comic)
-        except Exception as exc:
+        pass
+    except Exception as exc:
+        if isinstance(exc, sqlite.IntegrityError) or isinstance(
+            exc,
+        ):
+            pass
+        else:
             msg = Exception(
-                f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
+                f"Unhandled exception saving XKCD comic #{comic_obj.comic_num} to database. Details: {exc}"
             )
             log.error(msg)
             log.trace(exc)
+            log.warning(f"Did not save XKCD comic #{comic_obj.comic_num} to database.")
 
-            continue
-
-        log.info(f"Waiting [{request_sleep}]s between requests ...")
-        time.sleep(request_sleep)
-
-    if comics:
-        ## Suppress debug messaged on large comic list
-        if len(comics) < 50:
-            log.debug(f"Downloaded [{len(comics)}] comic(s)")
-
-    return comics
+    log.debug(f"Comic #{comic_obj.comic_num}: {comic_obj}")
+    return comic_obj

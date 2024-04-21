@@ -8,6 +8,16 @@ Code in this module should not import from outside the `core` directory, if poss
 
 from __future__ import annotations
 
+from .config import (
+    AppSettings,
+    DBSettings,
+    MinioSettings,
+    TelegramSettings,
+    db_settings,
+    # minio_settings,
+    settings,
+    telegram_settings,
+)
 from .constants import (
     CURRENT_XKCD_URL,
     IGNORE_COMIC_NUMS,
@@ -18,13 +28,6 @@ from .constants import (
 from .dependencies import (
     get_db,
 )
-from .config import (
-    db_settings,
-    # minio_settings,
-    settings,
-    telegram_settings,
-)
-from .config import AppSettings, DBSettings, MinioSettings, TelegramSettings
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,
@@ -37,4 +40,6 @@ from .paths import (
     SERIALIZE_COMIC_OBJECTS_DIR,
     SERIALIZE_COMIC_RESPONSES_DIR,
     SERIALIZE_DIR,
+    SERIALIZE_TELEGRAM_DIR,
+    TELEGRAM_CHAT_ID_FILE,
 )

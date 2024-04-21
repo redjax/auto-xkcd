@@ -10,7 +10,6 @@ from pathlib import Path
 import time
 import typing as t
 
-from _setup import base_app_setup
 from core import (
     COMIC_IMG_DIR,
     CURRENT_XKCD_URL,
@@ -30,6 +29,7 @@ from modules import requests_prefab, xkcd_mod
 import msgpack
 from packages import xkcd_comic
 from pipelines import comic_pipelines
+from setup import base_app_setup
 from utils import serialize_utils
 
 def run_pipeline(

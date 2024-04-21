@@ -12,7 +12,6 @@ from .commands import (
 import click
 from loguru import logger as log
 
-
 @click.group(name="pipelines")
 @click.pass_context
 def pipelines_cli(ctx):
