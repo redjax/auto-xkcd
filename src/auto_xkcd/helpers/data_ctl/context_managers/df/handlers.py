@@ -1,13 +1,14 @@
-import typing as t
+from __future__ import annotations
+
 from contextlib import AbstractContextManager
 from pathlib import Path
+import typing as t
 
+import duckdb
 import ibis
 from ibis.expr.types.relations import Table
-import pandas as pd
 from loguru import logger as log
-import duckdb
-
+import pandas as pd
 
 class IbisDuckDBController(AbstractContextManager):
     def __init__(

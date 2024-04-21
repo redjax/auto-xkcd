@@ -4,11 +4,10 @@ import json
 import typing as t
 
 from core import request_client
+from core.config import TelegramSettings, telegram_settings
 from core.constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
-from core.config import telegram_settings, TelegramSettings
 import httpx
 from loguru import logger as log
-
 
 def current_comic_req() -> httpx.Request:
     """Build an `httpx.Request` object for the current XKCD comic.

@@ -1,24 +1,24 @@
 from __future__ import annotations
 
 from .models import (
+    CurrentComicMetaModel,
+    XKCDComicImageModel,
     XKCDComicModel,
     XKCDSentComicModel,
-    XKCDComicImageModel,
-    CurrentComicMetaModel,
 )
 from .repository import (
+    CurrentComicMetaRepository,
+    XKCDComicImageRepository,
     XKCDComicRepository,
     XKCDSentComicRepository,
-    XKCDComicImageRepository,
-    CurrentComicMetaRepository,
 )
 from .schemas import (
     ComicNumCSVData,
     CurrentComicMeta,
     XKCDComic,
+    XKCDComicImage,
+    XKCDComicImageOut,
     XKCDComicOut,
     XKCDSentComic,
     XKCDSentComicOut,
-    XKCDComicImage,
-    XKCDComicImageOut,
 )

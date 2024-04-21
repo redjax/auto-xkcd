@@ -1,8 +1,11 @@
-from core.config import settings
+from __future__ import annotations
+
 from api.config import api_settings
 from api.responses import API_RESPONSES_DICT
+
 from .comics import comics_router
 
+from core.config import settings
 from fastapi import APIRouter
 from red_utils.ext.fastapi_utils import healthcheck
 

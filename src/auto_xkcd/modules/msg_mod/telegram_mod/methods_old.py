@@ -4,14 +4,13 @@ import json
 from pathlib import Path
 import typing as t
 
-from core.config import TelegramSettings
 from core import request_client
+from core.config import TelegramSettings
 import hishel
 import httpx
 from loguru import logger as log
 import msgpack
 import telegram
-
 
 def get_telegram_bot(bot_token: str = None) -> telegram.Bot:
     """Return an initialized Telegram bot."""

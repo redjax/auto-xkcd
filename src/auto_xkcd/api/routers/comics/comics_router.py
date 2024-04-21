@@ -1,21 +1,22 @@
-import typing as t
+from __future__ import annotations
+
 import sqlite3 as sqlite
+import typing as t
 
-from api.responses import API_RESPONSES_DICT
 from api.depends import cache_transport_dependency, db_dependency
-from core import request_client
-from domain.xkcd import comic
-from packages import xkcd_comic
-from modules import data_mod, xkcd_mod, msg_mod
-from core.config import settings, db_settings
+from api.responses import API_RESPONSES_DICT
 
-from loguru import logger as log
+from core import request_client
+from core.config import db_settings, settings
+from domain.xkcd import comic
 from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
-from red_utils.ext import time_utils
-
 import hishel
+from loguru import logger as log
+from modules import data_mod, msg_mod, xkcd_mod
+from packages import xkcd_comic
+from red_utils.ext import time_utils
 
 prefix: str = "/comics"
 tags: list[str] = ["comic"]

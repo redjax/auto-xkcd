@@ -1,1 +1,3 @@
-from .handlers import IbisDuckDBController, DuckDBController
+from __future__ import annotations
+
+from .handlers import DuckDBController, IbisDuckDBController

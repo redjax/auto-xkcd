@@ -9,7 +9,6 @@ from core.database import INT_PK, Base, TableNameMixin, TimestampMixin
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 
-
 class XKCDComicModel(Base):
     """Table model for XKCD comics.
 

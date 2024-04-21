@@ -1,9 +1,11 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from dynaconf import Dynaconf
 from loguru import logger as log
-from pydantic import Field, field_validator, ValidationError, ConfigDict, computed_field
+from pydantic import ConfigDict, Field, ValidationError, computed_field, field_validator
 from pydantic_settings import BaseSettings
 
 DYNACONF_API_SETTINGS: Dynaconf = Dynaconf(
