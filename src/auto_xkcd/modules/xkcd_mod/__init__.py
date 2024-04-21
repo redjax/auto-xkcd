@@ -8,4 +8,10 @@ from .methods import (
     load_serialized_comic,
     request_and_save_comic_img,
     save_serialize_comic_object,
+    make_comic_request,
+    save_comic_img,
+    save_comic_to_db,
+    update_current_comic_json,
+    update_current_comic_meta_db,
+    save_comic_img_to_db,
 )
