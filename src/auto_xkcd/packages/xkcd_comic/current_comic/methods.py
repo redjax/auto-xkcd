@@ -75,6 +75,17 @@ def get_current_comic(
 
             raise exc
 
+    ## Update comic_nums.txt file
+    log.debug(f"Updating comic_nums.txt file")
+    try:
+        data_ctl.update_comic_nums_file(comic_num=comic_obj.comic_num)
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception updating comic_nums file. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        log.warning("Did not update comic_nums file.")
+
     ## Update current comic metadata JSON
     try:
         current_comic_meta: comic.CurrentComicMeta = xkcd_mod.update_current_comic_json(
