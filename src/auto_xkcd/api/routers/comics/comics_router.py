@@ -23,6 +23,8 @@ tags: list[str] = ["comic"]
 
 router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT)
 
+MAX_MULTI_SCRAPE: int = 10
+
 
 @router.get("/current")
 def current_comic() -> JSONResponse:
@@ -77,3 +79,25 @@ def single_comic(comic_num: int) -> JSONResponse:
         )
 
         return res
+
+
+@router.post("/multi")
+def multiple_comics(comic_nums: list[int] = None) -> JSONResponse:
+    if len(comic_nums) > MAX_MULTI_SCRAPE:
+        log.error(f"Exceeded MAX_MULTI_SCRAPE: [{len(comic_nums)}/{MAX_MULTI_SCRAPE}]")
+
+        res: JSONResponse = JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "MalformedRequest": f"Exceeded maximum number of comic numbers to request at once. List of comic_nums must be less than {MAX_MULTI_SCRAPE}"
+            },
+        )
+
+        return res
+
+    return JSONResponse(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        content={
+            "NotImplemented": "Requesting multiple XKCD comics at once is not yet implemented"
+        },
+    )
