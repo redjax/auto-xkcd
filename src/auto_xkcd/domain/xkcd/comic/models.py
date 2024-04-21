@@ -41,7 +41,9 @@ class XKCDComicModel(Base):
     transcript: so.Mapped[str | None] = so.mapped_column(sa.VARCHAR(255))
     alt_text: so.Mapped[str] = so.mapped_column(__name_pos=sa.VARCHAR(255))
     img_url: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
+    img_saved: so.Mapped[bool] = so.mapped_column(sa.BOOLEAN, default=False)
     # img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+    comic_num_hash: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
 
 
 class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
@@ -63,8 +65,37 @@ class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
 
+class XKCDCurrentComicMetaModel(Base):
+    __tablename__ = "xkcd_current_comic_meta"
+    __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
+
+    current_comic_id: so.Mapped[INT_PK]
+
+    comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
+    last_updated: so.Mapped[date] = so.mapped_column(sa.Date)
+
+
+class XKCDCurrentComicMetaRepositoryBase(metaclass=abc.ABCMeta):
+    """Base database repository class for XKCDCurrentComicMeta."""
+
+    @abc.abstractmethod
+    def add(self, entity: XKCDCurrentComicMetaModel):
+        """Add new entity to repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def remove(self, entity: XKCDCurrentComicMetaModel):
+        """Remove existing entity from repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_by_id(self, comic_id: int) -> XKCDCurrentComicMetaModel:
+        """Retrieve entity from repository by its ID."""
+        raise NotImplementedError()
+
+
 class XKCDComicImageModel(Base):
-    __tablename__ = "xkcd_comic"
+    __tablename__ = "xkcd_comic_img"
     __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
 
     comic_img_id: so.Mapped[INT_PK]

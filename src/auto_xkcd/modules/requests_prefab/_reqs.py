@@ -65,6 +65,37 @@ def comic_num_req(comic_num: t.Union[int, str] = None) -> httpx.Request:
         raise msg
 
 
+def comic_img_req(comic_img_url: str = None) -> httpx.Request:
+    """Build an `httpx.Request` object from a comic image.
+
+    Params:
+        comic_img_url (str): A URL for an XKCD comic's image.
+
+    Returns:
+        (httpx.request): An initialized `httpx.Request` for the given `comic_img_url`.
+
+    """
+    assert comic_img_url, ValueError("Missing comic_img_url")
+    assert isinstance(comic_img_url, str), TypeError(
+        f"comic_img_url must be a str. Got type: ({type(comic_img_url)})"
+    )
+
+    # log.debug(f"Requesting URL for comic #{comic_num}: {_url}")
+    try:
+        ## Build the request
+        req: httpx.Request = request_client.build_request(url=comic_img_url)
+
+        return req
+
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception building request for comic image. Details: {exc}"
+        )
+        log.error(msg)
+
+        raise msg
+
+
 def telegram_chatid_req(bot_token: str = None):
     _url: str = f"https://api.telegram.org/bot{bot_token}/getUpdates"
 

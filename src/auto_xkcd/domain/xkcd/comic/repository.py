@@ -2,11 +2,16 @@ from __future__ import annotations
 
 from .models import (
     XKCDComicModel,
-    XKCDComicRepositoryBase,
     XKCDSentComicModel,
-    XKCDSentComicRepositoryBase,
     XKCDComicImageModel,
+    XKCDCurrentComicMetaModel,
+)
+
+from .models import (
+    XKCDComicRepositoryBase,
+    XKCDSentComicRepositoryBase,
     XKCDComicImageRepositoryBase,
+    XKCDCurrentComicMetaRepositoryBase,
 )
 
 from loguru import logger as log
@@ -105,6 +110,74 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
     def get_by_num(self, num: int) -> XKCDComicModel:
         try:
             return self.session.query(XKCDComicModel).get(num)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception retrieving entity by ID '{num}'. Details: {exc}"
+            )
+            log.error(msg)
+
+            raise msg
+
+
+class XKCDCurrentComicMetaRepository(XKCDCurrentComicMetaRepositoryBase):
+    """Database repository for handling metadata entities for current XKCD comic."""
+
+    def __init__(self, session: so.Session) -> None:  # noqa: D107
+        assert session is not None, ValueError("session cannot be None")
+        assert isinstance(session, so.Session), TypeError(
+            f"session must be of type sqlalchemy.orm.Session. Got type: ({type(session)})"
+        )
+
+        self.session: so.Session = session
+
+    def add(self, entity: XKCDCurrentComicMetaModel) -> None:
+        """Add new entity to the database."""
+        try:
+            self.session.add(instance=entity)
+            self.session.commit()
+        except IntegrityError as integ:
+            msg = Exception(
+                f"Integrity error committing entity to database. Details: {integ}"
+            )
+            log.warning(msg)
+
+            raise integ
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception committing entity to database. Details: {exc}"
+            )
+
+            raise msg
+
+    def remove(self, entity: XKCDCurrentComicMetaModel) -> None:
+        """Remove existing entity from the database."""
+        try:
+            self.session.delete(instance=entity)
+            self.session.commit()
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception removing entity from database. Details: {exc}"
+            )
+            log.error(msg)
+
+            raise msg
+
+    def get_by_id(self, current_comic_meta_id: int) -> XKCDCurrentComicMetaModel:
+        try:
+            return self.session.query(XKCDCurrentComicMetaModel).get(
+                current_comic_meta_id
+            )
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception retrieving entity by ID '{current_comic_meta_id}'. Details: {exc}"
+            )
+            log.error(msg)
+
+            raise msg
+
+    def get_by_num(self, num: int) -> XKCDCurrentComicMetaModel:
+        try:
+            return self.session.query(XKCDCurrentComicMetaModel).get(num)
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception retrieving entity by ID '{num}'. Details: {exc}"

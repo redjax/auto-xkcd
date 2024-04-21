@@ -17,6 +17,7 @@ from loguru import logger as log
 import msgpack
 from utils import serialize_utils
 
+
 def request_and_save_comic_img(
     comic: XKCDComic = None,
     cache_transport: hishel.CacheTransport = None,
@@ -35,7 +36,7 @@ def request_and_save_comic_img(
     ## Build request for image
     img_req: httpx.Request = request_client.build_request(url=img_url)
 
-    img_bytes_filename: str = f"{comic.num}.png"
+    img_bytes_filename: str = f"{comic.comic_num}.png"
     img_bytes_output_path: Path = Path(f"{output_dir}/{img_bytes_filename}")
 
     try:
@@ -78,8 +79,6 @@ def request_and_save_comic_img(
             log.warning(
                 f"Image has already been saved to path '{img_bytes_output_path}'. Skipping"
             )
-
-        comic.img_bytes = img_bytes
 
     except Exception as exc:
         msg = Exception(f"Unhandled exception saving img bytes. Details: {exc}")
@@ -160,12 +159,12 @@ def save_serialize_comic_object(
         overwrite (bool): If `True`, file will be overwritten if it already exists.
 
     """
-    serialized_filename = f"{comic.num}.msgpack"
+    serialized_filename = f"{comic.comic_num}.msgpack"
     output_filepath: Path = Path(f"{output_dir}/{serialized_filename}")
 
     if output_filepath.exists():
         log.warning(
-            f"Comic #{comic.num} is serialized at path '{output_filepath}' already."
+            f"Comic #{comic.comic_num} is serialized at path '{output_filepath}' already."
         )
         if overwrite:
             log.info(f"overwrite=True, continuing with serialization")

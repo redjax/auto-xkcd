@@ -2,6 +2,6 @@
     "python.analysis.extraPaths": [
         "./src/auto_xkcd",
         "./src/auto-xkcd",
-        "./src_bak/auto_xkcd"
+        // "./src_bak/auto_xkcd"
     ]
 }

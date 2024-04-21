@@ -113,6 +113,7 @@ class XKCDComicBase(BaseModel):
     alt_text: str = Field(default=None, alias="alt")
     img_url: str = Field(default=None, alias="img")
     # img_bytes: bytes | None = Field(default=None, repr=False)
+    img_saved: bool | None = Field(default=False)
 
     @property
     def telegram_msg(self) -> str:

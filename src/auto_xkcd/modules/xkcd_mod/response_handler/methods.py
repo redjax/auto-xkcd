@@ -10,6 +10,7 @@ import httpx
 from loguru import logger as log
 from utils import serialize_utils
 
+
 def convert_response_to_dict(res: httpx.Response = None) -> dict:
     """Attempt to decode an `httpx.Response` into a dict."""
     assert res, ValueError("Missing an httpx.Response object.")
@@ -85,10 +86,12 @@ def convert_comic_response_to_xkcdcomic(
     ## Convert Response dict to XKCDComic
     try:
         comic: XKCDComic = convert_dict_to_xkcdcomic(_dict=comic_res_dict)
-        log.success(f"Converted comic #{comic.num} Response dict to XKCDComic object")
+        log.success(
+            f"Converted comic #{comic.comic_num} Response dict to XKCDComic object"
+        )
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception converting XKCD comic #{comic.num} response dict to XKCDComic object. Details: {exc}"
+            f"Unhandled exception converting XKCD comic #{comic.comic_num} response dict to XKCDComic object. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)
