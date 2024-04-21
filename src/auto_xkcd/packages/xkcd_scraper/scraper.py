@@ -5,8 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
-from modules import xkcd_mod
-
 from core import request_client
 from core.paths import (
     COMIC_IMG_DIR,
@@ -25,7 +23,6 @@ import httpx
 from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 from utils import list_utils
-
 
 def scrape_missing_comics(
     cache_transport: hishel.CacheTransport = None,

@@ -40,10 +40,10 @@ $ cli.py pipelines update-db -c -t 120
 from __future__ import annotations
 
 from _cli.groups import pipelines_cli
-from setup import cli_app_setup
 import click
 from core.dependencies import db_settings, settings
 from loguru import logger as log
+from setup import cli_app_setup
 
 ## CLI command groups in this list will be added to the main CLI group
 ENABLED_COMMAND_GROUPS: list[click.Group] = [pipelines_cli]

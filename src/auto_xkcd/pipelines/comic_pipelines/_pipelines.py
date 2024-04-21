@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
-from setup import base_app_setup
 from core import (
     COMIC_IMG_DIR,
     CURRENT_XKCD_URL,
@@ -24,8 +23,8 @@ from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 import msgpack
 from packages import xkcd_comic
+from setup import base_app_setup
 from utils import serialize_utils
-
 
 def pipeline_current_comic(
     cache_transport: hishel.CacheTransport = None,

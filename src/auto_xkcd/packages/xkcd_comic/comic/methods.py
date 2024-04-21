@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from pathlib import Path
 import sqlite3 as sqlite
 import typing as t
 
-from core import database, paths, request_client, IGNORE_COMIC_NUMS
+from core import IGNORE_COMIC_NUMS, database, paths, request_client
 from core.config import db_settings, settings
 from core.dependencies import get_db
 from domain.xkcd import comic
@@ -14,7 +16,6 @@ from loguru import logger as log
 from modules import data_mod, requests_prefab, xkcd_mod
 from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
-
 
 def get_single_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
