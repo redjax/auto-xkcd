@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 from pathlib import Path
 import sqlite3 as sqlite
 import typing as t
 
-from core import database, paths, request_client
+from core import database, paths, request_client, IGNORE_COMIC_NUMS
 from core.config import db_settings, settings
 from core.dependencies import get_db
 from domain.xkcd import comic
@@ -18,44 +16,55 @@ from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 
 
-def get_current_comic(
+def get_single_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
+    comic_num: int = None,
     save_serial: bool = True,
     overwrite: bool = True,
 ) -> comic.XKCDComic:
-    cache_transport = validate_hishel_cachetransport(cache_transport)
+    """Request a single XKCD comic by its comic number.
 
-    ## Build request
-    req: httpx.Request = requests_prefab.current_comic_req()
+    Params:
+        cache_transport (hishel.CacheTransport): A cache transport for the request client.
+        comic_num (int): The number of the XKCD comic strip to request.
 
-    ## Make request for current comic
+    Returns:
+        (XKCDComic): The specified XKCD comic.
+
+    """
+    cache_transport = validate_hishel_cachetransport(cache_transport=cache_transport)
+
+    if comic_num in IGNORE_COMIC_NUMS:
+        log.warning(f"Comic #{comic_num} is in list of ignored comic numbers. Skipping")
+
+        return None
+
+    req: httpx.Request = requests_prefab.comic_num_req(comic_num=comic_num)
+
+    ## Get comic Response
     try:
-        log.info("Requesting current XKCD comic")
         comic_res: httpx.Response = xkcd_mod.make_comic_request(
             cache_transport=cache_transport, request=req
         )
-        log.debug(f"Current comic: {comic_res}")
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception making request for current XKCD comic. Details: {exc}"
+            f"Unhandled exception getting comic #{comic_num}. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)
 
         raise exc
 
-    ## Parse httpx.Response into comic.XKCDComic
+    ## Convert httpx.Response into XKCDComic object
     try:
-        # comic_obj: comic.XKCDComic = _parse_res_to_comic(response=res)
         comic_obj: comic.XKCDComic = (
             xkcd_mod.response_handler.convert_comic_response_to_xkcdcomic(
                 comic_res=comic_res
             )
         )
-
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception parsing current XKCD comic Response to XKCDComic object. Details: {exc}"
+            f"Unhandled exception converting httpx.Response to XKCDComic object. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)
@@ -66,6 +75,7 @@ def get_current_comic(
         ## Serialize comic object
         try:
             xkcd_mod.save_serialize_comic_object(comic=comic_obj, overwrite=overwrite)
+            log.success(f"Serialized XKCD comic #{comic_obj.comic_num}")
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception serializing XKCD comic #{comic_obj.comic_num}. Details: {exc}"
@@ -84,33 +94,7 @@ def get_current_comic(
         log.error(msg)
         log.trace(exc)
 
-        log.warning("Did not update comic_nums file.")
-
-    ## Update current comic metadata JSON
-    try:
-        current_comic_meta: comic.CurrentComicMeta = xkcd_mod.update_current_comic_json(
-            comic_obj=comic_obj
-        )
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception updating current_comic.json file. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        log.warning(f"current_comic.json file not updated.")
-
-    ## Update current comic metadata in database
-    try:
-        xkcd_mod.update_current_comic_meta_db(current_comic_meta=current_comic_meta)
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception updating current comic metadata in database. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
-
-        log.warning(f"Current comic metadata not updated in database")
+        raise exc
 
     ## Save comic image to file
     try:
@@ -159,4 +143,5 @@ def get_current_comic(
             log.trace(exc)
             log.warning(f"Did not save XKCD comic #{comic_obj.comic_num} to database.")
 
+    log.debug(f"Comic #{comic_obj.comic_num}: {comic_obj}")
     return comic_obj

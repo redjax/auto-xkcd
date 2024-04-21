@@ -46,3 +46,34 @@ def current_comic() -> JSONResponse:
         )
 
     return res
+
+
+@router.get("/{comic_num}")
+def single_comic(comic_num: int) -> JSONResponse:
+    try:
+        comic_obj: comic.XKCDComic = xkcd_comic.comic.get_single_comic(
+            comic_num=comic_num
+        )
+
+        res = JSONResponse(
+            status_code=status.HTTP_200_OK, content=comic_obj.model_dump()
+        )
+
+        return res
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting XKCD comic #{comic_num}. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        exc_ts: str = time_utils.get_ts(as_str=True)
+
+        res = JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "InternalServerError": f"[{exc_ts}] Unhandled exception getting XKCD comic #{comic_num}. Check server logs"
+            },
+        )
+
+        return res

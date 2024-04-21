@@ -17,6 +17,7 @@ from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 from utils import serialize_utils
 
+
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     request: httpx.Request = None,
@@ -401,11 +402,11 @@ def save_serialize_comic_object(
             f"Comic #{comic.comic_num} is serialized at path '{output_filepath}' already."
         )
         if overwrite:
-            log.info(f"overwrite=True, continuing with serialization")
+            # log.info(f"overwrite=True, continuing with serialization")
             pass
 
         else:
-            log.warning(f"overwrite=False, skipping.")
+            # log.warning(f"overwrite=False, skipping.")
 
             return
 
