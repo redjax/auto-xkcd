@@ -4,13 +4,13 @@ from .models import (
     XKCDComicModel,
     XKCDSentComicModel,
     XKCDComicImageModel,
-    XKCDCurrentComicMetaModel,
+    CurrentComicMetaModel,
 )
 from .repository import (
     XKCDComicRepository,
     XKCDSentComicRepository,
     XKCDComicImageRepository,
-    XKCDCurrentComicMetaRepository,
+    CurrentComicMetaRepository,
 )
 from .schemas import (
     ComicNumCSVData,

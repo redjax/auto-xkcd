@@ -5,8 +5,8 @@ from __future__ import annotations
 from .comic import (
     ComicNumCSVData,
     CurrentComicMeta,
-    XKCDCurrentComicMetaModel,
-    XKCDCurrentComicMetaRepository,
+    CurrentComicMetaModel,
+    CurrentComicMetaRepository,
     XKCDComic,
     XKCDComicModel,
     XKCDComicOut,

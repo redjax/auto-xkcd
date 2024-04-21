@@ -136,15 +136,78 @@ def _save_comic_to_db(
 def _update_current_comic_json(
     current_comic_json_file: str = paths.CURRENT_COMIC_FILE,
     comic_obj: comic.XKCDComic = None,
-):
+) -> comic.CurrentComicMeta:
     update_ts = get_ts()
     current_comic_meta: comic.CurrentComicMeta = comic.CurrentComicMeta(
         last_updated=update_ts, comic_num=comic_obj.comic_num
     )
 
-    data_ctl.update_current_comic_meta(
-        current_comic_file=current_comic_json_file, current_comic=current_comic_meta
-    )
+    try:
+        data_ctl.update_current_comic_meta(
+            current_comic_file=current_comic_json_file, current_comic=current_comic_meta
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception updating '{current_comic_json_file}'. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+        log.warning(f"File '{current_comic_json_file}' not updated.")
+
+    return current_comic_meta
+
+
+def _update_current_comic_meta_db(
+    current_comic_meta: comic.CurrentComicMeta = None,
+) -> comic.CurrentComicMeta:
+    try:
+        db_model: comic.CurrentComicMetaModel = comic.CurrentComicMetaModel(
+            **current_comic_meta.model_dump()
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception dumping CurrentComicMeta object to database model. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    try:
+        with get_db() as session:
+            repo = comic.CurrentComicMetaRepository(session=session)
+
+            try:
+                repo.add_or_update(entity=db_model)
+
+                return current_comic_meta
+            except IntegrityError as integ_err:
+                msg = Exception(f"Current comic metadata already exists in database.")
+                log.warning(msg)
+
+                # return current_comic_meta
+                raise integ_err
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception writing current comic metadata to database. Details ({type(exc)}): {exc}"
+                )
+                log.error(msg)
+                log.trace(exc)
+
+                raise exc
+    except IntegrityError or sqlite.IntegrityError as integ_err:
+        # return current_comic_meta
+        raise integ_err
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting database connection. Details ({type(exc)}): {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    return current_comic_meta
 
 
 def get_current_comic(
@@ -186,7 +249,9 @@ def get_current_comic(
 
     ## Update current comic metadata JSON
     try:
-        _update_current_comic_json(comic_obj=comic_obj)
+        current_comic_meta: comic.CurrentComicMeta = _update_current_comic_json(
+            comic_obj=comic_obj
+        )
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception updating current_comic.json file. Details: {exc}"
@@ -195,6 +260,18 @@ def get_current_comic(
         log.trace(exc)
 
         log.warning(f"current_comic.json file not updated.")
+
+    ## Update current comic metadata in database
+    try:
+        _update_current_comic_meta_db(current_comic_meta=current_comic_meta)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception updating current comic metadata in database. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        log.warning(f"Current comic metadata not updated in database")
 
     ## Save comic image to file
     try:

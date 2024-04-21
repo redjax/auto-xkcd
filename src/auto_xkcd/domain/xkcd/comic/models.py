@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import abc
-from datetime import date
+from datetime import date, datetime
 
 from core.database import INT_PK, Base, TableNameMixin, TimestampMixin
 import sqlalchemy as sa
@@ -65,31 +65,31 @@ class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
 
-class XKCDCurrentComicMetaModel(Base):
+class CurrentComicMetaModel(Base):
     __tablename__ = "xkcd_current_comic_meta"
     __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
 
     current_comic_id: so.Mapped[INT_PK]
 
     comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
-    last_updated: so.Mapped[date] = so.mapped_column(sa.Date)
+    last_updated: so.Mapped[datetime] = so.mapped_column(sa.DateTime)
 
 
-class XKCDCurrentComicMetaRepositoryBase(metaclass=abc.ABCMeta):
+class CurrentComicMetaRepositoryBase(metaclass=abc.ABCMeta):
     """Base database repository class for XKCDCurrentComicMeta."""
 
     @abc.abstractmethod
-    def add(self, entity: XKCDCurrentComicMetaModel):
+    def add(self, entity: CurrentComicMetaModel):
         """Add new entity to repository."""
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def remove(self, entity: XKCDCurrentComicMetaModel):
+    def remove(self, entity: CurrentComicMetaModel):
         """Remove existing entity from repository."""
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def get_by_id(self, comic_id: int) -> XKCDCurrentComicMetaModel:
+    def get_by_id(self, comic_id: int) -> CurrentComicMetaModel:
         """Retrieve entity from repository by its ID."""
         raise NotImplementedError()
 
