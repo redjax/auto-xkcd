@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
-from _setup import base_app_setup
 from core import (
     COMIC_IMG_DIR,
     CURRENT_XKCD_URL,
@@ -24,6 +23,7 @@ from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 import msgpack
 from packages import xkcd_comic
+from setup import base_app_setup
 from utils import serialize_utils
 
 def pipeline_current_comic(
@@ -45,9 +45,10 @@ def pipeline_current_comic(
     log.info(">> Start current XKCD comic pipeline")
 
     try:
-        comic: XKCDComic = xkcd_comic.get_current_comic(
+        comic: XKCDComic = xkcd_comic.current_comic.get_current_comic(
             cache_transport=cache_transport,
-            overwrite_serialized_comic=overwrite_serialized_comic,
+            save_serial=True,
+            overwrite=overwrite_serialized_comic,
         )
         log.success(f"Current XKCD comic requested")
 
@@ -88,6 +89,7 @@ def pipeline_multiple_comics(
 
     log.info(">> Start multiple comic pipeline")
 
+    raise NotImplementedError("Requesting multiple comics is not yet implemented")
     try:
         comics: list[XKCDComic] = xkcd_comic.get_multiple_comics(
             cache_transport=cache_transport,
@@ -133,10 +135,11 @@ def pipeline_scrape_missing_comics(
     log.info(">> Start scrape missing comics pipeline")
 
     ## Request current comic to ensure pipeline runs.
-    current_comic: XKCDComic = xkcd_comic.get_current_comic(
+    current_comic: XKCDComic = xkcd_comic.current_comic.get_current_comic(
         cache_transport=cache_transport, overwrite_serialized_comic=True
     )
 
+    raise NotImplementedError("Scraping comics is not yet implemented")
     try:
         scraped_comics: list[XKCDComic] = xkcd_comic.comic.scrape_missing_comics(
             cache_transport=cache_transport,

@@ -1,18 +1,19 @@
-import typing as t
-from pathlib import Path
-from contextlib import contextmanager, AbstractContextManager
+from __future__ import annotations
 
-from core import paths
+from contextlib import AbstractContextManager, contextmanager
+from pathlib import Path
+import typing as t
+
 from .methods import (
+    extract_chatid_from_response,
     get_chat_token,
     request_chat_id,
     save_chatid_to_file,
-    extract_chatid_from_response,
 )
 
+from core import paths
 from loguru import logger as log
 import telegram
-
 
 class TelegramBotController(AbstractContextManager):
     def __init__(self, bot_token: str = None, bot_name: str = None):

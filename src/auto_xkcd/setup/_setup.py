@@ -9,10 +9,10 @@ from __future__ import annotations
 from pathlib import Path
 from sqlite3 import OperationalError
 
+from api.config import APISettings, UvicornSettings, api_settings, uvicorn_settings
 from core import database
 from core.config import AppSettings, DBSettings
-from core.dependencies import settings, db_settings
-from api._config import APISettings, api_settings, UvicornSettings, uvicorn_settings
+from core.dependencies import db_settings, settings
 from core.paths import ENSURE_DIRS
 from helpers import cli_helpers
 import ibis

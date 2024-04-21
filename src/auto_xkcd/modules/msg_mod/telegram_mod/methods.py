@@ -1,14 +1,15 @@
-import typing as t
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from core import paths, request_client
+import typing as t
+
 from modules.requests_prefab import telegram_chatid_req
 
-import telegram
-from loguru import logger as log
-
+from core import paths, request_client
 import httpx
-
+from loguru import logger as log
+import telegram
 
 def save_chatid_to_file(
     chat_id: t.Union[str, int] = None,

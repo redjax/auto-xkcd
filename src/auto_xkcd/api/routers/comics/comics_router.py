@@ -1,111 +1,103 @@
+from __future__ import annotations
+
+import sqlite3 as sqlite
 import typing as t
 
-from api._responses import API_RESPONSES_DICT
-from api._depends import cache_transport_dependency, db_dependency
-from core import request_client
-from domain.xkcd import comic
-from helpers import data_ctl
-from modules import data_mod, xkcd_mod, msg_mod
-from packages import xkcd_comic, data_tools, msg
-from core.config import settings, db_settings
+from api.depends import cache_transport_dependency, db_dependency
+from api.responses import API_RESPONSES_DICT
 
-from loguru import logger as log
+from core import request_client
+from core.config import db_settings, settings
+from domain.xkcd import comic
 from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
-
-
 import hishel
+from loguru import logger as log
+from modules import data_mod, msg_mod, xkcd_mod
+from packages import xkcd_comic
+from red_utils.ext import time_utils
 
 prefix: str = "/comics"
 tags: list[str] = ["comic"]
 
-router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=tags)
+router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT)
+
+MAX_MULTI_SCRAPE: int = 10
 
 
 @router.get("/current")
-def current_comic(
-    cache_transport: cache_transport_dependency, db_session: db_dependency
-) -> JSONResponse:
-
-    with data_ctl.CurrentComicController() as current_comic_ctl:
-        _current_comic_dict = current_comic_ctl.read()
-
-        current_comic_num = _current_comic_dict["comic_num"]
-
-    with db_session as session:
-        repo = comic.XKCDComicRepository(session=session)
-
-        try:
-            current_comic = repo.get_by_num(current_comic_num)
-            log.debug(
-                f"Retrieved current comic ({type(current_comic)}): {current_comic}"
-            )
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception getting current comic from database. Details: {exc}"
-            )
-            log.error(msg)
-            log.trace(exc)
-
-            raise exc
-
-    # try:
-    #     current_comic: comic.XKCDComic = xkcd_comic.get_current_comic(
-    #         cache_transport=cache_transport, overwrite_serialized_comic=True
-    #     )
-
-    #     res = JSONResponse(
-    #         status_code=status.HTTP_200_OK,
-    #         content=current_comic.model_dump(exclude={"img_bytes"}),
-    #     )
-
-    #     return res
-
-    # except Exception as exc:
-    #     msg = Exception(
-    #         f"Unhandled exception getting current XKCD comic. Details: {exc}"
-    #     )
-    #     log.error(msg)
-    #     log.trace(exc)
-
-    #     res: JSONResponse = JSONResponse(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         content={"error": "Internal Server Error while getting current XKCD comic"},
-    #     )
-
-    #     return res
-
-
-@router.get("/comic/{comic_num}")
-def specific_comic(
-    comic_num: int, cache_transport: cache_transport_dependency
-) -> JSONResponse:
+def current_comic() -> JSONResponse:
     try:
-        _comic: comic.XKCDComic = xkcd_comic.get_single_comic(
-            cache_transport=cache_transport,
-            comic_num=comic_num,
-            overwrite_serialized_comic=True,
+        comic_obj: comic.XKCDComic = xkcd_comic.current_comic.get_current_comic()
+        res = JSONResponse(
+            status_code=status.HTTP_200_OK, content=comic_obj.model_dump()
+        )
+    except Exception as exc:
+        msg = Exception(f"Unhandled exception getting current comic. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        exc_ts: str = time_utils.get_ts(as_str=True)
+
+        res = JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "InternalServerError": f"[{exc_ts}] Unhandled exception getting current XKCD comic. Check server logs."
+            },
+        )
+
+    return res
+
+
+@router.get("/{comic_num}")
+def single_comic(comic_num: int) -> JSONResponse:
+    try:
+        comic_obj: comic.XKCDComic = xkcd_comic.comic.get_single_comic(
+            comic_num=comic_num
         )
 
         res = JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=_comic.model_dump(exclude={"img_bytes"}),
+            status_code=status.HTTP_200_OK, content=comic_obj.model_dump()
         )
 
         return res
     except Exception as exc:
         msg = Exception(
-            f"Unhandled exception getting comic #{comic_num}. Details: {exc}"
+            f"Unhandled exception getting XKCD comic #{comic_num}. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)
 
-        res: JSONResponse = JSONResponse(
+        exc_ts: str = time_utils.get_ts(as_str=True)
+
+        res = JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "error": f"Internal Server Error while getting comic #{comic_num}"
+                "InternalServerError": f"[{exc_ts}] Unhandled exception getting XKCD comic #{comic_num}. Check server logs"
             },
         )
 
         return res
+
+
+@router.post("/multi")
+def multiple_comics(comic_nums: list[int] = None) -> JSONResponse:
+    if len(comic_nums) > MAX_MULTI_SCRAPE:
+        log.error(f"Exceeded MAX_MULTI_SCRAPE: [{len(comic_nums)}/{MAX_MULTI_SCRAPE}]")
+
+        res: JSONResponse = JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "MalformedRequest": f"Exceeded maximum number of comic numbers to request at once. List of comic_nums must be less than {MAX_MULTI_SCRAPE}"
+            },
+        )
+
+        return res
+
+    return JSONResponse(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        content={
+            "NotImplemented": "Requesting multiple XKCD comics at once is not yet implemented"
+        },
+    )

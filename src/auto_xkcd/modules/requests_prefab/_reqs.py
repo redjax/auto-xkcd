@@ -4,11 +4,10 @@ import json
 import typing as t
 
 from core import request_client
+from core.config import TelegramSettings, telegram_settings
 from core.constants import CURRENT_XKCD_URL, XKCD_URL_BASE, XKCD_URL_POSTFIX
-from core.config import telegram_settings, TelegramSettings
 import httpx
 from loguru import logger as log
-
 
 def current_comic_req() -> httpx.Request:
     """Build an `httpx.Request` object for the current XKCD comic.
@@ -59,6 +58,37 @@ def comic_num_req(comic_num: t.Union[int, str] = None) -> httpx.Request:
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception building request for comic #{comic_num}. Details: {exc}"
+        )
+        log.error(msg)
+
+        raise msg
+
+
+def comic_img_req(comic_img_url: str = None) -> httpx.Request:
+    """Build an `httpx.Request` object from a comic image.
+
+    Params:
+        comic_img_url (str): A URL for an XKCD comic's image.
+
+    Returns:
+        (httpx.request): An initialized `httpx.Request` for the given `comic_img_url`.
+
+    """
+    assert comic_img_url, ValueError("Missing comic_img_url")
+    assert isinstance(comic_img_url, str), TypeError(
+        f"comic_img_url must be a str. Got type: ({type(comic_img_url)})"
+    )
+
+    # log.debug(f"Requesting URL for comic #{comic_num}: {_url}")
+    try:
+        ## Build the request
+        req: httpx.Request = request_client.build_request(url=comic_img_url)
+
+        return req
+
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception building request for comic image. Details: {exc}"
         )
         log.error(msg)
 

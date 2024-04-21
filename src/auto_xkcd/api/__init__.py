@@ -1,2 +1,3 @@
-from ._config import APISettings, UvicornSettings, api_settings, uvicorn_settings
-from ._main import app
+from __future__ import annotations
+
+from .config import APISettings, UvicornSettings, api_settings, uvicorn_settings

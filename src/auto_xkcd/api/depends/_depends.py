@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import typing as t
-from core import request_client, get_db
+
+from core import get_db, request_client
 from fastapi import Depends
 import hishel
 import sqlalchemy.orm as so

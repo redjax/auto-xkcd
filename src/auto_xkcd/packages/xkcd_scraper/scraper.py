@@ -5,8 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 import typing as t
 
-from .methods import get_multiple_comics, get_single_comic
-
 from core import request_client
 from core.paths import (
     COMIC_IMG_DIR,
@@ -80,21 +78,23 @@ def scrape_missing_comics(
     if not LIST_CHUNKED:
         ## List count is below max_list_size.
 
-        try:
-            missing_comics: list[XKCDComic] = get_multiple_comics(
-                cache_transport=cache_transport, comic_nums=missing_comic_nums
-            )
+        raise NotImplementedError(f"Requesting multiple comics is not yet implemented")
 
-            return missing_comics
+        # try:
+        #     missing_comics: list[XKCDComic] = get_multiple_comics(
+        #         cache_transport=cache_transport, comic_nums=missing_comic_nums
+        #     )
 
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception scraping missing comics. Details: {exc}"
-            )
-            log.error(msg)
-            log.trace(exc)
+        #     return missing_comics
 
-            raise exc
+        # except Exception as exc:
+        #     msg = Exception(
+        #         f"Unhandled exception scraping missing comics. Details: {exc}"
+        #     )
+        #     log.error(msg)
+        #     log.trace(exc)
+
+        #     raise exc
 
     else:
         ## List size is greater than max_list_size. Break into smaller chunks & loop
@@ -119,6 +119,10 @@ def scrape_missing_comics(
             for lst in missing_nums_lists:
                 log.debug(f"Loop [{LIST_LOOP_COUNTER}/{MAX_LOOPS}]")
                 log.debug(f"List item(s): {len(lst)}")
+
+                raise NotImplementedError(
+                    f"Requesting multiple comics is not yet implemented"
+                )
 
                 _comics: list[XKCDComic] = get_multiple_comics(
                     cache_transport=cache_transport,

@@ -8,10 +8,12 @@
 #     load_serialized_chat_id,
 #     send_photo_msg,
 # )
+from __future__ import annotations
+
+from .context_managers import TelegramBotController
 from .methods import (
-    request_chat_id,
-    save_chatid_to_file,
     extract_chatid_from_response,
     get_chat_token,
+    request_chat_id,
+    save_chatid_to_file,
 )
-from .context_managers import TelegramBotController
