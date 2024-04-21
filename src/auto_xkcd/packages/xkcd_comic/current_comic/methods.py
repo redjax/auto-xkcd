@@ -17,8 +17,11 @@ from modules import data_mod, requests_prefab, xkcd_mod
 from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 
+
 def get_current_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
+    save_serial: bool = True,
+    overwrite: bool = True,
 ) -> comic.XKCDComic:
     cache_transport = validate_hishel_cachetransport(cache_transport)
 
@@ -58,6 +61,19 @@ def get_current_comic(
         log.trace(exc)
 
         raise exc
+
+    if save_serial:
+        ## Serializee comic object
+        try:
+            xkcd_mod.save_serialize_comic_object(comic=comic_obj, overwrite=overwrite)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception serializing XKCD comic #{comic_obj.comic_num}. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
 
     ## Update current comic metadata JSON
     try:
