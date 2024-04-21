@@ -5,14 +5,17 @@ import sqlite3 as sqlite
 
 from core.config import settings, db_settings
 from core import database, request_client
+from core import paths
 from core.dependencies import get_db
 from helpers.validators import validate_hishel_cachetransport
+from helpers import data_ctl
 from modules import xkcd_mod, data_mod, requests_prefab
 from domain.xkcd import comic
 
 from loguru import logger as log
 import httpx
 import hishel
+from red_utils.ext.time_utils import get_ts
 
 
 def _make_request(
@@ -130,6 +133,20 @@ def _save_comic_to_db(
         raise exc
 
 
+def _update_current_comic_json(
+    current_comic_json_file: str = paths.CURRENT_COMIC_FILE,
+    comic_obj: comic.XKCDComic = None,
+):
+    update_ts = get_ts()
+    current_comic_meta: comic.CurrentComicMeta = comic.CurrentComicMeta(
+        last_updated=update_ts, comic_num=comic_obj.comic_num
+    )
+
+    data_ctl.update_current_comic_meta(
+        current_comic_file=current_comic_json_file, current_comic=current_comic_meta
+    )
+
+
 def get_current_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
 ) -> comic.XKCDComic:
@@ -166,6 +183,18 @@ def get_current_comic(
         log.trace(exc)
 
         raise exc
+
+    ## Update current comic metadata JSON
+    try:
+        _update_current_comic_json(comic_obj=comic_obj)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception updating current_comic.json file. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        log.warning(f"current_comic.json file not updated.")
 
     ## Save comic image to file
     try:
