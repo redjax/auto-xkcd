@@ -206,3 +206,4 @@ docker_data/
 .pixi
 *.egg-info
 
+**/*_bak

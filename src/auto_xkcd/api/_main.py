@@ -1,7 +1,8 @@
-from api._config import api_settings, APISettings
+from api.config import api_settings, APISettings
 from api.routers import api_v1_router
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, status
+from fastapi.responses import JSONResponse
 from loguru import logger as log
 
 INCLUDE_ROUTERS: list[APIRouter] = [api_v1_router]
@@ -24,6 +25,11 @@ app.include_router(api_v1_router)
 
 
 @app.get("/")
-def root():
-    log.debug(f"Root route reached")
-    return {"msg": "Hello world!"}
+def root() -> JSONResponse:
+    log.debug("Root route reached")
+
+    res: JSONResponse = JSONResponse(
+        status_code=status.HTTP_200_OK, content={"message": "Hello, world!"}
+    )
+
+    return res

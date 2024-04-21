@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .models import XKCDComicModel, XKCDSentComicModel
+from .models import XKCDComicModel, XKCDSentComicModel, XKCDComicImageModel
 from .repository import XKCDComicRepository, XKCDSentComicRepository
 from .schemas import (
     ComicNumCSVData,
@@ -9,4 +9,6 @@ from .schemas import (
     XKCDComicOut,
     XKCDSentComic,
     XKCDSentComicOut,
+    XKCDComicImage,
+    XKCDComicImageOut,
 )

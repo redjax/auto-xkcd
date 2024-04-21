@@ -17,7 +17,7 @@ class XKCDComicModel(Base):
         year (str): Published year
         month (str): Published month
         day (str): Published day
-        num (int): Comic number
+        comic_num (int): Comic number
         link (str|None): Link to comic.
         title (str): Comic title.
         transcript (str|None): Comic transcript.
@@ -28,20 +28,20 @@ class XKCDComicModel(Base):
     """
 
     __tablename__ = "xkcd_comic"
-    __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
+    __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
 
     comic_id: so.Mapped[INT_PK]
 
     year: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
     month: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
     day: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
-    num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
+    comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
     link: so.Mapped[str | None] = so.mapped_column(sa.VARCHAR(255))
     title: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
     transcript: so.Mapped[str | None] = so.mapped_column(sa.VARCHAR(255))
     alt_text: so.Mapped[str] = so.mapped_column(__name_pos=sa.VARCHAR(255))
     img_url: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
-    img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+    # img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
 
 
 class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
@@ -63,20 +63,49 @@ class XKCDComicRepositoryBase(metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
 
+class XKCDComicImageModel(Base):
+    __tablename__ = "xkcd_comic"
+    __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
+
+    comic_img_id: so.Mapped[INT_PK]
+
+    comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
+    img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+
+
+class XKCDComicImageRepositoryBase(metaclass=abc.ABCMeta):
+    """Base database repository for XKCDComicImage."""
+
+    @abc.abstractmethod
+    def add(self, entity: XKCDComicImageModel):
+        """Add new entity to repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def remove(self, entity: XKCDComicImageModel):
+        """Remove existing entity from repository."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_by_id(self, comic_id: int) -> XKCDComicImageModel:
+        """Retrieve entity from repository by its ID."""
+        raise NotImplementedError()
+
+
 class XKCDSentComicModel(Base):
     """Metadata about comics sent via Telegram.
 
     Params:
         sent_comic_id (INT_PK): Primary key for sent comic.
-        num (int): Comic's number.
+        comic_num (int): Comic's number.
         date_sent (date): Day the comic was sent on Telegram.
     """
 
     __tablename__ = "xkcd_sent_comic"
-    __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
+    __table_args__ = (sa.UniqueConstraint("comic_num", name="_comic_num_uc"),)
 
     sent_comic_id: so.Mapped[INT_PK]
-    num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
+    comic_num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
     date_sent: so.Mapped[date] = so.mapped_column(sa.Date)
 
 
