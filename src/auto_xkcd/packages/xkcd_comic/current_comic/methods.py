@@ -62,11 +62,11 @@ def _parse_res_to_comic(response: httpx.Response = None) -> comic.XKCDComic:
 def _save_comic_img(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     comic_obj: comic.XKCDComic = None,
-):
+) -> comic.XKCDComicImage:
     cache_transport = validate_hishel_cachetransport(cache_transport)
 
     try:
-        saved_comic: comic.XKCDComic = xkcd_mod.request_and_save_comic_img(
+        saved_comic: bytes = xkcd_mod.request_and_save_comic_img(
             comic=comic_obj, cache_transport=cache_transport
         )
     except Exception as exc:
@@ -77,6 +77,12 @@ def _save_comic_img(
         log.trace(exc)
 
         raise exc
+
+    comic_image: comic.XKCDComicImage = comic.XKCDComicImage(
+        comic_num=comic_obj.comic_num, img=saved_comic
+    )
+
+    return comic_image
 
 
 def _save_comic_to_db(
@@ -207,7 +213,54 @@ def _update_current_comic_meta_db(
 
         raise exc
 
-    return current_comic_meta
+
+def _save_comic_img_to_db(comic_img: comic.XKCDComicImage = None):
+    try:
+        db_model: comic.XKCDComicImageModel = comic.XKCDComicImageModel(
+            **comic_img.model_dump()
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception building XKCDComicImageModel from input XKCDComicImage object. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    try:
+        with get_db() as session:
+            repo = comic.XKCDComicImageRepository(session=session)
+
+            try:
+                repo.add(entity=db_model)
+
+                return comic_img
+            except IntegrityError as integ_err:
+                msg = Exception(
+                    f"Comic #{comic_img.comic_num} already exists in database."
+                )
+                log.warning(msg)
+
+                return comic_img
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception writing XKCD comic #{comic_img.comic_num} to database. Details ({type(exc)}): {exc}"
+                )
+                log.error(msg)
+                log.trace(exc)
+
+                raise exc
+    except IntegrityError or sqlite.IntegrityError as integ_err:
+        return comic_img
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting database connection. Details ({type(exc)}): {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
 
 
 def get_current_comic(
@@ -275,7 +328,9 @@ def get_current_comic(
 
     ## Save comic image to file
     try:
-        _save_comic_img(cache_transport=cache_transport, comic_obj=comic_obj)
+        comic_image: comic.XKCDComicImage = _save_comic_img(
+            cache_transport=cache_transport, comic_obj=comic_obj
+        )
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception saving image for XKCD comic #{comic_obj.comic_num}. Details: {exc}"
@@ -283,6 +338,19 @@ def get_current_comic(
         log.error(msg)
         log.trace(exc)
         log.warning(f"Did not save image for XKCD comic #{comic_obj.comic_num}")
+
+    ## Save comic image to db
+    try:
+        db_comic_image: comic.XKCDComicImage = _save_comic_img_to_db(
+            comic_img=comic_image
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception saving image for comic #{comic_obj.comic_num} to database. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+        log.warning(f"Did not save image to database for comic #{comic_obj.comic_num}")
 
     ## Save comic to database
     try:

@@ -22,7 +22,7 @@ def request_and_save_comic_img(
     comic: XKCDComic = None,
     cache_transport: hishel.CacheTransport = None,
     output_dir: t.Union[str, Path] = COMIC_IMG_DIR,
-) -> XKCDComic:
+) -> bytes:
     """Request a specific comic's image given an input `XKCDComic` object.
 
     Params:
@@ -87,7 +87,7 @@ def request_and_save_comic_img(
 
         raise exc
 
-    return comic
+    return img_bytes
 
 
 def load_serialized_comic(
