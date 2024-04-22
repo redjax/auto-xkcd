@@ -6,6 +6,7 @@ import typing as t
 
 from core import IGNORE_COMIC_NUMS, database, paths, request_client
 from core.config import db_settings, settings
+from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
 from core.dependencies import get_db
 from domain.xkcd import comic
 from helpers import data_ctl
@@ -17,12 +18,13 @@ from modules import data_mod, requests_prefab, xkcd_mod
 from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 
+
 def get_single_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     comic_num: int = None,
     save_serial: bool = True,
     overwrite: bool = True,
-) -> comic.XKCDComic:
+) -> comic.XKCDComic | None:
     """Request a single XKCD comic by its comic number.
 
     Params:
@@ -55,6 +57,14 @@ def get_single_comic(
         log.trace(exc)
 
         raise exc
+
+    if comic_res.status_code == 404:
+        err_comic_url: str = f"{XKCD_URL_BASE}/{comic_num}"
+        log.warning(
+            f"Could not find comic #{comic_num}. Does this comic exist? Check the XKCD site: {err_comic_url}"
+        )
+
+        return None
 
     ## Convert httpx.Response into XKCDComic object
     try:

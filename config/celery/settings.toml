@@ -1,0 +1,41 @@
+[default]
+
+##########
+# Celery #
+##########
+
+celery_broker_host = "localhost"
+celery_broker_port = 5672
+celery_broker_user = "guest"
+## Set password in config/celery/.secrets.toml
+# celery_broker_pass = ""
+celery_backend_host = "localhost"
+celery_backend_port = 6379
+
+[dev]
+
+##########
+# Celery #
+##########
+
+celery_broker_host = "localhost"
+celery_broker_port = 5672
+celery_broker_user = "rabbitmq"
+## Set password in config/celery/.secrets.toml
+# celery_broker_pass = ""
+celery_backend_host = "localhost"
+celery_backend_port = 6379
+
+[prod]
+
+##########
+# Celery #
+##########
+
+celery_broker_host = "localhost"
+celery_broker_port = 5672
+celery_broker_user = "guest"
+## Set password in config/celery/.secrets.toml
+# celery_broker_pass = ""
+celery_backend_host = "localhost"
+celery_backend_port = 6379

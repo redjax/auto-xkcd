@@ -10,6 +10,7 @@ from api import helpers as api_helpers
 
 from core import request_client
 from core.config import db_settings, settings
+from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
 from domain.xkcd import comic
 from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
@@ -216,6 +217,17 @@ def comic_img(comic_num: int = None) -> JSONResponse:
 
             return res
 
+        if comic_obj is None:
+            not_found_url: str = f"{XKCD_URL_BASE}/{comic_num}"
+            res: JSONResponse = JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={
+                    "NotFound": f"Could not find image for XKCD comic #{comic_num}. Does that comic exist? Check this link: {not_found_url}"
+                },
+            )
+
+            return res
+
         ## Retry getting img file after requesting
         try:
             img_file: Path | None = search_for_img_file()
@@ -225,6 +237,18 @@ def comic_img(comic_num: int = None) -> JSONResponse:
             )
             log.error(msg)
             log.trace(exc)
+
+    if img_file is None:
+        log.error(f"Could not find XKCD comic #{comic_num}")
+
+        xkcd_live_url: str = f"{XKCD_URL_BASE}/{comic_num}"
+
+        res: JSONResponse = JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "NotFound": f"Could not find image for XKCD comic #{comic_num} in the database or the XKCD API. If this like also returns a 404, this comic does not exist: {xkcd_live_url}"
+            },
+        )
 
     log.info(
         f"Found image file for XKCD comic #{comic_num} at path '{img_file}'. Streaming file response..."
