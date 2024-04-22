@@ -1,17 +1,6 @@
 version: "3.8"
 
 services:
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   container_name: minio-prometheus
-  #   volumes:
-  #     - ${PROMETHEUS_CONFIG_FILE:-./data/prometheus/prometheus.yml}:/etc/prometheus/prometheus.yml
-  #     - ${PROMETHEUS_ALERTMANAGER_RULES_FILE:-./data/prometheus/alert.rules}:/alertmanager/alert.rules
-  #   command:
-  #     - "--config.file=/etc/prometheus/prometheus.yml"
-  #   ports:
-  #     - "9090:9090"
-
   minio:
     image: quay.io/minio/minio:latest
     container_name: autoxkcd-minio

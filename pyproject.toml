@@ -23,6 +23,8 @@ dependencies = [
     "ibis-framework[duckdb,pandas]>=8.0.0",
     "fastapi>=0.110.2",
     "uvicorn[standard]>=0.29.0",
+    "celery[librabbitmq,msgpack,redis,sqlalchemy]>=5.4.0",
+    "redis>=5.0.3",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
