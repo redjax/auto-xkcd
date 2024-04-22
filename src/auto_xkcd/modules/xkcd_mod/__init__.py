@@ -14,4 +14,5 @@ from .methods import (
     save_serialize_comic_object,
     update_current_comic_json,
     update_current_comic_meta_db,
+    lookup_img_file,
 )
