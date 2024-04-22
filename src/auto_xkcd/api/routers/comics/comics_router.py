@@ -110,7 +110,9 @@ def comic_img(comic_num: int = None) -> JSONResponse:
     def search_for_img_file() -> Path | None:
         ## Get image file
         try:
-            img_file: Path | None = xkcd_mod.lookup_img_file(comic_num=comic_num)
+            img_file: Path | None = xkcd_comic.comic_img.lookup_img_file(
+                comic_num=comic_num
+            )
 
             return img_file
         except Exception as exc:
@@ -134,7 +136,7 @@ def comic_img(comic_num: int = None) -> JSONResponse:
         ## Check if image exists in database first, return if found.
         log.info(f"Searching database for XKCD comic #{comic_num}")
         try:
-            comic_img: comic.XKCDComicImage = xkcd_mod.retrieve_img_from_db(
+            comic_img: comic.XKCDComicImage = xkcd_comic.comic_img.retrieve_img_from_db(
                 comic_num=comic_num
             )
 
