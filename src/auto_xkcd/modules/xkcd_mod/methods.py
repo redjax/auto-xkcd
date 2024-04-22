@@ -492,7 +492,7 @@ def lookup_img_file(
         raise msg
 
 
-def retrieve_img_from_db(comic_num: int = None) -> comic.XKCDComicImage:
+def retrieve_img_from_db(comic_num: int = None) -> comic.XKCDComicImage | None:
     try:
         with get_db() as session:
             repo: comic.XKCDComicImageRepository = comic.XKCDComicImageRepository(
@@ -500,7 +500,9 @@ def retrieve_img_from_db(comic_num: int = None) -> comic.XKCDComicImage:
             )
 
             try:
-                db_comic_img: comic.XKCDComicImageModel = repo.get_by_num(num=comic_num)
+                db_comic_img: comic.XKCDComicImageModel = repo.get_by_comic_num(
+                    comic_num=comic_num
+                )
             except Exception as exc:
                 msg = Exception(
                     f"Unhandled exception getting comic image for XKCD comic #{comic_num}. Details: {exc}"
@@ -510,7 +512,11 @@ def retrieve_img_from_db(comic_num: int = None) -> comic.XKCDComicImage:
 
                 raise exc
 
-            log.debug(f"DB comic #{comic_num} image: {db_comic_img.__dict__}")
+            if db_comic_img is None:
+                log.warning(f"Comic #{comic_num} not found in database")
+                return None
+
+            log.success(f"Found image for XKCD comic #{comic_num} in database.")
 
             try:
                 comic_img: comic.XKCDComicImageOut = comic.XKCDComicImageOut(

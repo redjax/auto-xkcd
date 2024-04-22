@@ -5,7 +5,7 @@ import typing as t
 from pathlib import Path
 
 from api.depends import cache_transport_dependency, db_dependency
-from api.responses import API_RESPONSES_DICT
+from api.api_responses import API_RESPONSES_DICT, img_response
 from api import helpers as api_helpers
 
 from core import request_client
@@ -111,6 +111,8 @@ def comic_img(comic_num: int = None) -> JSONResponse:
         ## Get image file
         try:
             img_file: Path | None = xkcd_mod.lookup_img_file(comic_num=comic_num)
+
+            return img_file
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception getting image for XKCD comic #{comic_num}. Details: {exc}"
@@ -118,22 +120,66 @@ def comic_img(comic_num: int = None) -> JSONResponse:
             log.error(msg)
             log.trace(exc)
 
-            raise exc
+            ## Return a JSON response on error, finish image search
+            res: JSONResponse = JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "InternalServerError": f"Unhandled error while retrieving image for XKCD comic #{comic_num}"
+                },
+            )
 
-        return img_file
+            return res
 
-        # res: JSONResponse = JSONResponse(
-        #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     content={
-        #         "InternalServerError": f"Unhandled error while retrieving image for XKCD comic #{comic_num}"
-        #     },
-        # )
+    def check_db_for_img() -> comic.XKCDComicImage | None:
+        ## Check if image exists in database first, return if found.
+        log.info(f"Searching database for XKCD comic #{comic_num}")
+        try:
+            comic_img: comic.XKCDComicImage = xkcd_mod.retrieve_img_from_db(
+                comic_num=comic_num
+            )
 
-        # return res
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception retrieving image for XKCD comic #{comic_num} from database. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            return None
+
+        if comic_img is None:
+            return None
+        else:
+            return comic_img
+
+    try:
+        existing_comic_img: comic.XKCDComicImage | None = check_db_for_img()
+    except Exception as exc:
+        log.warning(
+            f"Error occurred while searching database for XKCD comic #{comic_num}. Continuing to search from filesystem, then requesting the comic from the XKCD API."
+        )
+        pass
+
+    if existing_comic_img:
+        log.debug(f"Found comic image. ({type(existing_comic_img)})")
+        log.info(f"Found image for XKCD comic #{comic_num} in database.")
+
+        log.info(f"Returning comic image")
+        try:
+            res: Response = img_response(img_bytes=existing_comic_img.img)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception getting Response object. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            log.warning(
+                f"Image found in database for XKCD comic #{comic_num}, but an error prevented returning it directly. Continuing to search from filesystem"
+            )
 
     ## Get image file
     try:
-        # img_file: Path | None = xkcd_mod.lookup_img_file(comic_num=comic_num)
         img_file: Path | None = search_for_img_file()
     except Exception as exc:
         msg = Exception(
@@ -142,26 +188,8 @@ def comic_img(comic_num: int = None) -> JSONResponse:
         log.error(msg)
         log.trace(exc)
 
-        # res: JSONResponse = JSONResponse(
-        #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     content={
-        #         "InternalServerError": f"Unhandled error while retrieving image for XKCD comic #{comic_num}"
-        #     },
-        # )
-
-        # return res
-
     ## Image file not found
     if img_file is None:
-        # res: JSONResponse = JSONResponse(
-        #     status_code=status.HTTP_404_NOT_FOUND,
-        #     content={
-        #         "FileNotFound": f"Could not find image file for XKCD comic #{comic_num}"
-        #     },
-        # )
-
-        # return res
-
         log.warning(f"Image not found for XKCD comic #{comic_num}.")
 
         log.info(f"Requesting XKCD comic #{comic_num}, then returning image.")
@@ -188,7 +216,6 @@ def comic_img(comic_num: int = None) -> JSONResponse:
 
         ## Retry getting img file after requesting
         try:
-            # img_file: Path | None = xkcd_mod.lookup_img_file(comic_num=comic_num)
             img_file: Path | None = search_for_img_file()
         except Exception as exc:
             msg = Exception(
@@ -196,16 +223,6 @@ def comic_img(comic_num: int = None) -> JSONResponse:
             )
             log.error(msg)
             log.trace(exc)
-
-            ## Return error response after second attempt
-            res: JSONResponse = JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={
-                    "InternalServerError": f"Unhandled error while retrieving image for XKCD comic #{comic_num}"
-                },
-            )
-
-            return res
 
     log.info(
         f"Found image file for XKCD comic #{comic_num} at path '{img_file}'. Streaming file response..."

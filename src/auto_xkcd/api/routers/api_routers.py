@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from api.config import api_settings
-from api.responses import API_RESPONSES_DICT
+from api.api_responses import API_RESPONSES_DICT
 
 from .comics import comics_router
 
