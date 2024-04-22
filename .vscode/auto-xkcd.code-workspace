@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "..",
+			"name": "Git Root"
+		},
+		{
+			"path": "../scripts",
+			"name": "Repo Scripts"
+		},
+		{
+			"path": "../config",
+			"name": "config"
+		},
+		{
+			"path": "../containers",
+			"name": "containers"
+		},
+		{
+			"path": "../src/auto_xkcd",
+			"name": "Auto-XKCD App"
+		}
+	]
+}
