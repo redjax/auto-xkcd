@@ -15,9 +15,10 @@ from loguru import logger as log
 
 import hishel
 import httpx
+import celery
 
 
-@CELERY_APP.task
+@CELERY_APP.task(name="get_current_comic")
 def task_current_comic() -> comic.XKCDComic:
     CACHE_TRANSPORT: hishel.CacheTransport = request_client.get_cache_transport()
 

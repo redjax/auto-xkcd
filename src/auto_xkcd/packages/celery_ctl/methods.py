@@ -13,5 +13,6 @@ from modules.celery_mod.tasks import comic_tasks
 from loguru import logger as log
 
 
-def get_current_task_bg():
-    pass
+def current_comic():
+    current_comic_task = comic_tasks.task_current_comic()
+    log.debug(f"CURRENT COMIC CELERY TASK ({type(current_comic_task)})")

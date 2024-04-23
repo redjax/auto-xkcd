@@ -1,1 +1,1 @@
-from .methods import get_current_task_bg
+from .methods import current_comic
