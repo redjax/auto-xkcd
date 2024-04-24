@@ -21,7 +21,7 @@ from packages import xkcd_comic
 from red_utils.ext import time_utils
 from celery.result import AsyncResult
 
-from celeryapp import celery_app, task_add
+from packages import celery_app
 
 prefix: str = "/test"
 tags: list[str] = ["test"]
@@ -60,7 +60,7 @@ def testing_root() -> JSONResponse:
 
 @router.get("/add-nums-task")
 def test_add_nums(x: int, y: int) -> JSONResponse:
-    result = task_add.delay(4, 4)
+    result = celery_app.task_add.delay(4, 4)
 
     print(f"Ready: {result.ready()}")
 
@@ -71,7 +71,8 @@ def test_add_nums(x: int, y: int) -> JSONResponse:
 
 @router.get("/check-task")
 def check_task_by_id(task_id: str) -> JSONResponse:
-    res: AsyncResult = celery_app.AsyncResult(f"{task_id}")
+    # res: AsyncResult = celery_app.app.AsyncResult(f"{task_id}")
+    res: AsyncResult = celery_app.check_task(task_id=task_id)
 
     log.debug(f"Task res ({res}): {res}")
 

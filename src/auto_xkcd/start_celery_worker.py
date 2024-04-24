@@ -1,4 +1,4 @@
-from celeryapp import celery_app
+from packages import celery_app
 from celery import Celery
 
 
@@ -8,13 +8,12 @@ from loguru import logger as log
 if __name__ == "__main__":
     base_app_setup()
 
-    log.debug(f"Celery app ({type(celery_app)}): {celery_app}")
+    log.debug(f"Celery app ({type(celery_app.app)}): {celery_app.app}")
 
-    celery_app: Celery = celery_app
-    celery_app.autodiscover_tasks(["celeryapp"])
+    celery_app.app.autodiscover_tasks(["packages.celery_app"])
 
     try:
-        worker = celery_app.worker_main(
+        worker = celery_app.app.worker_main(
             argv=["worker", "--loglevel=DEBUG", "--uid=0", "--gid=0"]
         )
     except Exception as exc:
