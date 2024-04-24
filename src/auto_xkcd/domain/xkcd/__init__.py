@@ -19,4 +19,5 @@ from .comic import (
     XKCDSentComicModel,
     XKCDSentComicOut,
     XKCDSentComicRepository,
+    MultiComicRequestQueue,
 )

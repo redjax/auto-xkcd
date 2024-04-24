@@ -10,7 +10,9 @@ from core.config import CelerySettings, celery_settings
 from loguru import logger as log
 
 app: Celery = Celery(
-    "tasks", broker=celery_settings.broker_url, backend=celery_settings.backend_url
+    "celery_tasks",
+    broker=celery_settings.broker_url,
+    backend=celery_settings.backend_url,
 )
 
 

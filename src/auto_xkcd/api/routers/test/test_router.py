@@ -19,7 +19,7 @@ import hishel
 from loguru import logger as log
 from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
-from packages.celeryapp import (
+from celeryapp import (
     app as celery_app,
     celery_tasks,
     check_task,

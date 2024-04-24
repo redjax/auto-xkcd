@@ -86,18 +86,6 @@ def single_comic(comic_num: int) -> JSONResponse:
 
 @router.post("/multi")
 def multiple_comics(comic_nums: list[int] = None) -> JSONResponse:
-    # if len(comic_nums) > MAX_MULTI_SCRAPE:
-    #     log.error(f"Exceeded MAX_MULTI_SCRAPE: [{len(comic_nums)}/{MAX_MULTI_SCRAPE}]")
-
-    #     res: JSONResponse = JSONResponse(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         content={
-    #             "MalformedRequest": f"Exceeded maximum number of comic numbers to request at once. List of comic_nums must be less than {MAX_MULTI_SCRAPE}"
-    #         },
-    #     )
-
-    #     return res
-
     if len(comic_nums) == 0 or comic_nums == [0]:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -108,7 +96,14 @@ def multiple_comics(comic_nums: list[int] = None) -> JSONResponse:
 
     log.info(f"Starting multi-comic request chain")
     try:
-        xkcd_comic.comic.get_multiple_comics(comic_nums_lst=comic_nums)
+        multi_comics_job: AsyncResult = xkcd_comic.comic.get_multiple_comics(
+            comic_nums_lst=comic_nums
+        )
+
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"task_id": multi_comics_job.task_id},
+        )
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception requesting multiple XKCD comics. Details: {exc}"

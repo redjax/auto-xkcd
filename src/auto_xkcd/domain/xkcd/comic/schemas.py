@@ -4,6 +4,7 @@ import datetime
 import typing as t
 
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
+from utils.list_utils import prepare_list_shards
 import pendulum
 from pydantic import (
     BaseModel,
@@ -15,6 +16,7 @@ from pydantic import (
 )
 from red_utils.ext import time_utils
 from red_utils.std import hash_utils
+
 
 class ComicNumCSVData(BaseModel):
     """Store metadata about a comic number, like if the image has been saved.
@@ -233,3 +235,32 @@ class XKCDSentComic(XKCDSentComicBase):
 
 class XKCDSentComicOut(XKCDSentComicBase):
     sent_comic_id: int
+
+
+class MultiComicRequestQueue(BaseModel):
+    queue: list[int] | list[list] = Field(default=None)
+    partitioned: bool = Field(default=False)
+    max_queue_size: int = Field(default=15)
+
+    @property
+    def queue_size(self) -> int:
+        if self.queue is None:
+            return 0
+        elif isinstance(self.queue[0], int):
+            return len(self.queue)
+        elif isinstance(self.queue[0], list):
+            queue_count = 0
+
+            for q in self.queue:
+                queue_count += 1
+
+            return queue_count
+
+    def partition_queue(self) -> list[int] | list[list[int]]:
+        _partitioned: list[list[int]] = prepare_list_shards(original_list=self.queue)
+
+        if isinstance(_partitioned[0], list):
+            self.queue = _partitioned
+            self.partitioned = True
+
+        return _partitioned

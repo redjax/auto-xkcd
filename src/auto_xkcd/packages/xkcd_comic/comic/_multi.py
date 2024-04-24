@@ -13,107 +13,29 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import typing as t
 
-from domain.xkcd import XKCDComic, XKCDComicImage, XKCDComicImageModel, XKCDComicModel
+from domain.xkcd import (
+    XKCDComic,
+    XKCDComicImage,
+    XKCDComicImageModel,
+    XKCDComicModel,
+    MultiComicRequestQueue,
+)
 from loguru import logger as log
 from modules import xkcd_mod
 from packages import xkcd_comic
+import celeryapp
 from red_utils.core.dataclass_utils import DictMixin
+from utils.list_utils import prepare_list_shards
 
-@dataclass
-class MultiComicRequestQueue(DictMixin):
-    queue: list[int] | list[list] = field(default=None)
-    partitioned: bool = field(default=False)
-    max_queue_size: int = field(default=15)
-
-    @property
-    def queue_size(self) -> int:
-        if self.queue is None:
-            return 0
-        elif isinstance(self.queue[0], int):
-            return len(self.queue)
-        elif isinstance(self.queue[0], list):
-            queue_count = 0
-
-            for q in self.queue:
-                queue_count += 1
-
-            return queue_count
-
-    def partition_queue(self) -> list[int] | list[list[int]]:
-        _partitioned: list[list[int]] = prepare_list_shards(original_list=self.queue)
-
-        if isinstance(_partitioned[0], list):
-            self.queue = _partitioned
-            self.partitioned = True
-
-        return _partitioned
-
-
-def prepare_list_shards(
-    original_list: list = [], shards: int = 1, shard_size_limit: int = 15
-) -> list[list[t.Any]]:
-    """Accept an input list. If size of list > set shard_size_limit, break into list of smaller lists.
-
-    Params:
-        original_list (list): A list with a lot of objects.
-        shards (int) | default=1: The number of shards to create. This value is dynamic; as the function loops, more
-            shards will be added as needed.
-        shard_size_limit (int) | default=2000: The size limit for individual list shards as the original_list is broken into smaller lists.
-
-    Returns:
-        (list[list[Any]]): A list of smaller lists.
-
-    """
-
-    def create_list_shards(
-        in_list=original_list, shards=shards, shard_size_limit=shard_size_limit
-    ) -> list[t.Any] | list[list[t.Any]]:
-        """Sub function that loops until all shards are individually smaller than shard_size_limit."""
-        ## Number of items in original list
-        list_len: int = len(in_list)
-        ## Divide by number of shards to get individual shard size
-        shard_size: int = int(list_len / shards)
-
-        if shard_size > shard_size_limit:
-            ## Individual shards still too large
-            exceeds_by: int = shard_size - shard_size_limit
-            print(
-                f"Individual shard size [{shard_size}] exceed shard size limit of [{shard_size_limit}] by [{exceeds_by}]. Creating additional shard."
-            )
-
-            ## Add another shard, then loop
-            shards += 1
-            sharded_list: list = create_list_shards(
-                in_list=in_list, shards=shards, shard_size_limit=shard_size_limit
-            )
-        else:
-            ## Shard size limit satisfied, build new list of sub-lists (shards) & return
-            sharded_list: list = [
-                in_list[i : i + shard_size] for i in range(0, len(in_list), shard_size)
-            ]
-
-            print(
-                f"Created [{len(sharded_list)}] shards. Individual shard size: [{len(sharded_list[0])}]"
-            )
-
-        return sharded_list
-
-    if len(original_list) <= shard_size_limit:
-        log.debug(
-            f"List does not need paritioning. Size: [{len(original_list)}/{shard_size_limit}]"
-        )
-
-        return original_list
-
-    list_of_shards: list[t.Any] | list[list[t.Any]] = create_list_shards()
-
-    return list_of_shards
+from celery.result import AsyncResult
 
 
 MAX_QUEUE_SIZE: int = 15
 
 
-def get_multiple_comics(comic_nums_lst: list[int] = None):
+def get_multiple_comics(
+    comic_nums_lst: list[int] = None, loop_pause: int = 15, req_pause: int = 5
+) -> AsyncResult | None:
     if len(comic_nums_lst) > MAX_QUEUE_SIZE:
         log.warning(
             f"Maximum comic request queue size limit exceeded [{len(comic_nums_lst)}/{MAX_QUEUE_SIZE}]. Queue will be partitioned"
@@ -134,13 +56,19 @@ def get_multiple_comics(comic_nums_lst: list[int] = None):
     if not comic_req_queue.partitioned:
         log.info(f"Requesting [{comic_req_queue.queue_size}] comic(s)")
     else:
-        loop_count: int = 1
+        # loop_count: int = 1
 
         log.info(f"Looping over comic number queues")
 
-        for queue_part in comic_req_queue.queue:
-            log.info(
-                f"Queue [{loop_count}/{comic_req_queue.queue_size}] size: {len(queue_part)}"
+        multi_comic_task = (
+            celeryapp.celery_tasks.comic.process_multi_comic_req_queue.delay(
+                comic_req_queue.model_dump(),
+                loop_pause,
+                req_pause,
             )
+        )
+        log.debug(
+            f"Multi-comic request task ({type(multi_comic_task)}): {multi_comic_task}"
+        )
 
-            loop_count += 1
+        return multi_comic_task
