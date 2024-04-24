@@ -134,9 +134,10 @@ class ComposeCLIContext(AbstractContextManager):
             print("a: attach (for viewing live CLI of container)")
             print("d: docker compose down")
             print("l: docker compose logs -f <container_name>")
+            print("r: docker compose restart <container_name>")
             print("\nq: quit")
 
-        valid_choices: list[str] = ["1", "2", "3", "4", "5", "a", "l", "d"]
+        valid_choices: list[str] = ["1", "2", "3", "4", "5", "a", "l", "d", "r"]
 
         clear()
 
@@ -176,6 +177,14 @@ class ComposeCLIContext(AbstractContextManager):
 
         return cmd
 
+    def _restart(self) -> list[str]:
+        cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
+            "restart",
+            self.container_name,
+        ]
+
+        return cmd
+
     def _logs(self) -> list[str]:
         cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
             "logs",
@@ -186,7 +195,10 @@ class ComposeCLIContext(AbstractContextManager):
         return cmd
 
     def _attach(self) -> None:
-        cmd: list[str] = ["docker", "attach", self.container_name]
+        cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
+            "attach",
+            self.container_name,
+        ]
 
         return cmd
 
@@ -220,6 +232,10 @@ class ComposeCLIContext(AbstractContextManager):
                 if not hasattr(self, "container_name"):
                     self.container_name = input("Enter container name: ")
                 command = self._logs()
+            case "r":
+                if not hasattr(self, "container_name"):
+                    self.container_name = input("Enter container name: ")
+                command = self._restart()
             case _:
                 raise ValueError(f"Invalid choice: {self.choice}")
 

@@ -8,7 +8,7 @@ def check_task(task_id: str | None = None) -> AsyncResult:
     assert task_id, ValueError("Missing task_id to check.")
 
     try:
-        task = AsyncResult(task_id)
+        task = AsyncResult(id=f"{task_id}")
 
         log.debug(f"Task ID [{task_id}] state: {task.state}")
 

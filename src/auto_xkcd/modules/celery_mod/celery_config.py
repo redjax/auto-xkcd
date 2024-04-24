@@ -57,7 +57,7 @@ class CelerySettings(BaseSettings):
     @property
     def backend_url(self) -> str:
         try:
-            _url = f"redis://{self.backend_host}:{self.backend_port}"
+            _url = f"redis://{self.backend_host}:{self.backend_port}/0"
 
             return _url
 

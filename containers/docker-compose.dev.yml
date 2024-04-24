@@ -83,11 +83,25 @@ services:
       DYNACONF_UVICORN_LOG_LEVEL: ${UVICORN_LOG_LEVEL:-DEBUG}
 
       ##
+      # Celery
+      ##
+
+      DYNACONF_CELERY_BROKER_HOST: ${CELERY_BROKER_HOST:-rabbitmq}
+      DYNACONF_CELERY_BROKER_PORT: ${CELERY_BROKER_PORT:-5672}
+      DYNACONF_CELERY_BROKER_USER: ${CELERY_BROKER_USER:-rabbitmq}
+      DYNACONF_CELERY_BROKER_PASS: ${CELERY_BROKER_PASS:-rabbitmq}
+
+      DYNACONF_CELERY_BACKEND_HOST: ${CELERY_BROKER_BACKEND_HOST:-redis}
+      DYNACONF_CELERY_BACKEND_PORT: ${CELERY_BROKER_BACKEND_PORT:-6379}
+
+      ##
       # TELEGRAM
       ##
       DYNACONF_TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-""}
       DYNACONF_TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-""}
 
+    depends_on:
+      - redis
     networks:
       - auto_xkcd_backend
       - auto_xkcd_frontend
@@ -182,9 +196,13 @@ services:
       DYNACONF_TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-""}
       DYNACONF_TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-""}
 
+    depends_on:
+      - api
+      - redis
+    links:
+      - redis:redis
     networks:
       - auto_xkcd_backend
-      - auto_xkcd_frontend
 
   rabbitmq:
     image: rabbitmq:management
@@ -196,7 +214,7 @@ services:
       # RABBITMQ_ENABLED_PLUGINS_FILE: /etc/rabbitmq/enabled_plugins
     ports:
       ## AMQP protocol
-      # - ${RABBITMQ_AMPQ_PORT:-5672}:5672
+      - ${RABBITMQ_AMPQ_PORT:-5672}:5672
       - ${RABBITMQ_HTTP_PORT:-15672}:15672
     volumes:
       - ${RABBITMQ_DATA_DIR:-./container_data/dev/rabbitmq_redis/data/rabbitmq}:/var/lib/rabbitmq
@@ -212,14 +230,19 @@ services:
       retries: 3
 
   redis:
+    ## Fix "overcommit memory" warning
+    #  https://ourcodeworld.com/articles/read/2083/how-to-remove-redis-warning-on-docker-memory-overcommit-must-be-enabled
+    #  https://r-future.github.io/post/how-to-fix-redis-warnings-with-docker/
     image: redis
     container_name: auto-xkcd-redis-d
     restart: unless-stopped
-    command: redis-server --save 20 1 --loglevel warning
+    command: redis-server --save 20 1 --loglevel verbose
     volumes:
       - ${REDIS_CACHE_DIR:-redis_cache}:/data
-    # ports:
-    #   - ${REDIS_PORT:-6379}:6379
+    expose:
+      - 6379
+    ports:
+      - ${REDIS_PORT:-6379}:6379
     networks:
       - auto_xkcd_backend
     healthcheck:
