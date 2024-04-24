@@ -18,7 +18,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response, StreamingResponse, FileResponse
 import hishel
 from loguru import logger as log
-from modules import data_mod, msg_mod, xkcd_mod, celery_mod
+from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
 from red_utils.ext import time_utils
 from celery.result import AsyncResult

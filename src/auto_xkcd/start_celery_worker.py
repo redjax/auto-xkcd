@@ -1,4 +1,4 @@
-from modules.celery_mod import celeryapp
+from celeryapp import celery_app
 from celery import Celery
 
 
@@ -8,10 +8,10 @@ from loguru import logger as log
 if __name__ == "__main__":
     base_app_setup()
 
-    log.debug(f"Celery app ({type(celeryapp.CELERY_APP)}): {celeryapp.CELERY_APP}")
+    log.debug(f"Celery app ({type(celery_app)}): {celery_app}")
 
-    celery_app: Celery = celeryapp.CELERY_APP
-    celery_app.autodiscover_tasks(["modules.celery_mod.tasks"])
+    celery_app: Celery = celery_app
+    celery_app.autodiscover_tasks(["celeryapp"])
 
     try:
         worker = celery_app.worker_main(

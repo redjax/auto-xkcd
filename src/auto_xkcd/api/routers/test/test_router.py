@@ -16,10 +16,12 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response, StreamingResponse, FileResponse
 import hishel
 from loguru import logger as log
-from modules import data_mod, msg_mod, xkcd_mod, celery_mod
+from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
 from red_utils.ext import time_utils
 from celery.result import AsyncResult
+
+from celeryapp import celery_app, task_add
 
 prefix: str = "/test"
 tags: list[str] = ["test"]
@@ -34,23 +36,55 @@ def testing_root() -> JSONResponse:
     )
 
 
-@router.get("/trigger-new-comic")
-def test_route() -> JSONResponse:
-    log.info("Starting background task")
-    try:
-        task: AsyncResult = celery_mod.tasks.comic_tasks.task_current_comic.delay()
-    except Exception as exc:
-        msg = Exception(
-            f"Unhandled exception running background task to get current comic. Details: {exc}"
-        )
-        log.error(msg)
-        log.trace(exc)
+# @router.get("/trigger-new-comic")
+# def test_route() -> JSONResponse:
+#     log.info("Starting background task")
+#     try:
+#         task: AsyncResult = celery_mod.tasks.comic_tasks.task_current_comic.delay()
+#     except Exception as exc:
+#         msg = Exception(
+#             f"Unhandled exception running background task to get current comic. Details: {exc}"
+#         )
+#         log.error(msg)
+#         log.trace(exc)
 
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"error": "Background task exited unexpectedly."},
-        )
+#         return JSONResponse(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             content={"error": "Background task exited unexpectedly."},
+#         )
+
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK, content={"success": True, "task_id": task.id}
+#     )
+
+
+@router.get("/add-nums-task")
+def test_add_nums(x: int, y: int) -> JSONResponse:
+    result = task_add.delay(4, 4)
+
+    print(f"Ready: {result.ready()}")
+
+    print(f"GET result: {result.get(timeout=1)}")
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"task_id": result.id})
+
+
+@router.get("/check-task")
+def check_task_by_id(task_id: str) -> JSONResponse:
+    res: AsyncResult = celery_app.AsyncResult(f"{task_id}")
+
+    log.debug(f"Task res ({res}): {res}")
+
+    log.debug(
+        f"Task '{task_id}':\n\tReady: {res.ready()}\n\tState: {res.state}\n\tStatus: {res.status}"
+    )
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"success": True, "task_id": task.id}
+        status_code=status.HTTP_200_OK,
+        content={
+            "task_id": task_id,
+            "ready": res.ready(),
+            "state": res.state,
+            "results": res.result,
+        },
     )
