@@ -14,11 +14,6 @@ app: Celery = Celery(
 )
 
 
-@app.task
-def task_add(x, y):
-    return x + y
-
-
 def check_task(task_id: str = None, app: Celery = app) -> AsyncResult | None:
     """Check a Celery task by its ID.
 
