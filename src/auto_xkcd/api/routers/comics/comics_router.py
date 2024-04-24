@@ -87,17 +87,47 @@ def single_comic(comic_num: int) -> JSONResponse:
 
 @router.post("/multi")
 def multiple_comics(comic_nums: list[int] = None) -> JSONResponse:
-    if len(comic_nums) > MAX_MULTI_SCRAPE:
-        log.error(f"Exceeded MAX_MULTI_SCRAPE: [{len(comic_nums)}/{MAX_MULTI_SCRAPE}]")
+    # if len(comic_nums) > MAX_MULTI_SCRAPE:
+    #     log.error(f"Exceeded MAX_MULTI_SCRAPE: [{len(comic_nums)}/{MAX_MULTI_SCRAPE}]")
 
-        res: JSONResponse = JSONResponse(
+    #     res: JSONResponse = JSONResponse(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         content={
+    #             "MalformedRequest": f"Exceeded maximum number of comic numbers to request at once. List of comic_nums must be less than {MAX_MULTI_SCRAPE}"
+    #         },
+    #     )
+
+    #     return res
+
+    if len(comic_nums) == 0 or comic_nums == [0]:
+        return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
-                "MalformedRequest": f"Exceeded maximum number of comic numbers to request at once. List of comic_nums must be less than {MAX_MULTI_SCRAPE}"
+                "BadRequest": "comic_nums must be a list of 1 or more positive, non-zero integers."
             },
         )
 
-        return res
+    log.info(f"Starting multi-comic request chain")
+    try:
+        xkcd_comic.comic.get_multiple_comics(comic_nums_lst=comic_nums)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception requesting multiple XKCD comics. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "InternalServerError": f"Error while requesting [{len(comic_nums)}] XKCD comic(s)."
+            },
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"NotImplemented": f"Would request XKCD comic numbers: {comic_nums}"},
+    )
 
     return JSONResponse(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
