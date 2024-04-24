@@ -10,15 +10,15 @@ from __future__ import annotations
 
 from .config import (
     AppSettings,
-    DBSettings,
     CelerySettings,
+    DBSettings,
     MinioSettings,
     TelegramSettings,
+    celery_settings,
     db_settings,
     # minio_settings,
     settings,
     telegram_settings,
-    celery_settings,
 )
 from .constants import (
     CURRENT_XKCD_URL,
@@ -33,6 +33,10 @@ from .dependencies import (
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,
+    CELERY_DATA_DIR,
+    CELERY_SQLITE_BACKEND_URI,
+    CELERY_SQLITE_BROKER_URI,
+    CELERY_SQLITE_RESULT_URI,
     COMIC_IMG_DIR,
     COMICS_PQ_FILE,
     CURRENT_COMIC_FILE,
@@ -44,8 +48,4 @@ from .paths import (
     SERIALIZE_DIR,
     SERIALIZE_TELEGRAM_DIR,
     TELEGRAM_CHAT_ID_FILE,
-    CELERY_DATA_DIR,
-    CELERY_SQLITE_BACKEND_URI,
-    CELERY_SQLITE_BROKER_URI,
-    CELERY_SQLITE_RESULT_URI,
 )

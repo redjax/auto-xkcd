@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 CUSTOM_API_TAGS: list[dict[str, str]] = [
     {
         "name": "testing",

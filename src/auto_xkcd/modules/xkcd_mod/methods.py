@@ -15,10 +15,8 @@ from loguru import logger as log
 import msgpack
 from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
-from utils import serialize_utils
-
 import sqlalchemy.orm as sa
-
+from utils import serialize_utils
 
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),

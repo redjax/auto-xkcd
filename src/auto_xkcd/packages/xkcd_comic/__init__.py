@@ -1,3 +1,3 @@
 from __future__ import annotations
 
-from . import comic, current_comic, comic_img
+from . import comic, comic_img, current_comic

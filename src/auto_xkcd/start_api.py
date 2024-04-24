@@ -7,7 +7,6 @@ from loguru import logger as log
 from setup import api_setup, setup_database
 import uvicorn
 
-
 def run_server(uvicorn_settings: UvicornSettings = None) -> None:
     """Run FastAPI app with Uvicorn."""
     try:

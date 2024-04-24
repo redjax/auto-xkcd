@@ -1,9 +1,9 @@
-from packages import celeryapp
+from __future__ import annotations
+
 from celery import Celery
-
-
-from setup import base_app_setup
 from loguru import logger as log
+from packages import celeryapp
+from setup import base_app_setup
 
 if __name__ == "__main__":
     base_app_setup()

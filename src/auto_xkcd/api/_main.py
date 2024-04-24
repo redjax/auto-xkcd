@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from api.config import APISettings, api_settings
 from api.routers import api_v1_router
-
 from fastapi import APIRouter, FastAPI, status
 from fastapi.responses import JSONResponse
 from loguru import logger as log

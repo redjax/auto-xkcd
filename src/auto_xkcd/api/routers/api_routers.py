@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from api.config import api_settings
-from api.api_responses import API_RESPONSES_DICT
-
 from .comics import comics_router
 from .tasks import tasks_router
 
+from api.api_responses import API_RESPONSES_DICT
+from api.config import api_settings
 from core.config import settings
 from fastapi import APIRouter
-from red_utils.ext.fastapi_utils import healthcheck
-
 from loguru import logger as log
+from red_utils.ext.fastapi_utils import healthcheck
 
 prefix: str = "/api/v1"
 

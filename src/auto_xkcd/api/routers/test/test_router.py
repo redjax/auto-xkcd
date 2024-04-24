@@ -1,27 +1,30 @@
+from __future__ import annotations
+
+from pathlib import Path
 import sqlite3 as sqlite
 import typing as t
-from pathlib import Path
 
-from api.depends import cache_transport_dependency, db_dependency
-from api.api_responses import API_RESPONSES_DICT, img_response
 from api import helpers as api_helpers
-
+from api.api_responses import API_RESPONSES_DICT, img_response
+from api.depends import cache_transport_dependency, db_dependency
+from celery.result import AsyncResult
 from core import request_client
 from core.config import db_settings, settings
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
 from domain.xkcd import comic
-
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse, Response, StreamingResponse, FileResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 import hishel
 from loguru import logger as log
 from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
+from packages.celeryapp import (
+    app as celery_app,
+    celery_tasks,
+    check_task,
+)
 from red_utils.ext import time_utils
-from celery.result import AsyncResult
-
-from packages.celeryapp import celery_tasks, check_task, app as celery_app
 
 prefix: str = "/test"
 tags: list[str] = ["test"]

@@ -7,17 +7,17 @@ These can be passed into "lanes," which will run Celery tasks.
 A controller can limit the number of "lanes" available to avoid excessive requests to the XKCD comic API.
 """
 
-import typing as t
-from pathlib import Path
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from pathlib import Path
+import typing as t
 
 from domain.xkcd import XKCDComic, XKCDComicImage, XKCDComicImageModel, XKCDComicModel
+from loguru import logger as log
 from modules import xkcd_mod
 from packages import xkcd_comic
-
-from loguru import logger as log
 from red_utils.core.dataclass_utils import DictMixin
-
 
 @dataclass
 class MultiComicRequestQueue(DictMixin):

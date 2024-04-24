@@ -1,16 +1,15 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
+import typing as t
 
 from core import paths, request_client
 from core.dependencies import get_db
 from domain.xkcd import comic
-from modules import xkcd_mod, requests_prefab
 from helpers import validators
-
-from loguru import logger as log
-
 import httpx
-
+from loguru import logger as log
+from modules import requests_prefab, xkcd_mod
 
 def lookup_img_file(
     search_dir: t.Union[str, Path] = paths.COMIC_IMG_DIR, comic_num: int = None

@@ -1,15 +1,15 @@
+from __future__ import annotations
+
 from pathlib import Path
 
-from domain.xkcd.comic.schemas import XKCDComicImage, XKCDComic
-from modules import requests_prefab, xkcd_mod
-from packages import xkcd_comic
 from core import get_db
-from helpers import data_ctl
-
-from loguru import logger as log
+from domain.xkcd.comic.schemas import XKCDComic, XKCDComicImage
 from fastapi import status
 from fastapi.responses import JSONResponse
-
+from helpers import data_ctl
+from loguru import logger as log
+from modules import requests_prefab, xkcd_mod
+from packages import xkcd_comic
 
 def search_comic_img(comic_num: int = None) -> bytes | None:
     log.info(f"Searching database for XKCD comic #{comic_num}")
