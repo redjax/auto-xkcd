@@ -1,12 +1,15 @@
 import typing as t
 from pathlib import Path
 
-from core import paths
+from core import paths, request_client
 from core.dependencies import get_db
 from domain.xkcd import comic
+from modules import xkcd_mod, requests_prefab
 from helpers import validators
 
 from loguru import logger as log
+
+import httpx
 
 
 def lookup_img_file(
@@ -81,6 +84,27 @@ def retrieve_img_from_db(comic_num: int = None) -> comic.XKCDComicImage | None:
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception getting database connection. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+
+def request_img_from_api(comic_obj: comic.XKCDComic = None) -> bytes:
+    assert comic_obj, ValueError("Missing an XKCDComic object.")
+
+    CACHE_TRANSPORT = request_client.get_cache_transport()
+
+    try:
+        img_bytes: bytes = xkcd_mod.request_and_save_comic_img(
+            cache_transport=CACHE_TRANSPORT, comic=comic_obj
+        )
+
+        return img_bytes
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception requesting image for XKCD comic #{comic_obj.comic_num}. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)
