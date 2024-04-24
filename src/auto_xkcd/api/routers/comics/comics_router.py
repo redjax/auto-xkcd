@@ -12,7 +12,8 @@ from core import request_client
 from core.config import db_settings, settings
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
 from domain.xkcd import comic
-from fastapi import APIRouter, Depends, status
+
+from fastapi import APIRouter, Depends, status, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response, StreamingResponse, FileResponse
 import hishel
@@ -20,11 +21,12 @@ from loguru import logger as log
 from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
 from red_utils.ext import time_utils
+from celery.result import AsyncResult
 
 prefix: str = "/comics"
 tags: list[str] = ["comic"]
 
-router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT)
+router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=tags)
 
 MAX_MULTI_SCRAPE: int = 10
 
@@ -53,7 +55,7 @@ def current_comic() -> JSONResponse:
     return res
 
 
-@router.get("/{comic_num}")
+@router.get("/by-num/{comic_num}")
 def single_comic(comic_num: int) -> JSONResponse:
     try:
         comic_obj: comic.XKCDComic = xkcd_comic.comic.get_single_comic(

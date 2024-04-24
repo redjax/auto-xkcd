@@ -11,12 +11,14 @@ from __future__ import annotations
 from .config import (
     AppSettings,
     DBSettings,
+    CelerySettings,
     MinioSettings,
     TelegramSettings,
     db_settings,
     # minio_settings,
     settings,
     telegram_settings,
+    celery_settings,
 )
 from .constants import (
     CURRENT_XKCD_URL,
