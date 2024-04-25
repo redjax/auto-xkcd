@@ -28,12 +28,61 @@ from red_utils.core.dataclass_utils import DictMixin
 from utils.list_utils import prepare_list_shards
 
 from celery.result import AsyncResult
+import time
 
 
 MAX_QUEUE_SIZE: int = 15
 
 
 def get_multiple_comics(
+    comic_nums_lst: list[int] = None, loop_pause: int = 15, req_pause: int = 5
+) -> list[XKCDComic]:
+    log.info(f"Requesting [{comic_nums_lst}] comic(s)")
+
+    comic_objects: list[XKCDComic] = []
+    err_comic_nums: list[int] = []
+
+    for comic_num in comic_nums_lst:
+        db_comic = None
+
+        try:
+            db_comic: XKCDComic | None = xkcd_mod.get_comic_from_db(comic_num=comic_num)
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception getting XKCDComic from database. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            # raise exc
+
+        if db_comic:
+            log.debug(f"Found comic #{comic_num} in database. Skipping request pause")
+            comic_objects.append(db_comic)
+
+            continue
+
+        log.debug(f"Did not find comic #{comic_num} in database.")
+        try:
+            _comic: XKCDComic = xkcd_comic.comic.get_single_comic(comic_num=comic_num)
+            comic_objects.append(_comic)
+        except Exception as exc:
+            msg = Exception(f"Unhandled exception requesting comic #{comic_num}")
+            log.error(msg)
+            log.trace(exc)
+
+            err_comic_nums.append(comic_num)
+
+        log.info(f"Waiting for [{req_pause}] second(s) between requests...")
+        time.sleep(req_pause)
+
+    if err_comic_nums:
+        log.warning(f"Errors: {err_comic_nums}")
+
+    return comic_objects
+
+
+def get_multiple_comics_task(
     comic_nums_lst: list[int] = None, loop_pause: int = 15, req_pause: int = 5
 ) -> AsyncResult | None:
     if len(comic_nums_lst) > MAX_QUEUE_SIZE:
@@ -53,22 +102,28 @@ def get_multiple_comics(
         f"Check 2: comic queue size (partitioned: {comic_req_queue.partitioned}): [part count: {comic_req_queue.queue_size}]"
     )
 
-    if not comic_req_queue.partitioned:
-        log.info(f"Requesting [{comic_req_queue.queue_size}] comic(s)")
+    if comic_req_queue.partitioned:
+        log.info(
+            f"Comic request queue is partitioned. Requesting [{len(comic_req_queue.queue)}] queue(s)"
+        )
     else:
-        # loop_count: int = 1
+        log.info(
+            f"Comic request queue is not partitioned. Requesting [{len(comic_req_queue.queue)}] comic(s)"
+        )
 
-        log.info(f"Looping over comic number queues")
-
+    try:
         multi_comic_task = (
             celeryapp.celery_tasks.comic.process_multi_comic_req_queue.delay(
-                comic_req_queue.model_dump(),
-                loop_pause,
-                req_pause,
+                comic_req_queue.model_dump(), loop_pause, req_pause
             )
-        )
-        log.debug(
-            f"Multi-comic request task ({type(multi_comic_task)}): {multi_comic_task}"
         )
 
         return multi_comic_task
+
+    except Exception as exc:
+
+        msg = Exception(f"Unhandled exception getting multiple comics. Details: {exc}")
+        log.error(msg)
+        log.trace(exc)
+
+        return None

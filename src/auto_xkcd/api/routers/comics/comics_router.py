@@ -96,7 +96,7 @@ def multiple_comics(comic_nums: list[int] = None) -> JSONResponse:
 
     log.info(f"Starting multi-comic request chain")
     try:
-        multi_comics_job: AsyncResult = xkcd_comic.comic.get_multiple_comics(
+        multi_comics_job: AsyncResult = xkcd_comic.comic.get_multiple_comics_task(
             comic_nums_lst=comic_nums
         )
 

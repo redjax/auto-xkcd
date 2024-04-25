@@ -10,16 +10,19 @@ from packages import xkcd_comic
 
 from loguru import logger as log
 import httpx
+from celery.result import AsyncResult
 
 
 @celery_mod.app.task(name="process_multiple_comic_requests")
 def process_multi_comic_req_queue(
     request_queue: dict = None,
-    loop_pause: int = 15,
+    loop_pause: int = 10,
     req_pause: int = 5,
-):
+) -> dict[str, t.Any] | None:
     try:
-        _convert_req_queue = MultiComicRequestQueue.model_validate(request_queue)
+        _convert_req_queue: MultiComicRequestQueue = (
+            MultiComicRequestQueue.model_validate(request_queue)
+        )
         request_queue: MultiComicRequestQueue = _convert_req_queue
     except Exception as exc:
         msg = Exception(
@@ -32,84 +35,71 @@ def process_multi_comic_req_queue(
 
     log.info(f"Incoming multi-comic request queue")
     log.debug(f"Request queue partitioned: {request_queue.partitioned}")
+
     if request_queue.partitioned:
+        ## Partitioned queue
         log.debug(f"Partitions: {request_queue.queue_size}")
-    else:
-        log.debug(f"Requests in queue: {request_queue.queue_size}")
 
-    if not request_queue.partitioned:
-        log.info(f"Requesting [{request_queue.queue_size}] comic(s)")
+        partition_count: int = 1
 
-        # comic_requests: list[httpx.Request] = []
-        comic_objs: list[XKCDComic] = []
-
-        for i in request_queue.queue:
-            log.debug(f"Queue item: {i}")
-            _comic: XKCDComic = xkcd_comic.comic.get_single_comic(comic_num=i)
-            comic_objs.append(_comic)
-            # req: httpx.Request = requests_prefab.comic_num_req(comic_num=i)
-            # comic_requests.append(req)
-
-        comic_return_dicts: list[dict] = []
-
-        for _comic in comic_objs:
-            comic_dict = _comic.model_dump()
-            comic_return_dicts.append(comic_dict)
-
-        return {"comics": comic_return_dicts}
-
-    else:
-        log.info(
-            f"Request queue is partitoned. Processing [{len(request_queue.queue)}] queue(s), pausing {loop_pause} second(s) in between each loop."
-        )
-
-        current_partition: int = 1
-
-        # request_batches: list[list[httpx.Request]] = []
-        comic_requests: list[XKCDComic] = []
-        batch_errored_urls: list[str] = []
-        err_comic_ids: list[int] = []
+        comic_objects: list[XKCDComic] = []
+        comic_dicts: list[dict] = []
+        err_comic_nums: list[int] = []
 
         for partition in request_queue.queue:
             log.info(
-                f"Processing partition [{current_partition}/{request_queue.queue_size}]"
+                f"Processing comic request queue partition [{partition_count}/{len(request_queue.queue)}]"
             )
-            log.debug(f"Partition size: {len(partition)}")
 
-            partition_comic_responses: list[XKCDComic] = []
-
-            for comic_num in partition:
-                try:
-                    _comic: XKCDComic = xkcd_comic.comic.get_single_comic(
-                        comic_num=comic_num
+            try:
+                partition_results: list[XKCDComic] = (
+                    xkcd_comic.comic.get_multiple_comics(
+                        comic_nums_lst=partition,
+                        loop_pause=loop_pause,
+                        req_pause=req_pause,
                     )
-                    partition_comic_responses.append(_comic)
-                except Exception as exc:
-                    msg = Exception(
-                        f"Unhandled exception requesting comic #{comic_num}. Details: {exc}"
-                    )
-                    log.error(msg)
-                    log.trace(exc)
+                )
+            except Exception as exc:
+                msg = Exception(f"Unhandled exception getting comics. Details: {exc}")
+                log.error(msg)
+                log.trace(exc)
 
-                    err_comic_ids.append(comic_num)
+                continue
 
-                    continue
+            comic_objects = comic_objects + partition_results
 
-                log.info(f"Sleeping for {req_pause} second(s) between requests...")
-                time.sleep(req_pause)
+        for comic_obj in comic_objects:
+            comic_dict: dict = comic_obj.model_dump()
+            comic_dicts.append(comic_dict)
 
-            comic_requests = comic_requests + partition_comic_responses
-            log.info(
-                f"Sleeping for {loop_pause} second(s) between partitioned requests..."
+        return_obj = {"comics": comic_dicts, "errors": err_comic_nums}
+
+        return return_obj
+
+    else:
+        ## Non-partitioned queue
+
+        log.info(f"Requesting [{request_queue.queue_size}] comic(s)")
+
+        comic_objects: list[XKCDComic] = []
+        comic_dicts: list[dict] = []
+        err_comic_nums: list[int] = []
+
+        try:
+            comic_objects: list[XKCDComic] = xkcd_comic.comic.get_multiple_comics(
+                comic_nums_lst=request_queue.queue,
+                loop_pause=loop_pause,
+                req_pause=req_pause,
             )
-            time.sleep(loop_pause)
+        except Exception as exc:
+            msg = Exception(f"Unhandled exception getting comics. Details: {exc}")
+            log.error(msg)
+            log.trace(exc)
 
-        log.info(f"Requested [{len(comic_requests)}] comic(s)")
+        for comic_obj in comic_objects:
+            comic_dict: dict = comic_obj.model_dump()
+            comic_dicts.append(comic_dict)
 
-        comic_return_dicts: list[dict] = []
+        return_obj = {"comics": comic_dicts, "errors": err_comic_nums}
 
-        for _comic in comic_requests:
-            comic_dict = _comic.model_dump()
-            comic_return_dicts.append(comic_dict)
-
-        return {"comics": comic_return_dicts}
+        return return_obj

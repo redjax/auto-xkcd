@@ -7,6 +7,7 @@ from api import helpers as api_helpers
 from api.api_responses import API_RESPONSES_DICT, img_response
 from api.depends import cache_transport_dependency, db_dependency
 from celery.result import AsyncResult
+import celeryapp
 from core import request_client
 from core.config import db_settings, settings
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
@@ -35,35 +36,34 @@ def tasks_root() -> JSONResponse:
 
 @router.get("/id/{task_id}")
 def task_by_id(task_id: str) -> JSONResponse:
-    # log.info(f"Retrieving Celery task {task_id}")
+    log.info(f"Checking background task '{task_id}'")
 
-    # log.debug(f"BACKEND URL: {celery_mod.celery_settings.backend_url}")
-    # try:
-    #     # task_res: AsyncResult = celery_mod.celery_utils.check_task(task_id=task_id)
-    #     task_res: AsyncResult = AsyncResult(f"{task_id}")
+    try:
+        res: AsyncResult = celeryapp.check_task(task_id=task_id)
+        log.debug(
+            f"Task '{task_id}':\n\tReady: {res.ready()}\n\tState: {res.state}\n\tStatus: {res.status}"
+        )
 
-    #     res_dict = {
-    #         "task": task_id,
-    #         "state": task_res.state,
-    #         # "ready": task_res.ready(),
-    #         "status": task_res.status,
-    #         "name": task_res.name,
-    #         "date_done": task_res.date_done,
-    #         "result": task_res.result,
-    #         "errors": {"traceback": task_res.traceback},
-    #     }
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting task '{task_id}' results. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
 
-    #     return JSONResponse(status_code=status.HTTP_200_OK, content=res_dict)
-    # except Exception as exc:
-    #     msg = Exception(
-    #         f"Unhandled exception checking task '{task_id}'. Details: {exc}"
-    #     )
-    #     log.error(msg)
-    #     log.trace(exc)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "NotImplemented": f"Failed retrieving background task by id '{task_id}'."
+            },
+        )
 
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_200_OK,
         content={
-            "NotImplemented": f"Failed retrieving background task by id '{task_id}'."
+            "task_id": task_id,
+            "ready": res.ready(),
+            "state": res.state,
+            "results": res.result,
         },
     )

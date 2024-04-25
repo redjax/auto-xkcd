@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import sqlite3
 import typing as t
-
+from .response_handler import convert_db_comic_to_comic_obj
 from core import paths, request_client
 from core.dependencies import get_db
 from domain.xkcd import comic
@@ -17,6 +17,7 @@ from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as sa
 from utils import serialize_utils
+
 
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
@@ -127,6 +128,49 @@ def save_comic_to_db(
         log.trace(exc)
 
         raise exc
+
+
+def get_comic_from_db(comic_num: int = None) -> None | comic.XKCDComic:
+    try:
+        with get_db() as session:
+            repo = comic.XKCDComicRepository(session=session)
+
+            try:
+                db_comic: comic.XKCDComicModel = repo.get_by_num(num=comic_num)
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception writing XKCD comic #{comic_num} to database. Details ({type(exc)}): {exc}"
+                )
+                log.error(msg)
+                log.trace(exc)
+
+                return None
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting database connection. Details ({type(exc)}): {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        return None
+
+    if db_comic is None:
+        return None
+    else:
+        try:
+            _comic: comic.XKCDComic = convert_db_comic_to_comic_obj(
+                db_comic=db_comic.__dict__
+            )
+
+            return _comic
+        except Exception as exc:
+            msg = Exception(
+                f"Error converting XKCDComicModel to XKCDComic object. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+            raise exc
 
 
 def update_current_comic_json(
