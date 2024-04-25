@@ -15,11 +15,11 @@ from .repository import (
 from .schemas import (
     ComicNumCSVData,
     CurrentComicMeta,
+    MultiComicRequestQueue,
     XKCDComic,
     XKCDComicImage,
     XKCDComicImageOut,
     XKCDComicOut,
     XKCDSentComic,
     XKCDSentComicOut,
-    MultiComicRequestQueue,
 )

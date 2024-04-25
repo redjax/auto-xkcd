@@ -1,17 +1,17 @@
-import typing as t
+from __future__ import annotations
+
 from pathlib import Path
 import time
+import typing as t
 
-from core import request_client, database
+from celery.result import AsyncResult
+from core import database, request_client
 from core.config import settings
 from domain.xkcd import MultiComicRequestQueue, XKCDComic
-from modules import xkcd_mod, celery_mod, requests_prefab
-from packages import xkcd_comic
-
-from loguru import logger as log
 import httpx
-from celery.result import AsyncResult
-
+from loguru import logger as log
+from modules import celery_mod, requests_prefab, xkcd_mod
+from packages import xkcd_comic
 
 @celery_mod.app.task(name="process_multiple_comic_requests")
 def process_multi_comic_req_queue(

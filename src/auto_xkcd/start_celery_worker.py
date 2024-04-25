@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from celery import Celery
-from loguru import logger as log
 import celeryapp
+from loguru import logger as log
 from setup import base_app_setup
 
 if __name__ == "__main__":

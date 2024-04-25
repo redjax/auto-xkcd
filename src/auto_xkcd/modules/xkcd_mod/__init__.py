@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from . import response_handler
 from .methods import (
+    get_comic_from_db,
     list_missing_nums,
     load_serialized_comic,
     make_comic_request,
@@ -14,5 +15,4 @@ from .methods import (
     save_serialize_comic_object,
     update_current_comic_json,
     update_current_comic_meta_db,
-    get_comic_from_db,
 )

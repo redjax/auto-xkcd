@@ -11,25 +11,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+import time
 import typing as t
 
+from celery.result import AsyncResult
+import celeryapp
 from domain.xkcd import (
+    MultiComicRequestQueue,
     XKCDComic,
     XKCDComicImage,
     XKCDComicImageModel,
     XKCDComicModel,
-    MultiComicRequestQueue,
 )
 from loguru import logger as log
 from modules import xkcd_mod
 from packages import xkcd_comic
-import celeryapp
 from red_utils.core.dataclass_utils import DictMixin
 from utils.list_utils import prepare_list_shards
-
-from celery.result import AsyncResult
-import time
-
 
 MAX_QUEUE_SIZE: int = 15
 

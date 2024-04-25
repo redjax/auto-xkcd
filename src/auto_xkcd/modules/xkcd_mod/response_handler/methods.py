@@ -10,7 +10,6 @@ import httpx
 from loguru import logger as log
 from utils import serialize_utils
 
-
 def convert_response_to_dict(res: httpx.Response = None) -> dict:
     """Attempt to decode an `httpx.Response` into a dict."""
     assert res, ValueError("Missing an httpx.Response object.")

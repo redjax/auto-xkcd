@@ -3,7 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 import sqlite3
 import typing as t
+
 from .response_handler import convert_db_comic_to_comic_obj
+
 from core import paths, request_client
 from core.dependencies import get_db
 from domain.xkcd import comic
@@ -17,7 +19,6 @@ from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as sa
 from utils import serialize_utils
-
 
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),

@@ -4,7 +4,6 @@ import datetime
 import typing as t
 
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
-from utils.list_utils import prepare_list_shards
 import pendulum
 from pydantic import (
     BaseModel,
@@ -16,7 +15,7 @@ from pydantic import (
 )
 from red_utils.ext import time_utils
 from red_utils.std import hash_utils
-
+from utils.list_utils import prepare_list_shards
 
 class ComicNumCSVData(BaseModel):
     """Store metadata about a comic number, like if the image has been saved.

@@ -8,6 +8,11 @@ from api import helpers as api_helpers
 from api.api_responses import API_RESPONSES_DICT, img_response
 from api.depends import cache_transport_dependency, db_dependency
 from celery.result import AsyncResult
+from celeryapp import (
+    app as celery_app,
+    celery_tasks,
+    check_task,
+)
 from core import request_client
 from core.config import db_settings, settings
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
@@ -19,11 +24,6 @@ import hishel
 from loguru import logger as log
 from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
-from celeryapp import (
-    app as celery_app,
-    celery_tasks,
-    check_task,
-)
 from red_utils.ext import time_utils
 
 prefix: str = "/test"
