@@ -81,7 +81,7 @@ def process_multi_comic_req_queue(
 
         log.info(f"Requesting [{request_queue.queue_size}] comic(s)")
 
-        comic_objects: list[XKCDComic] = []
+        # comic_objects: list[XKCDComic] = []
         comic_dicts: list[dict] = []
         err_comic_nums: list[int] = []
 
