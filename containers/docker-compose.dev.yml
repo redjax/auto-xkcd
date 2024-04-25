@@ -253,7 +253,7 @@ services:
 
   redis-commander:
     image: rediscommander/redis-commander:latest
-    container_name: xkcd_bot-redis-commander
+    container_name: xkcd_bot-redis-commander-d
     hostname: redis-commander
     restart: unless-stopped
     environment:
