@@ -45,6 +45,7 @@ def get_multiple_comics(
     for comic_num in comic_nums_lst:
         db_comic = None
 
+        ## Load from database
         try:
             db_comic: XKCDComic | None = xkcd_mod.get_comic_from_db(comic_num=comic_num)
         except Exception as exc:
@@ -54,24 +55,50 @@ def get_multiple_comics(
             log.error(msg)
             log.trace(exc)
 
-            # raise exc
-
-        if db_comic:
+        _comic = db_comic
+        if _comic:
             log.debug(f"Found comic #{comic_num} in database. Skipping request pause")
-            comic_objects.append(db_comic)
+            comic_objects.append(_comic)
 
             continue
 
         log.debug(f"Did not find comic #{comic_num} in database.")
+        log.debug(f"Searching for serialized comic #{comic_num}")
+        try:
+            _comic: XKCDComic = xkcd_mod.load_serialized_comic(comic_num=comic_num)
+
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception loading comic #{comic_num} from serialized Response file. Details: {exc}"
+            )
+            log.error(msg)
+            log.trace(exc)
+
+        if _comic:
+            log.debug(
+                f"Found comic #{comic_num} in a serialized file. Skipping request pause"
+            )
+            comic_objects.append(_comic)
+
+            continue
+
+        ## Live HTTP request
         try:
             _comic: XKCDComic = xkcd_comic.comic.get_single_comic(comic_num=comic_num)
-            comic_objects.append(_comic)
         except Exception as exc:
             msg = Exception(f"Unhandled exception requesting comic #{comic_num}")
             log.error(msg)
             log.trace(exc)
 
             err_comic_nums.append(comic_num)
+
+        if _comic is None:
+            log.warning(
+                f"Could not load XKCD comic #{comic_num} from database, serialized file, or a live HTTP request. Does this comic exist? https://xkcd.com/{comic_num}"
+            )
+            continue
+
+        comic_objects.append(_comic)
 
         log.info(f"Waiting for [{req_pause}] second(s) between requests...")
         time.sleep(req_pause)
