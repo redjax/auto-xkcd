@@ -6,12 +6,14 @@ import typing as t
 
 from celery.result import AsyncResult
 from core import database, request_client
+from core.constants import IGNORE_COMIC_NUMS
 from core.config import settings
 from domain.xkcd import MultiComicRequestQueue, XKCDComic
 import httpx
 from loguru import logger as log
 from modules import celery_mod, requests_prefab, xkcd_mod
 from packages import xkcd_comic
+
 
 @celery_mod.app.task(name="process_multiple_comic_requests")
 def process_multi_comic_req_queue(

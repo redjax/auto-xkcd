@@ -14,6 +14,7 @@ from pathlib import Path
 import time
 import typing as t
 
+from core.constants import IGNORE_COMIC_NUMS
 from celery.result import AsyncResult
 import celeryapp
 from domain.xkcd import (
@@ -41,6 +42,11 @@ def get_multiple_comics(
     err_comic_nums: list[int] = []
 
     for comic_num in comic_nums_lst:
+        if comic_num in IGNORE_COMIC_NUMS:
+            log.warning(f"Skipping ignored comic #{comic_num}")
+
+            continue
+
         db_comic = None
 
         ## Load from database
