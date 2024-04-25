@@ -5,7 +5,7 @@ import typing as t
 
 from core import request_client
 from core.paths import SERIALIZE_COMIC_OBJECTS_DIR, SERIALIZE_COMIC_RESPONSES_DIR
-from domain.xkcd import XKCDComic
+from domain.xkcd import XKCDComic, XKCDComicModel
 import httpx
 from loguru import logger as log
 from utils import serialize_utils
@@ -122,6 +122,21 @@ def serialize_comic_response_dict(
     except Exception as exc:
         msg = Exception(
             f"Unhandled exception serializing comic #{res_dict['num']}. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+
+def convert_db_comic_to_comic_obj(db_comic: XKCDComicModel) -> XKCDComic:
+    try:
+        _comic: XKCDComic = XKCDComic.model_validate(db_comic)
+
+        return _comic
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception converting XKCDComicModel to XKCDComic object. Details: {exc}"
         )
         log.error(msg)
         log.trace(exc)

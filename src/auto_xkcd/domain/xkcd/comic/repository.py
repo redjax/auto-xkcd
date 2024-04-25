@@ -293,16 +293,26 @@ class XKCDComicImageRepository(XKCDComicImageRepositoryBase):
 
             raise msg
 
-    def get_by_num(self, num: int) -> XKCDComicImageModel:
+    def get_by_comic_num(self, comic_num: int) -> XKCDComicImageModel:
         try:
-            return self.session.query(XKCDComicImageModel).get(num)
+            stmt = sa.select(XKCDComicImageModel).where(
+                XKCDComicImageModel.comic_num == comic_num
+            )
+            # return self.session.query(XKCDComicImageModel).get(comic_num)
+            db_comic_img = self.session.execute(stmt).first()
+
         except Exception as exc:
             msg = Exception(
-                f"Unhandled exception retrieving entity by ID '{num}'. Details: {exc}"
+                f"Unhandled exception retrieving entity by ID '{comic_num}'. Details: {exc}"
             )
             log.error(msg)
 
             raise msg
+
+        if isinstance(db_comic_img, sa.Row):
+            return db_comic_img[0]
+
+        return db_comic_img
 
 
 class XKCDSentComicRepository(XKCDSentComicRepositoryBase):

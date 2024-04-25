@@ -17,6 +17,7 @@ from core.paths import ENSURE_DIRS
 from helpers import cli_helpers
 import ibis
 from loguru import logger as log
+from red_utils.ext.fastapi_utils import setup_uvicorn_logging
 from red_utils.ext.loguru_utils import init_logger, sinks
 from red_utils.std import path_utils
 
@@ -190,4 +191,5 @@ def api_setup(
     )
 
     setup_logging(settings=settings)
+    setup_uvicorn_logging(level=settings.log_level)
     setup_ensure_dirs(ensure_dirs=ensure_dirs)

@@ -4,11 +4,10 @@ import json
 from pathlib import Path
 import typing as t
 
-from modules.requests_prefab import telegram_chatid_req
-
 from core import paths, request_client
 import httpx
 from loguru import logger as log
+from modules.requests_prefab import telegram_chatid_req
 import telegram
 
 def save_chatid_to_file(

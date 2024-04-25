@@ -10,9 +10,11 @@ from __future__ import annotations
 
 from .config import (
     AppSettings,
+    CelerySettings,
     DBSettings,
     MinioSettings,
     TelegramSettings,
+    celery_settings,
     db_settings,
     # minio_settings,
     settings,
@@ -31,6 +33,10 @@ from .dependencies import (
 from .paths import (
     BACKUP_DIR,
     CACHE_DIR,
+    CELERY_DATA_DIR,
+    CELERY_SQLITE_BACKEND_URI,
+    CELERY_SQLITE_BROKER_URI,
+    CELERY_SQLITE_RESULT_URI,
     COMIC_IMG_DIR,
     COMICS_PQ_FILE,
     CURRENT_COMIC_FILE,

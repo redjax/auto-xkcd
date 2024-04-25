@@ -19,7 +19,6 @@ from core.config import (
     settings,
     telegram_settings,
 )
-
 from dynaconf import Dynaconf
 import hishel
 import httpx

@@ -6,6 +6,7 @@ import typing as t
 
 from core import IGNORE_COMIC_NUMS, database, paths, request_client
 from core.config import db_settings, settings
+from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
 from core.dependencies import get_db
 from domain.xkcd import comic
 from helpers import data_ctl
@@ -22,7 +23,7 @@ def get_single_comic(
     comic_num: int = None,
     save_serial: bool = True,
     overwrite: bool = True,
-) -> comic.XKCDComic:
+) -> comic.XKCDComic | None:
     """Request a single XKCD comic by its comic number.
 
     Params:
@@ -55,6 +56,14 @@ def get_single_comic(
         log.trace(exc)
 
         raise exc
+
+    if comic_res.status_code == 404:
+        err_comic_url: str = f"{XKCD_URL_BASE}/{comic_num}"
+        log.warning(
+            f"Could not find comic #{comic_num}. Does this comic exist? Check the XKCD site: {err_comic_url}"
+        )
+
+        return None
 
     ## Convert httpx.Response into XKCDComic object
     try:

@@ -1,0 +1,48 @@
+version: "3.8"
+
+# networks:
+#   rabbit_net:
+#     driver: bridge
+
+volumes:
+  redis_cache:
+    driver: local
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: xkcd_bot-rabbitmq-dev
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-rabbitmq}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-rabbitmq}
+      # RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-rabbitmq}
+      # RABBITMQ_ENABLED_PLUGINS_FILE: /etc/rabbitmq/enabled_plugins
+    ports:
+      ## AMQP protocol
+      - ${RABBITMQ_AMPQ_PORT:-5672}:5672
+      - ${RABBITMQ_HTTP_PORT:-15672}:15672
+    volumes:
+      - ${RABBITMQ_DATA_DIR:-./data/rabbitmq}:/var/lib/rabbitmq
+      - ${RABBITMQ_LOGS_DIR:-./logs/rabbitmq}:/var/log/rabbitmq
+      - ./provision/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+      - ./provision/rabbitmq/rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
+
+  redis:
+    image: redis
+    container_name: xkcd_bot-redis-dev
+    restart: unless-stopped
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - ${REDIS_CACHE_DIR:-redis_cache}:/data
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: xkcd_bot-redis-commander-dev
+    hostname: redis-commander
+    restart: unless-stopped
+    environment:
+    - REDIS_HOSTS=local:redis:${REDIS_PORT:-6379}
+    ports:
+    - ${REDIS_COMMANDER_PORT:-8081}:8081

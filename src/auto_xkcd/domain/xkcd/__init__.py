@@ -7,6 +7,7 @@ from .comic import (
     CurrentComicMeta,
     CurrentComicMetaModel,
     CurrentComicMetaRepository,
+    MultiComicRequestQueue,
     XKCDComic,
     XKCDComicImage,
     XKCDComicImageModel,
