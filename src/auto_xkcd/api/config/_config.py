@@ -59,6 +59,25 @@ class APISettings(BaseSettings):
         default=DYNACONF_API_SETTINGS.FASTAPI_ROOT_PATH_IN_SERVERS,
         env="FASTAPI_ROOT_PATH_IN_SERVERS",
     )
+    include_admin_router: bool = Field(
+        default=DYNACONF_API_SETTINGS.FASTAPI_INCLUDE_ADMIN_ROUTER,
+        env="FASTAPI_INCLUDE_ADMIN_ROUTER",
+    )
+
+    @field_validator("include_admin_router")
+    def validate_include_admin_router(cls, v) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            match v.lower():
+                case "true":
+                    return True
+                case "false":
+                    return False
+                case _:
+                    raise ValidationError
+
+        raise ValidationError
 
 
 class UvicornSettings(BaseSettings):

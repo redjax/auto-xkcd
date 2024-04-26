@@ -13,9 +13,15 @@ FASTAPI_OPENAPI_PREFIX = ""
 FASTAPI_ROOT_PATH = ""
 FASTAPI_ROOT_PATH_IN_SERVERS = true
 
+## Include custom admin router
+FASTAPI_INCLUDE_ADMIN_ROUTER = false
+
 [dev]
 
 FASTAPI_DEBUG = true
 FASTAPI_TITLE = "[DEV] auto-xkcd"
+
+## Include custom admin router
+FASTAPI_INCLUDE_ADMIN_ROUTER = true
 
 [prod]

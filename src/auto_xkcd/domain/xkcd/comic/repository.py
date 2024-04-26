@@ -16,6 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
+
 class XKCDComicRepository(XKCDComicRepositoryBase):
     """Database repository for handling XKCDComic entities."""
 
@@ -182,6 +183,7 @@ class CurrentComicMetaRepository(CurrentComicMetaRepositoryBase):
     def get_by_id(self, current_comic_meta_id: int) -> CurrentComicMetaModel:
         try:
             return self.session.query(CurrentComicMetaModel).get(current_comic_meta_id)
+
         except Exception as exc:
             msg = Exception(
                 f"Unhandled exception retrieving entity by ID '{current_comic_meta_id}'. Details: {exc}"
