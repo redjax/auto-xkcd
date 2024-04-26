@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     log.debug(f"Celery app ({type(celeryapp.app)}): {celeryapp.app}")
 
-    celeryapp.app.autodiscover_tasks(["packages.celery_app"])
+    celeryapp.app.autodiscover_tasks(["celeryapp.celery_tasks"])
 
     try:
         worker = celeryapp.app.worker_main(

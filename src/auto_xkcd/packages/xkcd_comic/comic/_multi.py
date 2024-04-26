@@ -144,7 +144,7 @@ def get_multiple_comics_task(
 
     try:
         multi_comic_task = (
-            celeryapp.celery_tasks.comic.process_multi_comic_req_queue.delay(
+            celeryapp.celery_tasks.comic.task_process_multi_comic_req_queue.delay(
                 comic_req_queue.model_dump(), loop_pause, req_pause
             )
         )

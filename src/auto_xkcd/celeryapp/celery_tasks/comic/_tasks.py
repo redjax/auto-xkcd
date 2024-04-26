@@ -11,12 +11,31 @@ from core.config import settings
 from domain.xkcd import MultiComicRequestQueue, XKCDComic
 import httpx
 from loguru import logger as log
-from modules import celery_mod, requests_prefab, xkcd_mod
+from modules import requests_prefab, xkcd_mod
 from packages import xkcd_comic
+from celeryapp._celeryapp import app
 
 
-@celery_mod.app.task(name="process_multiple_comic_requests")
-def process_multi_comic_req_queue(
+@app.task(name="request_current_comic")
+def task_current_comic() -> dict[str, XKCDComic]:
+    log.info("Get current XKCD comic in background")
+
+    try:
+        _comic: XKCDComic = xkcd_comic.current_comic.get_current_comic()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting current XKCD comic. Details: {exc}"
+        )
+        log.error(msg)
+        log.trace(exc)
+
+        raise exc
+
+    return {"comic": _comic}
+
+
+@app.task(name="process_multiple_comic_requests")
+def task_process_multi_comic_req_queue(
     request_queue: dict = None,
     loop_pause: int = 10,
     req_pause: int = 5,

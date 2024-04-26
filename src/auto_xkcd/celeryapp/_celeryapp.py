@@ -6,7 +6,7 @@ import typing as t
 import celery
 from celery import Celery
 from celery.result import AsyncResult
-from core.config import CelerySettings, celery_settings
+from celeryapp.celeryconfig import CelerySettings, celery_settings
 from loguru import logger as log
 
 app: Celery = Celery(
@@ -14,6 +14,14 @@ app: Celery = Celery(
     broker=celery_settings.broker_url,
     backend=celery_settings.backend_url,
 )
+app.autodiscover_tasks(
+    [
+        "celeryapp.celery_tasks.comic._tasks",
+        "celeryapp.celery_tasks.demo._tasks",
+        "celeryapp.celery_tasks._scheduled",
+    ]
+)
+log.debug(f"Discovered Celery tasks: {app.tasks}")
 
 
 def check_task(task_id: str = None, app: Celery = app) -> AsyncResult | None:
