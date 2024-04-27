@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from core.config import settings
 from celery import Celery
 import celeryapp
+from core.config import settings
 from loguru import logger as log
 from setup import base_app_setup
 

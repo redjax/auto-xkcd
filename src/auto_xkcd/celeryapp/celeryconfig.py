@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import typing as t
 
 from dynaconf import Dynaconf
-from pydantic import Field, field_validator, ValidationError, computed_field
+from pydantic import Field, ValidationError, computed_field, field_validator
 from pydantic_settings import BaseSettings
 
 DYNACONF_CELERY_SETTINGS: Dynaconf = Dynaconf(

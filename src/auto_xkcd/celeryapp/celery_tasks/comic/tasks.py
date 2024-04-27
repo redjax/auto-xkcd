@@ -5,16 +5,15 @@ import time
 import typing as t
 
 from celery.result import AsyncResult
+from celeryapp._celeryapp import app
 from core import database, request_client
-from core.constants import IGNORE_COMIC_NUMS
 from core.config import settings
+from core.constants import IGNORE_COMIC_NUMS
 from domain.xkcd import MultiComicRequestQueue, XKCDComic
 import httpx
 from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 from packages import xkcd_comic
-from celeryapp._celeryapp import app
-
 
 @app.task(name="request_current_comic")
 def task_current_comic() -> dict[str, XKCDComic]:

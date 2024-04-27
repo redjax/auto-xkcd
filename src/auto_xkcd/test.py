@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from core.config import settings, db_settings
 from core import database
+from core.config import db_settings, settings
 from core.dependencies import get_db
 from domain.xkcd import comic
-
 from loguru import logger as log
 
 if __name__ == "__main__":
