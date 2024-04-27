@@ -59,7 +59,7 @@ services:
       ##
       # FastAPI
       ##
-      DYNACONF_FASTAPI_DEBUG: ${FASTAPI_DEBUG:-true}
+      DYNACONF_FASTAPI_DEBUG: ${FASTAPI_DEBUG:-false}
       DYNACONF_FASTAPI_TITLE: ${FASTAPI_TITLE:-"auto-xkcd"}
       DYNACONF_FASTAPI_SUMMARY: ${FASTAPI_SUMMARY:-"An overengineered app to get XKCD comics"}
       DYNACONF_FASTAPI_DESCRIPTION: ${FASTAPI_DESCRIPTION:-"API for getting XKCD comics. This is a learning project, and intentionally over-engineered as a result."}
@@ -71,7 +71,7 @@ services:
       DYNACONF_FASTAPI_OPENAPI_PREFIX: ${FASTAPI_OPENAPI_PREFIX:-""}
       DYNACONF_FASTAPI_ROOT_PATH: ${FASTAPI_ROOT_PATH:-""}
       DYNACONF_FASTAPI_ROOT_PATH_IN_SERVERS: ${FASTAPI_ROOT_PATH_IN_SERVERS:-true}
-      DYNACONF_FASTAPI_INCLUDE_ADMIN_ROUTER: ${FASTAPI_INCLUDE_ADMIN_ROUTER:-true}
+      DYNACONF_FASTAPI_INCLUDE_ADMIN_ROUTER: ${FASTAPI_INCLUDE_ADMIN_ROUTER:-false}
 
       ##
       # Uvicorn
@@ -80,7 +80,7 @@ services:
       DYNACONF_UVICORN_HOST: ${UVICORN_HOST:-"0.0.0.0"}
       DYNACONF_UVICORN_PORT: ${UVICORN_PORT:-8000}
       DYNACONF_UVICORN_ROOT_PATH: ${UVICORN_ROOT_PATH:-""}
-      DYNACONF_UVICORN_RELOAD: ${UVICORN_RELOAD:-true}
+      DYNACONF_UVICORN_RELOAD: ${UVICORN_RELOAD:-false}
       DYNACONF_UVICORN_LOG_LEVEL: ${UVICORN_LOG_LEVEL:-INFO}
 
       ##
@@ -157,7 +157,7 @@ services:
       ##
       # FastAPI
       ##
-      DYNACONF_FASTAPI_DEBUG: ${FASTAPI_DEBUG:-true}
+      DYNACONF_FASTAPI_DEBUG: ${FASTAPI_DEBUG:-false}
       DYNACONF_FASTAPI_TITLE: ${FASTAPI_TITLE:-"auto-xkcd"}
       DYNACONF_FASTAPI_SUMMARY: ${FASTAPI_SUMMARY:-"An overengineered app to get XKCD comics"}
       DYNACONF_FASTAPI_DESCRIPTION: ${FASTAPI_DESCRIPTION:-"API for getting XKCD comics. This is a learning project, and intentionally over-engineered as a result."}
@@ -178,7 +178,7 @@ services:
       DYNACONF_UVICORN_HOST: ${UVICORN_HOST:-"0.0.0.0"}
       DYNACONF_UVICORN_PORT: ${UVICORN_PORT:-8000}
       DYNACONF_UVICORN_ROOT_PATH: ${UVICORN_ROOT_PATH:-""}
-      DYNACONF_UVICORN_RELOAD: ${UVICORN_RELOAD:-true}
+      DYNACONF_UVICORN_RELOAD: ${UVICORN_RELOAD:-false}
       DYNACONF_UVICORN_LOG_LEVEL: ${UVICORN_LOG_LEVEL:-INFO}
 
       ##
@@ -256,7 +256,7 @@ services:
       ##
       # FastAPI
       ##
-      DYNACONF_FASTAPI_DEBUG: ${FASTAPI_DEBUG:-true}
+      DYNACONF_FASTAPI_DEBUG: ${FASTAPI_DEBUG:-false}
       DYNACONF_FASTAPI_TITLE: ${FASTAPI_TITLE:-"auto-xkcd"}
       DYNACONF_FASTAPI_SUMMARY: ${FASTAPI_SUMMARY:-"An overengineered app to get XKCD comics"}
       DYNACONF_FASTAPI_DESCRIPTION: ${FASTAPI_DESCRIPTION:-"API for getting XKCD comics. This is a learning project, and intentionally over-engineered as a result."}
@@ -277,7 +277,7 @@ services:
       DYNACONF_UVICORN_HOST: ${UVICORN_HOST:-"0.0.0.0"}
       DYNACONF_UVICORN_PORT: ${UVICORN_PORT:-8000}
       DYNACONF_UVICORN_ROOT_PATH: ${UVICORN_ROOT_PATH:-""}
-      DYNACONF_UVICORN_RELOAD: ${UVICORN_RELOAD:-true}
+      DYNACONF_UVICORN_RELOAD: ${UVICORN_RELOAD:-false}
       DYNACONF_UVICORN_LOG_LEVEL: ${UVICORN_LOG_LEVEL:-INFO}
 
       ##
