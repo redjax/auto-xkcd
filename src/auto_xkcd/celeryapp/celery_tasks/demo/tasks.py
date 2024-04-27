@@ -6,7 +6,8 @@ import celery
 from celery import Celery
 from celery.result import AsyncResult
 from loguru import logger as log
-from modules.celery_mod import app
+from celeryapp._celeryapp import app
+
 
 @app.task
 def demo_task_add(x, y):

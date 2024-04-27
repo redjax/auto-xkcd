@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from core.constants import IGNORE_COMIC_NUMS
 import typing as t
+
 
 def validate_comic_nums_lst(comic_nums: list[int] = None) -> list[int]:
     """Return a validated list of integers.
@@ -22,3 +24,10 @@ def validate_comic_nums_lst(comic_nums: list[int] = None) -> list[int]:
         )
 
     return comic_nums
+
+
+def validate_comic_num(comic_num: int = None) -> int:
+    assert comic_num, ValueError("Missing comic_num to validate")
+    assert isinstance(comic_num, int), TypeError(
+        f"comic_num must be an integer. Got type: ({type(comic_num)})"
+    )

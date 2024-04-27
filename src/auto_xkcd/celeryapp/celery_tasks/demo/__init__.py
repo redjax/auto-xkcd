@@ -1,3 +1,3 @@
 from __future__ import annotations
 
-from ._tasks import demo_task_add
+from .tasks import demo_task_add

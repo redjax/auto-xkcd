@@ -9,6 +9,7 @@ from api.api_responses import API_RESPONSES_DICT, img_response
 from api.depends import cache_transport_dependency, db_dependency
 from celery.result import AsyncResult
 from core import request_client
+from core.constants import IGNORE_COMIC_NUMS
 from core.config import db_settings, settings
 from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
 from domain.xkcd import comic
@@ -55,6 +56,15 @@ def current_comic() -> JSONResponse:
 
 @router.get("/by-num/{comic_num}")
 def single_comic(comic_num: int) -> JSONResponse:
+    if comic_num in IGNORE_COMIC_NUMS:
+        log.warning(f"Ignored comic #{comic_num} requested")
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={
+                "IgnoredComicNum": f"Comic #{comic_num} is in list of ignored comic numbers and cannot be requested."
+            },
+        )
+
     try:
         comic_obj: comic.XKCDComic = xkcd_comic.comic.get_single_comic(
             comic_num=comic_num

@@ -3,10 +3,12 @@ from __future__ import annotations
 from functools import lru_cache
 import typing as t
 
+from .celery_tasks.scheduled import TASK_SCHEDULE_current_comic_check
 import celery
 from celery import Celery
+from celery.schedules import crontab
 from celery.result import AsyncResult
-from core.config import CelerySettings, celery_settings
+from celeryapp.celeryconfig import CelerySettings, celery_settings
 from loguru import logger as log
 
 app: Celery = Celery(
@@ -14,6 +16,25 @@ app: Celery = Celery(
     broker=celery_settings.broker_url,
     backend=celery_settings.backend_url,
 )
+# app.autodiscover_tasks(
+#     [
+#         "celeryapp.celery_tasks.comic",
+#         "celeryapp.celery_tasks.demo",
+#     ]
+# )
+
+## Set app config
+app.conf.update(timezone="America/New_York", enable_utc=True)
+
+
+## Periodic jobs
+@app.on_after_finalize.connect
+def scheduled_tasks(sender, **kwargs):
+    ## Call task_current_comic() every hour. Use imported schedule
+    app.conf.beat_schedule = TASK_SCHEDULE_current_comic_check
+
+
+log.debug(f"Discovered Celery tasks: {app.tasks}")
 
 
 def check_task(task_id: str = None, app: Celery = app) -> AsyncResult | None:

@@ -10,11 +10,11 @@ from __future__ import annotations
 
 from .config import (
     AppSettings,
-    CelerySettings,
+    # CelerySettings,
     DBSettings,
     MinioSettings,
     TelegramSettings,
-    celery_settings,
+    # celery_settings,
     db_settings,
     # minio_settings,
     settings,

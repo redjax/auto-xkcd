@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from api.config import APISettings, api_settings
-from api.routers import api_v1_router
+from api.routers import api_v1_router, admin_router
 from fastapi import APIRouter, FastAPI, status
 from fastapi.responses import JSONResponse
 from loguru import logger as log
 
+IMPORT_ADMIN_ROUTER: bool = api_settings.include_admin_router
 INCLUDE_ROUTERS: list[APIRouter] = [api_v1_router]
+
+if IMPORT_ADMIN_ROUTER:
+    INCLUDE_ROUTERS.append(admin_router)
 
 app: FastAPI = FastAPI(
     title=api_settings.title,
@@ -23,6 +27,10 @@ app: FastAPI = FastAPI(
 )
 
 app.include_router(api_v1_router)
+
+if IMPORT_ADMIN_ROUTER:
+    log.warning("Mouting admin router")
+    app.include_router(admin_router)
 
 
 @app.get("/")
