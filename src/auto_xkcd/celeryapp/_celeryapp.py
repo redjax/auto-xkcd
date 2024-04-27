@@ -4,10 +4,11 @@ from functools import lru_cache
 import typing as t
 
 from .celery_tasks.scheduled import TASK_SCHEDULE_current_comic_check
+
 import celery
 from celery import Celery
-from celery.schedules import crontab
 from celery.result import AsyncResult
+from celery.schedules import crontab
 from celeryapp.celeryconfig import CelerySettings, celery_settings
 from loguru import logger as log
 

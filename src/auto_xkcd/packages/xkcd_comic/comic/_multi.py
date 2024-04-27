@@ -14,9 +14,9 @@ from pathlib import Path
 import time
 import typing as t
 
-from core.constants import IGNORE_COMIC_NUMS
 from celery.result import AsyncResult
 import celeryapp
+from core.constants import IGNORE_COMIC_NUMS
 from domain.xkcd import (
     MultiComicRequestQueue,
     XKCDComic,

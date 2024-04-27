@@ -9,9 +9,8 @@ from api.api_responses import API_RESPONSES_DICT, img_response
 from api.depends import cache_transport_dependency, db_dependency
 from celery.result import AsyncResult
 from core import request_client
-from core.constants import IGNORE_COMIC_NUMS
 from core.config import db_settings, settings
-from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
+from core.constants import IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
 from domain.xkcd import comic
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.encoders import jsonable_encoder

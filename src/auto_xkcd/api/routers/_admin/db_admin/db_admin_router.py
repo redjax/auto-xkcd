@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from core.dependencies import get_db
 from api import helpers as api_helpers
 from api.api_responses import API_RESPONSES_DICT, img_response
 from api.depends import cache_transport_dependency, db_dependency
 from celery.result import AsyncResult
 from core import request_client
-from core.constants import IGNORE_COMIC_NUMS
 from core.config import db_settings, settings
-from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
+from core.constants import IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
+from core.dependencies import get_db
 from domain.xkcd import comic
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.encoders import jsonable_encoder
