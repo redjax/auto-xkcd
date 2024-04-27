@@ -33,6 +33,14 @@ The API handles requests to the XKCD API, with a rate limit of 1 request per 5 s
 | rabbitMQ Management Console | 15672 |
 | redis-commander webUI       |  8081 |
 
+### Celery Usage
+
+This app uses Celery for background & scheduled tasks. Because the code is in a `src/` directory, the `celery -A ...` command needs to be modified. To change the working directory of `celery`, use the `--workdir=src/app_name` param:
+
+```shell
+celery --workdir=src/auto_xkcd -A ...
+```
+
 ## Links
 
 - [minio-py Github](https://github.com/minio/minio-py)

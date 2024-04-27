@@ -117,6 +117,7 @@ services:
       - env_files/dev.env
     working_dir: /app
     command: ["python", "src/auto_xkcd/start_celery_worker.py"]
+    # command: ["celery", "--workdir=src/auto_xkcd", "-A", "celeryapp._celeryapp", "worker", "--loglevel=debug"]
 
     ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
     # entrypoint: ["pwd"]
@@ -215,7 +216,7 @@ services:
     env_file:
       - env_files/dev.env
     working_dir: /app
-    command: ["python", "src/auto_xkcd/start_celery_beat.py"]
+    command: ["celery", "--workdir=src/auto_xkcd", "-A", "celeryapp._celeryapp", "beat", "--loglevel=debug", "-s", "celerybeat-schedule"]
 
     ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
     # entrypoint: ["pwd"]

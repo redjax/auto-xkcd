@@ -21,28 +21,3 @@ if __name__ == "__main__":
         log.trace(exc)
 
         raise exc
-
-    # try:
-    #     worker = celeryapp.app.worker_main(
-    #         argv=["worker", "beat", "--loglevel=DEBUG", "--uid=0", "--gid=0"]
-    #     )
-    # except Exception as exc:
-    #     msg = Exception(
-    #         f"Unhandled exception getting Celery beat worker. Details: {exc}"
-    #     )
-    #     log.error(msg)
-    #     log.trace(exc)
-
-    #     raise exc
-
-    # log.info("Starting Celery worker")
-    # try:
-    #     worker.start()
-    # except Exception as exc:
-    #     msg = Exception(
-    #         f"Unhandled exception starting Celery beat worker. Details: {exc}"
-    #     )
-    #     log.error(msg)
-    #     log.trace(exc)
-
-    #     raise exc
