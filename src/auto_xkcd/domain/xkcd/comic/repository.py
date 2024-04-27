@@ -16,6 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
+
 class XKCDComicRepository(XKCDComicRepositoryBase):
     """Database repository for handling XKCDComic entities."""
 
@@ -153,12 +154,15 @@ class CurrentComicMetaRepository(CurrentComicMetaRepositoryBase):
         """
         existing_entity: CurrentComicMetaModel | None = (
             self.session.query(CurrentComicMetaModel)
-            .filter_by(comic_num=entity.comic_num)
-            .first()
+            # .filter_by(comic_num=entity.comic_num)
+            .where(CurrentComicMetaModel.current_comic_id == 1).first()
         )
 
         if existing_entity:
+            log.debug(f"AddOrUpdate existing entity: {existing_entity.__dict__}")
+
             # Update existing entity
+            existing_entity.comic_num = entity.comic_num
             existing_entity.last_updated = entity.last_updated
         else:
             # Add new entity
