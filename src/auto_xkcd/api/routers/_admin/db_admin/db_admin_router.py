@@ -28,11 +28,11 @@ router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=
 MAX_MULTI_SCRAPE: int = 10
 
 
-@router.get("/")
-def admin_root() -> JSONResponse:
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"msg": "Database admin root reached"}
-    )
+# @router.get("/")
+# def admin_root() -> JSONResponse:
+#     return JSONResponse(
+#         status_code=status.HTTP_200_OK, content={"msg": "Database admin root reached"}
+#     )
 
 
 @router.delete("/delete-currentcomic-metadata/{metadata_id}")
