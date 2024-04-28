@@ -25,6 +25,7 @@ dependencies = [
     "uvicorn[standard]>=0.29.0",
     "celery[librabbitmq,msgpack,redis,sqlalchemy]>=5.4.0",
     "redis>=5.0.3",
+    "jinja2>=3.1.3",
 ]
 requires-python = ">=3.11"
 readme = "README.md"

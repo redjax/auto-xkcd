@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:81a9652b950a51af6f5af539c22bbaad5fd9d0952a32e4160aa1cc586d993221"
+content_hash = "sha256:5b2586e5e2d5d13789bf7a626c8ec3b26fe53d72a3f2246469de1d8dafb1ac8c"
 
 [[package]]
 name = "amqp"
@@ -826,7 +826,7 @@ name = "jinja2"
 version = "3.1.3"
 requires_python = ">=3.7"
 summary = "A very fast and expressive template engine."
-groups = ["docs"]
+groups = ["default", "docs"]
 dependencies = [
     "MarkupSafe>=2.0",
 ]
@@ -909,7 +909,7 @@ name = "markupsafe"
 version = "2.1.5"
 requires_python = ">=3.7"
 summary = "Safely add untrusted strings to HTML/XML markup."
-groups = ["docs"]
+groups = ["default", "docs"]
 files = [
     {file = "MarkupSafe-2.1.5-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:629ddd2ca402ae6dbedfceeba9c46d5f7b2a61d9749597d4307f943ef198fc1f"},
     {file = "MarkupSafe-2.1.5-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:5b7b716f97b52c5a14bffdf688f971b2d5ef4029127f1ad7a513973cfd818df2"},
