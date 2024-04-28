@@ -166,6 +166,12 @@ def _add_operations_to_subparser(
     return subparsers
 
 
+def _pull_changes_rebuild():
+    raise NotImplementedError(
+        f"Updating Docker Compose stack from repository not yet supported."
+    )
+
+
 def run_cli() -> None:
     ## Create main parser
     parser = argparse.ArgumentParser(
