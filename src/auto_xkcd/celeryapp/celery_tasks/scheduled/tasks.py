@@ -6,6 +6,6 @@ from celery.schedules import crontab
 TASK_SCHEDULE_current_comic_check = {
     "hourly_current_comic_check": {
         "task": "request_current_comic",
-        "schedule": crontab(hour="*", minute="*"),
+        "schedule": crontab(hour="*", minute=0),
     }
 }
