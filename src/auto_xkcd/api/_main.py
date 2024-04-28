@@ -39,7 +39,7 @@ app: FastAPI = FastAPI(
 app.include_router(api_v1_router)
 
 if IMPORT_ADMIN_ROUTER:
-    log.warning("Mouting admin router")
+    log.warning("Mounting admin router")
     app.include_router(admin_router)
 
 
