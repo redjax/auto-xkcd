@@ -10,4 +10,8 @@ CUSTOM_API_TAGS: list[dict[str, str]] = [
         "name": "task",
         "description": "Interact with background tasks, i.e. comic retrievals or data tasks.",
     },
+    {
+        "name": "admin",
+        "description": "[Only mounted in DEV environment] A backend admin route handler.",
+    },
 ]

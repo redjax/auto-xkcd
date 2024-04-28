@@ -15,6 +15,7 @@ from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 from packages import xkcd_comic
 
+
 @app.task(name="request_current_comic")
 def task_current_comic() -> dict[str, XKCDComic]:
     log.info("Get current XKCD comic in background")
@@ -30,7 +31,10 @@ def task_current_comic() -> dict[str, XKCDComic]:
 
         raise exc
 
-    return {"comic": _comic}
+    if _comic:
+        return {"comic": _comic.model_dump()}
+    else:
+        return {"comic": None}
 
 
 @app.task(name="process_multiple_comic_requests")

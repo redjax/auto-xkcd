@@ -1,273 +1,304 @@
-"""Run prefab docker-compose commands with a simple interface.
-
-Run long docker commands like: docker-compose -f containers/docker-compose.*.yml [up|build|down]
-"""
-
-import os
-from contextlib import contextmanager, AbstractContextManager
-from dataclasses import dataclass, field
 import typing as t
-from pathlib import Path
+import argparse
 import subprocess
+from pathlib import Path
+from dataclasses import dataclass, field
 
+## Set paths to docker-compose and .env files
 DEV_COMPOSE_FILE: Path = Path("containers/docker-compose.dev.yml")
 DEV_COMPOSE_ENV_FILE: Path = Path("containers/env_files/dev.env")
 PROD_COMPOSE_FILE: Path = Path("containers/docker-compose.prod.yml")
 PROD_COMPOSE_ENV_FILE: Path = Path("containers/env_files/prod.env")
 
-dev_compose_dict: dict = {
-    "env": "dev",
-    "compose_file": DEV_COMPOSE_FILE,
-    "compose_env_file": DEV_COMPOSE_ENV_FILE,
-}
+VALID_DEV_ENV_STRINGS: list[str] = ["d", "dev", "development"]
+VALID_PROD_ENV_STRINGS: list[str] = ["p", "prod", "production"]
+VALID_ENV_STRINGS: list[str] = VALID_DEV_ENV_STRINGS + VALID_PROD_ENV_STRINGS
 
-prod_compose_dict: dict = {
-    "env": "prod",
-    "compose_file": PROD_COMPOSE_FILE,
-    "compose_env_file": PROD_COMPOSE_ENV_FILE,
-}
+
+def validate_path(p: t.Union[str, Path] = None) -> Path:
+    assert p, ValueError("Missing a path to validate")
+    assert isinstance(p, Path) or isinstance(p, str), TypeError(
+        f"p must be a string or Path. Got type: ({type(p)})"
+    )
+
+    _path: Path = Path(f"{p}")
+    if "~" in f"{_path}":
+        _path: Path = Path(f"{_path}").expanduser()
+
+    return _path
+
+
+def validate_env_str(env_str: str = None) -> str:
+    assert env_str, ValueError("Missing an environment string to parse")
+    assert isinstance(env_str, str), TypeError(
+        f"env_str must be a string. Got type: ({type(env_str)})"
+    )
+
+    ## Environment check
+    if env_str in VALID_DEV_ENV_STRINGS:
+        ## Dev
+        env = "dev"
+
+    elif env_str in VALID_PROD_ENV_STRINGS:
+        ## Prod
+        env = "prod"
+
+    else:
+        raise ValueError(
+            f"Invalid environment: '{env_str}'. Must be one of {VALID_ENV_STRINGS}"
+        )
+
+    return env
+
+
+def validate_parser_obj(
+    parser: argparse.ArgumentParser = None,
+) -> argparse.ArgumentParser:
+    assert parser, ValueError("Missing an arg parser")
+    assert isinstance(parser, argparse.ArgumentParser), TypeError(
+        f"parser must be of type argparse.ArgumentParser. Got type: ({type(parser)})"
+    )
+
+    return parser
+
+
+def validate_subparser_obj(
+    subparser: argparse._SubParsersAction = None,
+) -> argparse._SubParsersAction:
+    assert subparser, ValueError("Missing a subparser object.")
+    assert isinstance(subparser, argparse._SubParsersAction), TypeError(
+        f"subparser must be of type _SubParsersAction[ArgumentParser]. Got type: ({type(subparser)})"
+    )
+
+    return subparser
 
 
 @dataclass
-class ComposeFileMeta:
-    env: str = field(default="prod")
-    compose_file: Path = field(default=None)
-    compose_env_file: Path = field(default=None)
+class ComposeEnvironmentSpec:
+    env_name: str = field(default=None)
+    compose_file: t.Union[str, Path] = field(default=None)
+    env_file: t.Union[str, Path] = field(default=None)
 
-    @property
-    def compose_f_param(self) -> list[str]:
-        """Return ["-f", f"{self.compose_file}]."""
-        return ["-f", f"{self.compose_file}"]
+    def __post_init__(self):  # noqa: D105
+        self.env_name = validate_env_str(env_str=self.env_name)
+        self.compose_file = validate_path(self.compose_file)
+        self.env_file = validate_path(self.env_file)
 
-    def cmd_str_prefix(self) -> list[str]:
-        return ["docker", "compose"] + self.compose_f_param
-
-
-DEV_COMPOSE: ComposeFileMeta = ComposeFileMeta(**dev_compose_dict)
-PROD_COMPOSE: ComposeFileMeta = ComposeFileMeta(**prod_compose_dict)
+    def cmd_prefix(self) -> list[str]:
+        return ["docker", "compose", "-f", str(self.compose_file)]
 
 
-def clear() -> None:
-    cmd = "cls" if os.name == "nt" else "clear"
-    os.system(cmd)
+DEV_ENV: ComposeEnvironmentSpec = ComposeEnvironmentSpec(
+    env_name="dev", compose_file=DEV_COMPOSE_FILE, env_file=DEV_COMPOSE_ENV_FILE
+)
+PROD_ENV: ComposeEnvironmentSpec = ComposeEnvironmentSpec(
+    env_name="prod", compose_file=PROD_COMPOSE_FILE, env_file=PROD_COMPOSE_ENV_FILE
+)
 
 
-def prompt_env(loop_msg: str = None) -> str:
-    clear()
+def _parse_env(parser: argparse.ArgumentParser = None):
+    parser = validate_parser_obj(parser=parser)
+    parser.add_argument(
+        "-e",
+        "--env",
+        choices=VALID_ENV_STRINGS,
+        required=True,
+        help=f"Environment selection. Development options: {VALID_DEV_ENV_STRINGS}; Production options: {VALID_PROD_ENV_STRINGS}.",
+    )
 
+
+def _add_compose_log_parser(
+    subparsers: argparse._SubParsersAction = None,
+):
+    subparsers = validate_subparser_obj(subparser=subparsers)
+
+    logs_parser = subparsers.add_parser(
+        "logs", help="Follow logs for a container. Must pass a container name."
+    )
+    ## Add container name requirement
+    logs_parser.add_argument(
+        "container", metavar="<container_name>", help="Container name"
+    )
+
+
+def _add_compose_attach_parser(subparsers: argparse._SubParsersAction = None):
+    subparsers = validate_subparser_obj(subparser=subparsers)
+
+    attach_parser = subparsers.add_parser(
+        "attach", help="Attach to a container. Must pass a container name."
+    )
+    ## Add container name requirement
+    attach_parser.add_argument(
+        "container", metavar="<container_name>", help="Container name"
+    )
+
+
+def _add_compose_restart_parser(subparsers: argparse._SubParsersAction = None):
+    subparsers = validate_subparser_obj(subparser=subparsers)
+
+    restart_parser = subparsers.add_parser(
+        "restart", help="Restart a container. Must pass a container name."
+    )
+    ## Add container name requirement
+    restart_parser.add_argument(
+        "container", metavar="<container_name>", help="Container name"
+    )
+
+
+def _get_compose_spec(env_str: str = None) -> ComposeEnvironmentSpec:
+    env_str = validate_env_str(env_str=env_str)
+    ## Environment check
+
+    compose_spec: ComposeEnvironmentSpec = PROD_ENV if env_str == "prod" else DEV_ENV
+
+    return compose_spec
+
+
+def _add_operations_to_subparser(
+    subparsers: argparse._SubParsersAction = None,
+    operations: list[str] = None,
+) -> argparse._SubParsersAction:
+    subparsers = validate_subparser_obj(subparser=subparsers)
+
+    for operation in operations:
+        subparsers.add_parser(operation)
+
+    return subparsers
+
+
+def run_cli() -> None:
+    ## Create main parser
+    parser = argparse.ArgumentParser(
+        description="CLI for the auto-xkcd Docker Compose stack."
+    )
+
+    ## Add environment selection arg
+    _parse_env(parser=parser)
+
+    ## Create subparser for docker-compose commands
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser] = (
+        parser.add_subparsers(
+            dest="operation", required=True, help="Docker Compose operation to perform."
+        )
+    )
+
+    ## Create subparser for docker-compose logs commands
+    _add_compose_log_parser(subparsers=subparsers)
+
+    ## Create subparser for docker-compose attach commands
+    _add_compose_attach_parser(subparsers=subparsers)
+
+    ## Create subparser for docker-compose restart commands
+    _add_compose_restart_parser(subparsers=subparsers)
+
+    ## Add subarsers main parser
+    subparsers = _add_operations_to_subparser(
+        subparsers=subparsers,
+        operations=["build", "build-nocache", "up", "up-build", "down"],
+    )
+
+    ## Parse args
     try:
-        if loop_msg:
-            print(loop_msg)
-
-        choice = input("> Which environment [options: (d)ev|(p)rod]?: ").lower()
-
-        if choice in ["d", "dev"]:
-            choice = "dev"
-        elif choice in ["p", "prod"]:
-            choice = "prod"
-
-        if choice not in ["dev", "prod"]:
-            msg = ValueError(
-                f"[ERROR] Invalid choice: {choice}. Must be one of ['dev', 'prod']"
-            )
-
-            choice = prompt_env(loop_msg=msg)
-
-        return choice
-
+        args = parser.parse_args()
     except Exception as exc:
-        msg = Exception(f"Unhandled exception parsing user input. Details: {exc}")
-        print(f"[ERROR] {msg}")
+        parser.error(Exception(f"Error while parsing args. Details: {exc}"))
 
-        raise msg
+    # ## Environment check
+    DOCKER_ENV: ComposeEnvironmentSpec = _get_compose_spec(env_str=args.env)
+    print(f"Docker Compose environment: {DOCKER_ENV}")
 
+    ## Create command map
+    command_map: dict[str, t.Any] = {
+        "build": DOCKER_ENV.cmd_prefix() + ["build"],
+        "build-nocache": DOCKER_ENV.cmd_prefix() + ["build", "--no-cache"],
+        "up": DOCKER_ENV.cmd_prefix() + ["up", "-d"],
+        "up-build": DOCKER_ENV.cmd_prefix() + ["up", "-d", "--build"],
+        "down": DOCKER_ENV.cmd_prefix() + ["down"],
+    }
 
-class ComposeCLIContext(AbstractContextManager):
-    def __init__(
-        self, compose_meta: ComposeFileMeta, env: str | None = None
-    ):  # noqa: D107
-        self.compose_meta = compose_meta
-        # self.env = env
-        self.proc = None
+    ## Detect docker-compose operation
+    operation: str = args.operation
+    ## Get container name option if operation requires one
+    container: str | None = getattr(args, "container", None)
 
-    def __enter__(self):  # noqa: D105
-        choice = self.get_choice()
+    ## An operation requiring a container name was selected, but no container name was passed
+    if operation in ["logs", "attach", "restart"] and not container:
+        parser.error(f"Operation '{operation}' requires a container name")
 
-        self.choice = choice
-        if choice == "5":
-            self.prompt_container_name()
+    ## Build docker-compose command
+    command = (
+        command_map.get(operation)
+        if operation not in ["logs", "attach", "restart"]
+        else (
+            DOCKER_ENV.cmd_prefix() + ["logs", "-f", container]
+            if operation == "logs"
+            else DOCKER_ENV.cmd_prefix() + [operation, container]
+        )
+    )
 
-        return self
+    if not command:
+        ## Command not found
+        parser.error(message=f"Invalid operation: command '{command}' not found")
+    else:
+        ## Command found, build and run
+        print(f"Running docker-compose command: {' '.join(command)}")
 
-    def __exit__(self, exc_type, exc_value, traceback):  # noqa: D105
-        pass
+        ## Use subprocess.PIPE/.STDOUT for docker-compose commands
+        #  whose output should be tailed
+        if operation in ["logs", "attach"]:
+            try:
+                ## Open subprocess and pipe docker-compose command, leaving open
+                with subprocess.Popen(
+                    command,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    bufsize=1,
+                    universal_newlines=True,
+                ) as process:
+                    ## Print command lines to console
+                    for line in process.stdout:
+                        print(line, end="")
 
-    def prompt_container_name(self):
-        self.container_name = input("Enter container name: ")
+            ## CTRL-C command detected in pipe
+            except KeyboardInterrupt:
+                print("\n[CTRL-C detected] Operation interrupted.")
+                # process.terminate()  # Terminate the subprocess explicitly
 
-    # def prompt_compose_env(self) -> str:
-    #     if self.env:
-    #         return self
+            ## subprocess error
+            except subprocess.CalledProcessError as e:
+                print(f"Error running command: {e}")
 
-    #     _env = prompt_env()
-    #     self.env = _env
+            except Exception as exc:
+                err_details: dict = {
+                    "exc_type": type(exc),
+                    "command": command,
+                    "exc_text": exc,
+                }
+                parser.error(
+                    Exception(
+                        f"Unhandled exception running command. Details: {err_details}"
+                    )
+                )
+        else:
+            ## Any other operation that's not logs or attach
+            try:
+                ## Run command
+                subprocess.run(command, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error running command: {e}")
 
-    #     return self
-
-    def get_choice(self, loop_msg: str = None):
-        # if not self.env:
-        #     prompt_env()
-
-        def print_menu() -> None:
-            print(f"[env:{self.compose_meta.env}] Docker Compose CLI\n")
-            print("Choose an option:")
-            print("1: docker compose build")
-            print("2: docker compose build --no-cache")
-            print("3: docker compose up -d")
-            print("4: docker compose up -d --build")
-            # print("5: docker compose logs -f <container_name>")
-            print(
-                "5: docker compose up -d --build && docker compose logs -f <container_name>"
-            )
-
-            print("")
-            print("a: attach (for viewing live CLI of container)")
-            print("d: docker compose down")
-            print("l: docker compose logs -f <container_name>")
-            print("r: docker compose restart <container_name>")
-            print("\nq: quit")
-
-        valid_choices: list[str] = ["1", "2", "3", "4", "5", "a", "l", "d", "r"]
-
-        clear()
-
-        print_menu()
-
-        if loop_msg:
-            print(loop_msg)
-
-        _choice: str = input("\n> Choice: ")
-
-        if _choice == "q":
-            print("Quitting.")
-            exit(0)
-
-        while _choice not in valid_choices:
-            msg = ValueError(f"Invalid choice: {_choice}")
-            print(f"[ERROR] {msg}")
-            _choice = self.get_choice(loop_msg=msg)
-
-        return _choice
-
-    def _build(self, with_cache: bool = True) -> list[str]:
-        cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
-            "build",
-        ]
-
-        if not with_cache:
-            cmd = cmd + ["--no-cache"]
-
-        return cmd
-
-    def _up(self, build: bool = False) -> list[str]:
-        cmd: list[str] = self.compose_meta.cmd_str_prefix() + ["up", "-d"]
-
-        if build:
-            cmd = cmd + ["--build"]
-
-        return cmd
-
-    def _restart(self) -> list[str]:
-        cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
-            "restart",
-            self.container_name,
-        ]
-
-        return cmd
-
-    def _logs(self) -> list[str]:
-        cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
-            "logs",
-            "-f",
-            self.container_name,
-        ]
-
-        return cmd
-
-    def _attach(self) -> None:
-        cmd: list[str] = self.compose_meta.cmd_str_prefix() + [
-            "attach",
-            self.container_name,
-        ]
-
-        return cmd
-
-    def _down(self) -> list[str]:
-        cmd: list[str] = self.compose_meta.cmd_str_prefix() + ["down"]
-
-        return cmd
-
-    def run_command(self):
-        match self.choice:
-            case "1":
-                command: list[str] = self._build()
-            case "2":
-                command = self._build(with_cache=False)
-            case "3":
-                command = self._up()
-            case "4":
-                command = self._up(build=True)
-            case "5":
-                if not hasattr(self, "container_name"):
-                    self.container_name = input("Enter container name: ")
-                command = self._up(build=True)
-                command = self._logs()
-            case "a":
-                if not hasattr(self, "container_name"):
-                    self.container_name = input("Enter container name: ")
-                command = self._attach()
-            case "d":
-                command = self._down()
-            case "l":
-                if not hasattr(self, "container_name"):
-                    self.container_name = input("Enter container name: ")
-                command = self._logs()
-            case "r":
-                if not hasattr(self, "container_name"):
-                    self.container_name = input("Enter container name: ")
-                command = self._restart()
-            case _:
-                raise ValueError(f"Invalid choice: {self.choice}")
-
-        print(f"Docker command: {command}")
-        try:
-            subprocess.run(command)
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception running command '{command}'. Details: {exc}"
-            )
-            print(f"[ERROR] {msg}")
-
-            return
-
-
-def main(env: str = None):
-    if not env:
-        env: str = prompt_env()
-
-    match env:
-        case "prod":
-            compose_meta: ComposeFileMeta = PROD_COMPOSE
-        case "dev":
-            compose_meta: ComposeFileMeta = DEV_COMPOSE
-        case _:
-
-            raise ValueError(f"Unknown env: {env}")
-
-    with ComposeCLIContext(compose_meta=compose_meta) as ctx:
-        ctx.run_command()
+            except Exception as exc:
+                err_details: dict = {
+                    "exc_type": type(exc),
+                    "command": command,
+                    "exc_text": exc,
+                }
+                parser.error(
+                    Exception(
+                        f"Unhandled exception running command. Details: {err_details}"
+                    )
+                )
 
 
 if __name__ == "__main__":
-    env: str = prompt_env()
-    main(env=env)
+    run_cli()

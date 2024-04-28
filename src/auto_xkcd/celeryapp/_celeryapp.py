@@ -16,11 +16,17 @@ app: Celery = Celery(
     "celery_tasks",
     broker=celery_settings.broker_url,
     backend=celery_settings.backend_url,
+    include=[
+        "celeryapp.celery_tasks.comic",
+        "celeryapp.celery_tasks.demo",
+        "celeryapp.celery_tasks.scheduled",
+    ],
 )
 # app.autodiscover_tasks(
 #     [
 #         "celeryapp.celery_tasks.comic",
 #         "celeryapp.celery_tasks.demo",
+#         "celeryapp.celery_tasks.scheduled",
 #     ]
 # )
 

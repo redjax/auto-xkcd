@@ -27,11 +27,11 @@ tags: list[str] = ["task"]
 router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=tags)
 
 
-@router.get("/")
-def tasks_root() -> JSONResponse:
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"msg": "Tasks root reached"}
-    )
+# @router.get("/")
+# def tasks_root() -> JSONResponse:
+#     return JSONResponse(
+#         status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Missing a task_id"}
+#     )
 
 
 @router.get("/id/{task_id}")

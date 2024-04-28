@@ -32,32 +32,10 @@ tags: list[str] = ["test"]
 router: APIRouter = APIRouter(prefix=prefix, responses=API_RESPONSES_DICT, tags=tags)
 
 
-@router.get("/")
-def testing_root() -> JSONResponse:
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"msg": "testing root reached"}
-    )
-
-
-# @router.get("/trigger-new-comic")
-# def test_route() -> JSONResponse:
-#     log.info("Starting background task")
-#     try:
-#         task: AsyncResult = celery_mod.tasks.comic_tasks.task_current_comic.delay()
-#     except Exception as exc:
-#         msg = Exception(
-#             f"Unhandled exception running background task to get current comic. Details: {exc}"
-#         )
-#         log.error(msg)
-#         log.trace(exc)
-
-#         return JSONResponse(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             content={"error": "Background task exited unexpectedly."},
-#         )
-
+# @router.get("/")
+# def testing_root() -> JSONResponse:
 #     return JSONResponse(
-#         status_code=status.HTTP_200_OK, content={"success": True, "task_id": task.id}
+#         status_code=status.HTTP_200_OK, content={"msg": "testing root reached"}
 #     )
 
 
