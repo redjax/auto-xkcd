@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     try:
         worker = celeryapp.app.worker_main(
-            argv=["worker", "--loglevel=DEBUG", "--uid=1000", "--gid=1000"]
+            argv=["worker", "--loglevel=DEBUG", "--uid=0", "--gid=0"]
         )
     except Exception as exc:
         msg = Exception(f"Unhandled exception getting Celery worker. Details: {exc}")
