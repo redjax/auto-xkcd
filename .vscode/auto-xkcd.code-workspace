@@ -10,11 +10,11 @@
 		},
 		{
 			"path": "../config",
-			"name": "config"
+			"name": "Config"
 		},
 		{
 			"path": "../containers",
-			"name": "containers"
+			"name": "Containers"
 		},
 		{
 			"path": "../src/auto_xkcd",
