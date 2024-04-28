@@ -83,7 +83,7 @@ def prompt_env(loop_msg: str = None) -> str:
 
 
 class ComposeCLIContext(AbstractContextManager):
-    def __init__(
+    def __init__(  # noqa: D107
         self, compose_meta: ComposeFileMeta, env: str | None = None
     ):  # noqa: D107
         self.compose_meta = compose_meta
