@@ -9,16 +9,16 @@
 
         <ul class="uk-background-secondary uk-light" uk-dropnav="dropbar: true">
           <li>
-            <a {% if page_title == 'comics' %}class="uk-active" {% endif %}href="/comics">comics <span uk-drop-parent-icon></a>
+            <a href="/comics">comics <span uk-drop-parent-icon></a>
 
           <div class="uk-navbar-dropdown uk-background-secondary uk-light">
             <ul class="uk-nav uk-navbar-dropdown-nav uk-background-secondary uk-light">
-              <li class="{% if page_title == 'all comics' %}uk-active{% endif %}"><a href="/comics/all">all comics</a></li>
+              <li><a href="/comics/all">all comics</a></li>
 
               <hr class="uk-divider">
               
-              <li><a {% if page_title == 'random comic' %}class="uk-active" {% endif %}href="/comics/random">random comic</a></li>
-              <li><a {% if page_title == 'search comics' %}class="uk-active "{% endif %}href="#">search comics</a></li>
+              <li><a href="/comics/random">random comic</a></li>
+              <li><a href="#">search comics</a></li>
               
             </ul>
           </div>

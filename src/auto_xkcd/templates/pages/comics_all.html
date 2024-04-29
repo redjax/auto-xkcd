@@ -4,8 +4,15 @@
 <section class="uk-section">
     <div class="uk-container">
         <div class="uk-child-width-expand@s uk-text-center" uk-grid>
-            <p>Page title: {{ page_title }}</p>
+            <div>
+                <p>Page title: {{ page_title }}</p>
+            </div>
+
+            <div>
+                <p>Total number of comics in database: {{ count }}</p>
+            </div>
         </div>
+
     </div>
 </section>
 {% endblock main_content %}
