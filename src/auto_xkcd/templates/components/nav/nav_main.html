@@ -1,58 +1,32 @@
-<nav class="navbar has-background-dark has-text-white is-selected mb-1" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a class="navbar-item" href="/">
-      <div class="is-size-5-mobile is-size-3-desktop has-text-success">auto-xkcd</div>
-    </a>
+<nav class="uk-navbar-container uk-background-secondary uk-light">
+  <div class="uk-container uk-background-secondary uk-light">
+  
+    <div class="uk-background-secondary uk-light" uk-navbar>
 
-    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
-  </div>
+      <div class="uk-navbar-left uk-background-secondary uk-light">
 
-  <div id="navbarBasicExample" class="navbar-menu">
-    <div class="navbar-start">
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link" href="/comics">
-          comics
-        </a>
+        <li class="uk-navbar-item uk-logo"><a href="/">auto-xkcd</a></li>
 
-        <div class="navbar-dropdown">
-          <a class="navbar-item {% if page_title == 'random comic' %}is-selected{% endif %}" href="/comics/random">
-            <span class="icon-text">
-                <span class="icon">
-                    <ion-icon name="dice"></ion-icon>
-                </span>
-            </span>
-            <span>random</span>
-          </a>
-          <a class="navbar-item {% if page_title == 'all comics' %}is-selected{% endif %}", href="/comics/all">
-            all
-          </a>
+        <ul class="uk-background-secondary uk-light" uk-dropnav="dropbar: true">
+          <li>
+            <a {% if page_title == 'comics' %}class="uk-active" {% endif %}href="/comics">comics <span uk-drop-parent-icon></a>
 
-          <hr class="navbar-divider">
+          <div class="uk-navbar-dropdown uk-background-secondary uk-light">
+            <ul class="uk-nav uk-navbar-dropdown-nav uk-background-secondary uk-light">
+              <li class="{% if page_title == 'all comics' %}uk-active{% endif %}"><a href="/comics/all">all comics</a></li>
 
-          <a class="navbar-item {% if page_title == 'search' %}is-selected{% endif %}" href="#">
-            search
-          </a>
-        </div>
+              <hr class="uk-divider">
+              
+              <li><a {% if page_title == 'random comic' %}class="uk-active" {% endif %}href="/comics/random">random comic</a></li>
+              <li><a {% if page_title == 'search comics' %}class="uk-active "{% endif %}href="#">search comics</a></li>
+              
+            </ul>
+          </div>
+        </li>
+
       </div>
 
     </div>
-
-    <!-- <div class="navbar-end">
-      <div class="navbar-item">
-        <div class="buttons">
-          <a class="button is-primary">
-            <strong>Sign up</strong>
-          </a>
-          <a class="button is-light">
-            Log in
-          </a>
-        </div>
-      </div>
-    </div> -->
 
   </div>
 </nav>

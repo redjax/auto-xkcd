@@ -115,6 +115,15 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
 
             raise msg
 
+    def count(self) -> int:
+        try:
+            return self.session.query(XKCDComicModel).count()
+        except Exception as exc:
+            msg = Exception(f"Unhandled exception counting entities. Details: {exc}")
+            log.error(msg)
+
+            raise msg
+
 
 class CurrentComicMetaRepository(CurrentComicMetaRepositoryBase):
     """Database repository for handling metadata entities for current XKCD comic."""

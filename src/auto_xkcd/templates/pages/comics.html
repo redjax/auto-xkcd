@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-<section class="section">
-    <article class="message">
-        
-        <p>Page title: {{ page_title }}</p>
-
-    </article>
+<section class="uk-section">
+    <div class="uk-container">
+        <div class="uk-child-width-expand@s uk-text-center" uk-grid>
+            <p>Page title: {{ page_title }}</p>
+        </div>
+    </div>
 </section>
 {% endblock main_content %}

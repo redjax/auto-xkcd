@@ -8,6 +8,7 @@ from api import helpers as api_helpers
 # from api.api_responses import API_RESPONSES_DICT, img_response
 from api.routers._frontend._responses import FRONTEND_RESPONSES_DICT
 from api.depends import cache_transport_dependency, db_dependency
+from .methods import count_total_comics
 
 # from celery.result import AsyncResult
 # import celeryapp
@@ -71,11 +72,12 @@ def render_comics_page(request: Request) -> HTMLResponse:
 
 @router.get("/comics/all", response_class=HTMLResponse)
 def render_all_comics_page(request: Request) -> HTMLResponse:
+    count_comics = count_total_comics()
     template = templates.TemplateResponse(
         request=request,
         name="pages/comics_all.html",
         status_code=status.HTTP_200_OK,
-        context={"page_title": "all comics"},
+        context={"page_title": "all comics", "count": count_comics},
     )
 
     return template
