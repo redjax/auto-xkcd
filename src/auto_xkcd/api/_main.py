@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from api._tags import CUSTOM_API_TAGS
 from api.config import APISettings, api_settings
-from api.routers import admin_router, api_v1_router
+from api.routers import admin_router, api_v1_router, frontend_router
 from fastapi import APIRouter, FastAPI, status
 from fastapi.responses import JSONResponse
 from loguru import logger as log
@@ -10,7 +10,7 @@ from loguru import logger as log
 from red_utils.ext.fastapi_utils import tags_metadata, update_tags_metadata
 
 IMPORT_ADMIN_ROUTER: bool = api_settings.include_admin_router
-INCLUDE_ROUTERS: list[APIRouter] = [api_v1_router]
+INCLUDE_ROUTERS: list[APIRouter] = [api_v1_router, frontend_router]
 
 if IMPORT_ADMIN_ROUTER:
     INCLUDE_ROUTERS.append(admin_router)
@@ -44,12 +44,12 @@ if IMPORT_ADMIN_ROUTER:
     app.include_router(admin_router)
 
 
-@app.get("/")
-def root() -> JSONResponse:
-    log.debug("Root route reached")
+# @app.get("/")
+# def root() -> JSONResponse:
+#     log.debug("Root route reached")
 
-    res: JSONResponse = JSONResponse(
-        status_code=status.HTTP_200_OK, content={"message": "Hello, world!"}
-    )
+#     res: JSONResponse = JSONResponse(
+#         status_code=status.HTTP_200_OK, content={"message": "Hello, world!"}
+#     )
 
-    return res
+#     return res
