@@ -59,6 +59,7 @@ pandas==2.2.1
 parsy==2.1
 pathspec==0.12.1
 pendulum==3.0.0
+pillow==10.3.0
 platformdirs==4.2.0
 pluggy==1.4.0
 prompt-toolkit==3.0.43

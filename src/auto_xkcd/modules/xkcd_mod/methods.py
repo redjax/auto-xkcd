@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+from functools import lru_cache
 from pathlib import Path
 import sqlite3
 import typing as t
@@ -7,6 +9,7 @@ import typing as t
 from .response_handler import convert_db_comic_to_comic_obj
 
 from core import paths, request_client
+from core.constants import XKCD_URL_BASE
 from core.dependencies import get_db
 from domain.xkcd import comic
 from helpers import data_ctl
@@ -19,6 +22,7 @@ from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as sa
 from utils import serialize_utils
+
 
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
@@ -159,9 +163,7 @@ def get_comic_from_db(comic_num: int = None) -> None | comic.XKCDComic:
         return None
     else:
         try:
-            _comic: comic.XKCDComic = convert_db_comic_to_comic_obj(
-                db_comic=db_comic.__dict__
-            )
+            _comic: comic.XKCDComic = convert_db_comic_to_comic_obj(db_comic=db_comic)
 
             return _comic
         except Exception as exc:
@@ -311,8 +313,15 @@ def request_and_save_comic_img(
         output_dir (str|Path): Path to the directory where comic image will be saved.
 
     """
+    log.debug(f"Comic ({type(comic)}): {comic}")
     ## Extract image URL
     img_url: str = comic.img_url
+    if img_url is None:
+        log.warning(
+            f"URL for comic #{comic.comic_num} is None. Setting URL to {XKCD_URL_BASE}/{comic.comic_num}"
+        )
+        url: str = f"{XKCD_URL_BASE}/{comic.comic_num}"
+
     ## Build request for image
     img_req: httpx.Request = request_client.build_request(url=img_url)
 
@@ -507,3 +516,36 @@ def list_missing_nums() -> list[int]:
     log.debug(f"Found [{len(missing_comic_nums)}] missing comic number(s)")
 
     return missing_comic_nums
+
+
+@lru_cache
+def count_comics_in_db() -> int:
+    with get_db() as session:
+        repo = comic.XKCDComicRepository(session)
+
+        _count = repo.count()
+
+    return _count
+
+
+def encode_img_bytes(img_bytes: bytes = None, encoding: str = "utf-8"):
+    img_base64: str = base64.b64encode(img_bytes).decode(encoding=encoding)
+
+    return img_base64
+
+
+def read_current_comic_file() -> int:
+    try:
+        with data_ctl.CurrentComicController() as current_comic_ctl:
+            _data = current_comic_ctl.read()
+
+            return _data
+
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception reading current comic metadata. Details: {exc}"
+        )
+        log.error(msg)
+
+        ## Default to 0, which is the "current" XKCD comic
+        return None

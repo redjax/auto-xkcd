@@ -2,13 +2,18 @@ from __future__ import annotations
 
 from pathlib import Path
 import typing as t
+import random
+import base64
+import time
 
+from core.constants import IGNORE_COMIC_NUMS
 from api import helpers as api_helpers
+
+from helpers import data_ctl
 
 # from api.api_responses import API_RESPONSES_DICT, img_response
 from api.routers._frontend._responses import FRONTEND_RESPONSES_DICT
 from api.depends import cache_transport_dependency, db_dependency
-from .methods import count_total_comics
 
 # from celery.result import AsyncResult
 # import celeryapp
@@ -72,7 +77,7 @@ def render_comics_page(request: Request) -> HTMLResponse:
 
 @router.get("/comics/all", response_class=HTMLResponse)
 def render_all_comics_page(request: Request) -> HTMLResponse:
-    count_comics = count_total_comics()
+    count_comics = xkcd_mod.count_comics_in_db()
     template = templates.TemplateResponse(
         request=request,
         name="pages/comics_all.html",
@@ -85,11 +90,88 @@ def render_all_comics_page(request: Request) -> HTMLResponse:
 
 @router.get("/comics/random", response_class=HTMLResponse)
 def render_random_comics_page(request: Request) -> HTMLResponse:
+    ## Load current XKCD comic metadata from file to set max number for random comic
+    try:
+        current_comic_metadata = xkcd_comic.current_comic.get_current_comic_metadata()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading current XKCD comic metadata from file, and failed requesting current comic. Details: {exc}"
+        )
+        log.error(msg)
+
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "InternalServerError": "Error loading random XKCD comic. Check the server logs."
+            },
+        )
+
+    current_comic_num: int = current_comic_metadata.comic_num
+
+    ## Get a random comic number betwee 1 and the current XKCD comic number
+    rand_index: int = random.randint(1, current_comic_num)
+
+    ## Re-roll if rand_index is 404
+    while rand_index in IGNORE_COMIC_NUMS:
+        log.warning(
+            f"Random comic number [{rand_index}] is in ignored list. Re-rolling"
+        )
+        rand_index = random.randint(1, current_comic_num)
+
+    ## Load/request comic
+    _comic: comic.XKCDComic | None = xkcd_comic.comic.get_single_comic(
+        comic_num=rand_index
+    )
+
+    if _comic is None:
+        ## Comic not found, checked DB, serialized files, and attempted a live request.
+        log.warning(f"Comic #{rand_index} not found.")
+
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "NotFound": f"Could not find XKCD comic #{rand_index} locally, and failed requesting from the XKCD API."
+            },
+        )
+
+    log.debug(f"COMIC ({type(_comic)}):\n{_comic}")
+
+    try:
+        ## Load comic image from database
+        _comic_img: comic.XKCDComicImage | None = (
+            xkcd_comic.comic_img.retrieve_img_from_db(comic_num=rand_index)
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading XKCD comic #{rand_index} image from database. Details: {exc}"
+        )
+        log.error(msg)
+
+    if _comic_img is None:
+        ## Comic not found in database, request from API and save
+        log.warning(f"Comic #{rand_index} image not found.")
+
+        _comic_img = xkcd_mod.save_comic_img(comic_obj=_comic)
+
+    ## Encode img bytes so comic image can be rendered on webpage
+    try:
+        img_base64 = xkcd_mod.encode_img_bytes(_comic_img.img)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception converting XKCD comic #{rand_index} image to base64-encoded bytes. Details: {exc}"
+        )
+        log.error(msg)
+
+    ## Build template response
     template = templates.TemplateResponse(
         request=request,
         name="pages/comics_random.html",
         status_code=status.HTTP_200_OK,
-        context={"page_title": "random comic"},
+        context={
+            "page_title": "random comic",
+            "comic": _comic,
+            "comic_img": img_base64,
+        },
     )
 
     return template

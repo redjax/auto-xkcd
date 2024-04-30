@@ -17,6 +17,7 @@ from red_utils.ext import time_utils
 from red_utils.std import hash_utils
 from utils.list_utils import prepare_list_shards
 
+
 class ComicNumCSVData(BaseModel):
     """Store metadata about a comic number, like if the image has been saved.
 
@@ -106,7 +107,9 @@ class XKCDComicBase(BaseModel):
     year: str = Field(default=None)
     month: str = Field(default=None)
     day: str = Field(default=None)
-    comic_num: int = Field(default=None, alias="num")
+    ## XKCD's API responds with 'num,' but I use 'comic_num'.
+    #  Set priority 2 on alias so DB model validation works
+    comic_num: int = Field(default=None, alias="num", alias_priorty=2)
     # link: str | None = Field(default=None)
     title: str = Field(default=None)
     transcript: str | None = Field(default=None)

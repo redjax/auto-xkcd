@@ -15,4 +15,7 @@ from .methods import (
     save_serialize_comic_object,
     update_current_comic_json,
     update_current_comic_meta_db,
+    count_comics_in_db,
+    encode_img_bytes,
+    read_current_comic_file,
 )

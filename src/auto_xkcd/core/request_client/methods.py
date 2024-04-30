@@ -9,6 +9,7 @@ import typing as t
 import httpx
 from loguru import logger as log
 
+
 def save_bytes(
     _bytes: bytes = None,
     output_dir: t.Union[str, Path] = None,

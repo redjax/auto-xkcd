@@ -18,6 +18,7 @@ from modules import data_mod, requests_prefab, xkcd_mod
 from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 
+
 def get_single_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     comic_num: int = None,
@@ -40,6 +41,21 @@ def get_single_comic(
         log.warning(f"Comic #{comic_num} is in list of ignored comic numbers. Skipping")
 
         return None
+
+    ## Attempt to load from DB
+    try:
+        _comic = xkcd_mod.get_comic_from_db(comic_num=comic_num)
+
+        if _comic:
+            return _comic
+
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting comic #{comic_num} from database. Details: {exc}"
+        )
+        log.error(msg)
+
+    log.warning(f"Comic #{comic_num} not found in database. Requesting comic.")
 
     req: httpx.Request = requests_prefab.comic_num_req(comic_num=comic_num)
 

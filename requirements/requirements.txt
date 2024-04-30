@@ -49,6 +49,7 @@ packaging==24.0
 pandas==2.2.1
 parsy==2.1
 pendulum==3.0.0
+pillow==10.3.0
 prompt-toolkit==3.0.43
 pyarrow==15.0.2
 pyarrow-hotfix==0.6
