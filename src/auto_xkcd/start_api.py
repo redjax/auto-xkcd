@@ -48,6 +48,8 @@ if __name__ == "__main__":
         log.error(msg)
         log.trace(exc)
 
+    log.info("Starting uvicorn server")
+    log.debug(f"Uvicorn reload: {uvicorn_settings.reload}")
     try:
         run_server(uvicorn_settings=uvicorn_settings)
     except Exception as exc:

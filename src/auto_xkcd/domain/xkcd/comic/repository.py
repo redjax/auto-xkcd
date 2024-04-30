@@ -16,7 +16,6 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as so
 
-
 class XKCDComicRepository(XKCDComicRepositoryBase):
     """Database repository for handling XKCDComic entities."""
 
@@ -111,6 +110,15 @@ class XKCDComicRepository(XKCDComicRepositoryBase):
             msg = Exception(
                 f"Unhandled exception retrieving entity by ID '{num}'. Details: {exc}"
             )
+            log.error(msg)
+
+            raise msg
+
+    def count(self) -> int:
+        try:
+            return self.session.query(XKCDComicModel).count()
+        except Exception as exc:
+            msg = Exception(f"Unhandled exception counting entities. Details: {exc}")
             log.error(msg)
 
             raise msg

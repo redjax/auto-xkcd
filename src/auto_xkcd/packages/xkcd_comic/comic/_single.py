@@ -41,6 +41,21 @@ def get_single_comic(
 
         return None
 
+    ## Attempt to load from DB
+    try:
+        _comic = xkcd_mod.get_comic_from_db(comic_num=comic_num)
+
+        if _comic:
+            return _comic
+
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting comic #{comic_num} from database. Details: {exc}"
+        )
+        log.error(msg)
+
+    log.warning(f"Comic #{comic_num} not found in database. Requesting comic.")
+
     req: httpx.Request = requests_prefab.comic_num_req(comic_num=comic_num)
 
     ## Get comic Response

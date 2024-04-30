@@ -106,7 +106,9 @@ class XKCDComicBase(BaseModel):
     year: str = Field(default=None)
     month: str = Field(default=None)
     day: str = Field(default=None)
-    comic_num: int = Field(default=None, alias="num")
+    ## XKCD's API responds with 'num,' but I use 'comic_num'.
+    #  Set priority 2 on alias so DB model validation works
+    comic_num: int = Field(default=None, alias="num", alias_priorty=2)
     # link: str | None = Field(default=None)
     title: str = Field(default=None)
     transcript: str | None = Field(default=None)

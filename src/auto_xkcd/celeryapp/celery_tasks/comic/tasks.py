@@ -15,7 +15,6 @@ from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 from packages import xkcd_comic
 
-
 @app.task(name="request_current_comic")
 def task_current_comic() -> dict[str, XKCDComic]:
     log.info("Get current XKCD comic in background")

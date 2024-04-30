@@ -159,3 +159,37 @@ def get_current_comic(
             log.warning(f"Did not save XKCD comic #{comic_obj.comic_num} to database.")
 
     return comic_obj
+
+
+def get_current_comic_metadata() -> comic.CurrentComicMeta:
+    meta_dict = xkcd_mod.read_current_comic_file()
+
+    if meta_dict is None:
+        log.warning(
+            ValueError(
+                f"Metadata content could not be read from file. Attempting to refresh current comic metadata."
+            )
+        )
+
+        try:
+            current_comic: comic.XKCDComic = get_current_comic()
+
+            log.success(f"Current XKCD comic metadata refreshed.")
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception requesting current XKCD comic. Details: {exc}"
+            )
+            log.error(msg)
+
+            raise msg
+
+        log.info("Attempting to load current XKCD comic metadata from file again")
+
+        meta_dict = xkcd_mod.read_current_comic_file()
+
+        if meta_dict is None:
+            raise ValueError("Unable to load current XKCD comic metadata from file.")
+
+    _meta = comic.CurrentComicMeta(**meta_dict)
+
+    return _meta

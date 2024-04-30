@@ -1,0 +1,59 @@
+<nav class="uk-navbar-container uk-background-secondary uk-light">
+  <div class="uk-container uk-background-secondary uk-light">
+
+    <div class="uk-background-secondary uk-light" uk-navbar>
+
+      <!-- Left half of nav -->
+      <div class="uk-navbar-left uk-background-secondary uk-light">
+
+        <li class="uk-navbar-item uk-logo"><a href="/">auto-xkcd</a></li>
+
+        <!-- Comics dropdown -->
+        <ul class="uk-background-secondary uk-light" uk-dropnav="dropbar: true">
+          <li>
+            <a href="/comics">comics <span uk-drop-parent-icon></a>
+
+            <div class="uk-navbar-dropdown uk-background-secondary uk-light">
+              <!-- Comics dropdown items -->
+              <ul class="uk-nav uk-navbar-dropdown-nav uk-background-secondary uk-light">
+                <!-- All comics-->
+                <li><a href="/comics/all">all comics</a></li>
+
+                <hr class="uk-divider">
+
+                <!-- Random comic -->
+                <li><a href="/comics/random">random comic</a></li>
+
+              </ul>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+      <!-- End left half of nav -->
+
+      <!-- Right half of nav -->
+      <div class="uk-navbar-right">
+
+        <ul class="uk-navbar-nav">
+          <li>
+            <!-- Comic search -->
+            <a class="uk-navbar-toggle" href="" uk-search-icon></a>
+            <div class="uk-drop" uk-drop="mode: click; pos: left-center; offset: 0">
+              <form class="uk-search uk-search-navbar uk-width-1-1">
+                <input id="navComicSearch" class="uk-search-input" type="search" placeholder="comic #"
+                  aria-label="Search" autofocus>
+              </form>
+
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  </div>
+</nav>
+
+<!-- Navbar javascript for search bar -->
+{% include "components/nav/js/navbar_search.html" %}

@@ -1,8 +1,8 @@
-import typing as t
 import argparse
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass, field
+import typing as t
 
 ## Set paths to docker-compose and .env files
 DEV_COMPOSE_FILE: Path = Path("containers/docker-compose.dev.yml")
@@ -51,28 +51,6 @@ def validate_env_str(env_str: str = None) -> str:
     return env
 
 
-def validate_parser_obj(
-    parser: argparse.ArgumentParser = None,
-) -> argparse.ArgumentParser:
-    assert parser, ValueError("Missing an arg parser")
-    assert isinstance(parser, argparse.ArgumentParser), TypeError(
-        f"parser must be of type argparse.ArgumentParser. Got type: ({type(parser)})"
-    )
-
-    return parser
-
-
-def validate_subparser_obj(
-    subparser: argparse._SubParsersAction = None,
-) -> argparse._SubParsersAction:
-    assert subparser, ValueError("Missing a subparser object.")
-    assert isinstance(subparser, argparse._SubParsersAction), TypeError(
-        f"subparser must be of type _SubParsersAction[ArgumentParser]. Got type: ({type(subparser)})"
-    )
-
-    return subparser
-
-
 @dataclass
 class ComposeEnvironmentSpec:
     env_name: str = field(default=None)
@@ -97,7 +75,6 @@ PROD_ENV: ComposeEnvironmentSpec = ComposeEnvironmentSpec(
 
 
 def _parse_env(parser: argparse.ArgumentParser = None):
-    parser = validate_parser_obj(parser=parser)
     parser.add_argument(
         "-e",
         "--env",
@@ -110,8 +87,6 @@ def _parse_env(parser: argparse.ArgumentParser = None):
 def _add_compose_log_parser(
     subparsers: argparse._SubParsersAction = None,
 ):
-    subparsers = validate_subparser_obj(subparser=subparsers)
-
     logs_parser = subparsers.add_parser(
         "logs", help="Follow logs for a container. Must pass a container name."
     )
@@ -122,8 +97,6 @@ def _add_compose_log_parser(
 
 
 def _add_compose_attach_parser(subparsers: argparse._SubParsersAction = None):
-    subparsers = validate_subparser_obj(subparser=subparsers)
-
     attach_parser = subparsers.add_parser(
         "attach", help="Attach to a container. Must pass a container name."
     )
@@ -134,8 +107,6 @@ def _add_compose_attach_parser(subparsers: argparse._SubParsersAction = None):
 
 
 def _add_compose_restart_parser(subparsers: argparse._SubParsersAction = None):
-    subparsers = validate_subparser_obj(subparser=subparsers)
-
     restart_parser = subparsers.add_parser(
         "restart", help="Restart a container. Must pass a container name."
     )
@@ -158,12 +129,29 @@ def _add_operations_to_subparser(
     subparsers: argparse._SubParsersAction = None,
     operations: list[str] = None,
 ) -> argparse._SubParsersAction:
-    subparsers = validate_subparser_obj(subparser=subparsers)
-
     for operation in operations:
         subparsers.add_parser(operation)
 
     return subparsers
+
+
+def _add_build_parser(
+    subparsers: argparse._SubParsersAction = None,
+):
+    build_parser = subparsers.add_parser(
+        "build", help="Rebuild whole stack or single container"
+    )
+    ## Add container name requirement
+    build_parser.add_argument(
+        "container", metavar="<container_name>", nargs="?", help="Container name"
+    )
+    ## Add optional --no-cache flag
+    build_parser.add_argument(
+        "--no-cache",
+        "-nc",
+        action="store_true",
+        help="Build without using cache",
+    )
 
 
 def run_cli() -> None:
@@ -191,17 +179,17 @@ def run_cli() -> None:
     ## Create subparser for docker-compose restart commands
     _add_compose_restart_parser(subparsers=subparsers)
 
+    ## Create subparser for docker-compose build commands
+    _add_build_parser(subparsers=subparsers)
+
     ## Add subarsers main parser
     subparsers = _add_operations_to_subparser(
         subparsers=subparsers,
-        operations=["build", "build-nocache", "up", "up-build", "down"],
+        operations=["up", "up-build", "down"],
     )
 
     ## Parse args
-    try:
-        args = parser.parse_args()
-    except Exception as exc:
-        parser.error(Exception(f"Error while parsing args. Details: {exc}"))
+    args = parser.parse_args()
 
     # ## Environment check
     DOCKER_ENV: ComposeEnvironmentSpec = _get_compose_spec(env_str=args.env)
@@ -220,10 +208,6 @@ def run_cli() -> None:
     operation: str = args.operation
     ## Get container name option if operation requires one
     container: str | None = getattr(args, "container", None)
-
-    ## An operation requiring a container name was selected, but no container name was passed
-    if operation in ["logs", "attach", "restart"] and not container:
-        parser.error(f"Operation '{operation}' requires a container name")
 
     ## Build docker-compose command
     command = (
@@ -281,6 +265,19 @@ def run_cli() -> None:
                 )
         else:
             ## Any other operation that's not logs or attach
+
+            if operation in ["build", "build-nocache"]:
+                ## Append --no-cache flag if specified
+                if args.no_cache:
+                    command.append("--no-cache")
+
+                if container is None:
+                    pass
+                else:
+                    command.append(container)
+
+            print(f"Running command: {command}")
+
             try:
                 ## Run command
                 subprocess.run(command, check=True)
@@ -289,15 +286,30 @@ def run_cli() -> None:
 
             except Exception as exc:
                 err_details: dict = {
-                    "exc_type": type(exc),
+                    "exc_type": f"{type(exc)}",
                     "command": command,
-                    "exc_text": exc,
+                    "exc_text": f"{exc}",
                 }
                 parser.error(
                     Exception(
                         f"Unhandled exception running command. Details: {err_details}"
                     )
                 )
+
+            ## Restart container after rebuild
+            if operation in ["build", "build-nocache"]:
+                if container:
+                    print(f"Restarting container {container} after rebuilding")
+                    restart_cmd = DOCKER_ENV.cmd_prefix() + ["restart", container]
+                    try:
+                        subprocess.run(restart_cmd, check=True)
+                    except Exception as eexc:
+                        err_details: dict = {
+                            "exc_type": f"{type(exc)}",
+                            "command": command,
+                            "container": container,
+                            "exc_text": f"{exc}",
+                        }
 
 
 if __name__ == "__main__":
