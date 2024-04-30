@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from . import response_handler
 from .methods import (
+    count_comics_in_db,
+    encode_img_bytes,
     get_comic_from_db,
     list_missing_nums,
     load_serialized_comic,
     make_comic_request,
+    read_current_comic_file,
     request_and_save_comic_img,
     save_comic_img,
     save_comic_img_to_db,
@@ -15,7 +18,4 @@ from .methods import (
     save_serialize_comic_object,
     update_current_comic_json,
     update_current_comic_meta_db,
-    count_comics_in_db,
-    encode_img_bytes,
-    read_current_comic_file,
 )

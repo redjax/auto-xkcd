@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 FRONTEND_RESPONSES_DICT: dict[int, dict[str, t.Any]] = {

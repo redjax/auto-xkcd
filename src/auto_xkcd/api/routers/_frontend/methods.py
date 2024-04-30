@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from pathlib import Path
+
 from fastapi.templating import Jinja2Templates
-
 from loguru import logger as log
-
 
 def get_templates_dir(templates_dirname: str = "templates") -> Jinja2Templates:
     if not Path(f"{templates_dirname}").exists():

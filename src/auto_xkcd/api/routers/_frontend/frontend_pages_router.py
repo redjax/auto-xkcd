@@ -1,38 +1,36 @@
 from __future__ import annotations
 
-from pathlib import Path
-import typing as t
-import random
 import base64
+from pathlib import Path
+import random
 import time
+import typing as t
 
-from core.constants import IGNORE_COMIC_NUMS
+from .methods import get_templates_dir
+
 from api import helpers as api_helpers
-
-from helpers import data_ctl
+from api.depends import cache_transport_dependency, db_dependency
 
 # from api.api_responses import API_RESPONSES_DICT, img_response
 from api.routers._frontend._responses import FRONTEND_RESPONSES_DICT
-from api.depends import cache_transport_dependency, db_dependency
-
-from .methods import get_templates_dir
 
 # from celery.result import AsyncResult
 # import celeryapp
 from core import request_client
 from core.config import db_settings, settings
-from core.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX
+from core.constants import IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
 from domain.xkcd import comic
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import (
     FileResponse,
+    HTMLResponse,
     JSONResponse,
     Response,
     StreamingResponse,
-    HTMLResponse,
 )
 from fastapi.templating import Jinja2Templates
+from helpers import data_ctl
 import hishel
 from loguru import logger as log
 from modules import data_mod, msg_mod, xkcd_mod

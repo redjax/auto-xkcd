@@ -5,10 +5,9 @@ from api.config import api_settings
 from core.config import settings
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
+from frontend.pages import page_home
 from loguru import logger as log
 from red_utils.ext.fastapi_utils import healthcheck
-
-from frontend.pages import page_home
 
 prefix: str = "/ui"
 

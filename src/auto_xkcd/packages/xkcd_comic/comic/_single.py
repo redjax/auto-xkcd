@@ -18,7 +18,6 @@ from modules import data_mod, requests_prefab, xkcd_mod
 from red_utils.ext.time_utils import get_ts
 from sqlalchemy.exc import IntegrityError
 
-
 def get_single_comic(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     comic_num: int = None,

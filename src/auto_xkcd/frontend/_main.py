@@ -1,12 +1,12 @@
+from __future__ import annotations
+
+from fastapi import APIRouter, FastAPI, status
+from fastapi.responses import HTMLResponse, JSONResponse
 from frontend._tags import CUSTOM_FRONTEND_TAGS
 
 # from frontend.config import FrontendSettings, frontend_settings
 from frontend.routers import router as frontend_router
-
-from fastapi import APIRouter, FastAPI, status
-from fastapi.responses import JSONResponse, HTMLResponse
 from loguru import logger as log
-
 from red_utils.ext.fastapi_utils import tags_metadata, update_tags_metadata
 
 # IMPORT_ADMIN_ROUTER:bool = frontend_settings.include_admin_router
