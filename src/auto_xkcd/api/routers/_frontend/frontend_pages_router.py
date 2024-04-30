@@ -47,13 +47,63 @@ router: APIRouter = APIRouter(
 )
 
 
+def is_current(comic_num: int = None) -> bool:
+    current_comic_meta = xkcd_comic.current_comic.get_current_comic_metadata()
+
+    if comic_num == current_comic_meta.comic_num:
+        return True
+    else:
+        return False
+
+
 @router.get("/", response_class=HTMLResponse)
 def render_home_page(request: Request) -> HTMLResponse:
+    try:
+        current_comic = xkcd_comic.current_comic.get_current_comic()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting current XKCD comic for home page. Details: {exc}"
+        )
+        log.error(msg)
+
+        current_comic = None
+
+    try:
+        ## Load comic image from database
+        comic_img: comic.XKCDComicImage | None = (
+            xkcd_comic.comic_img.retrieve_img_from_db(comic_num=current_comic.comic_num)
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading XKCD comic #{current_comic.comic_num} image from database. Details: {exc}"
+        )
+        log.error(msg)
+
+    if comic_img is None:
+        ## Comic not found in database, request from API and save
+        log.warning(f"Comic #{current_comic.comic_num} image not found.")
+
+        comic_img = xkcd_mod.save_comic_img(comic_obj=current_comic.comic_num)
+
+    ## Encode img bytes so comic image can be rendered on webpage
+    try:
+        img_base64 = xkcd_mod.encode_img_bytes(comic_img.img)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception converting XKCD comic #{current_comic.comic_num} image to base64-encoded bytes. Details: {exc}"
+        )
+        log.error(msg)
+
     template = templates.TemplateResponse(
         request=request,
         name="pages/index.html",
         status_code=status.HTTP_200_OK,
-        context={"page_title": "home"},
+        context={
+            "page_title": "home",
+            "comic": current_comic,
+            "comic_img": img_base64,
+            "is_current_comic": is_current(comic_num=current_comic.comic_num),
+        },
     )
 
     return template
@@ -167,6 +217,7 @@ def render_random_comics_page(request: Request) -> HTMLResponse:
             "page_title": "random comic",
             "comic": _comic,
             "comic_img": img_base64,
+            "is_current_comic": is_current(comic_num=_comic.comic_num),
         },
     )
 
@@ -229,6 +280,7 @@ def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
             "page_title": f"#{_comic.comic_num}",
             "comic": _comic,
             "comic_img": img_base64,
+            "is_current_comic": is_current(comic_num=_comic.comic_num),
         },
     )
 
