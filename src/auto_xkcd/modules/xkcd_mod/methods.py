@@ -23,6 +23,7 @@ from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as sa
 from utils import serialize_utils
 
+
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     request: httpx.Request = None,
@@ -517,7 +518,7 @@ def list_missing_nums() -> list[int]:
     return missing_comic_nums
 
 
-@lru_cache
+# @lru_cache
 def count_comics_in_db() -> int:
     with get_db() as session:
         repo = comic.XKCDComicRepository(session)
