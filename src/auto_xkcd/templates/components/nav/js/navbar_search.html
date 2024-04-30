@@ -1,0 +1,28 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('navComicSearch');
+        const searchButton = document.querySelector('.uk-navbar-toggle');
+
+        // Handle Enter keypress
+        searchInput.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission
+                const searchContents = searchInput.value.trim();
+                if (searchContents) {
+                    const url = `/comics/${encodeURIComponent(searchContents)}`;
+                    window.location.href = url;
+                }
+            }
+        });
+
+        // Handle search button click
+        searchButton.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the default behavior (e.g., navigating to a new page)
+            const searchContents = searchInput.value.trim();
+            if (searchContents) {
+                const url = `/comics/${encodeURIComponent(searchContents)}`;
+                window.location.href = url;
+            }
+        });
+    });
+</script>
