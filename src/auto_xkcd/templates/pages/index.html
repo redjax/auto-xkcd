@@ -8,13 +8,30 @@
 
             <!-- Site intro  -->
             <div class="uk-flex uk-flex-center uk-text-center">
-                <p class="uk-text-lead">
-                    Frontend for my auto-xkcd API. Use the search icon in the navbar to search for a comic by its number
-                    (i.e.
-                    42, 150,
-                    2340, ...), or get a random comic using the button below.
-                </p>
+                <div>
+                    <p class="uk-text-lead">
+                        Frontend for my auto-xkcd API.
+                    </p>
+                    <p>
+                        Use the search icon in the navbar to search for a comic by its
+                        number
+                        (i.e.
+                        42, 150,
+                        2340, ...), or get a random comic using the button below.
+                    </p>
+                </div>
             </div>
+
+            <br>
+
+            <div class="uk-container">
+                <div class="uk-flex uk-flex-center uk-text-center">
+                    {% include "components/cards/media_cards/comic_card.html" %}
+                </div>
+
+            </div>
+
+            <br>
 
             <div class="uk-flex uk-flex-center uk-text-center">
 
