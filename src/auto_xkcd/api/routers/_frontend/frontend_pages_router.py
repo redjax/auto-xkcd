@@ -15,6 +15,8 @@ from helpers import data_ctl
 from api.routers._frontend._responses import FRONTEND_RESPONSES_DICT
 from api.depends import cache_transport_dependency, db_dependency
 
+from .methods import get_templates_dir
+
 # from celery.result import AsyncResult
 # import celeryapp
 from core import request_client
@@ -37,11 +39,7 @@ from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
 from red_utils.ext import time_utils
 
-if not Path("auto_xkcd/templates").exists():
-    raise FileNotFoundError("Directory not found: 'templates'")
-else:
-    log.debug("Found templates dir.")
-    templates = Jinja2Templates(directory="auto_xkcd/templates")
+templates: Jinja2Templates = get_templates_dir(templates_dirname="auto_xkcd/templates")
 
 prefix: str = ""
 tags: list[str] = ["frontend"]
@@ -169,6 +167,68 @@ def render_random_comics_page(request: Request) -> HTMLResponse:
         status_code=status.HTTP_200_OK,
         context={
             "page_title": "random comic",
+            "comic": _comic,
+            "comic_img": img_base64,
+        },
+    )
+
+    return template
+
+
+## Keep at bottom to avoid overriding other URLs
+@router.get("/comics/{comic_num}", response_class=HTMLResponse)
+def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
+    ## Load/request comic
+    _comic: comic.XKCDComic | None = xkcd_comic.comic.get_single_comic(
+        comic_num=comic_num
+    )
+
+    if _comic is None:
+        ## Comic not found, checked DB, serialized files, and attempted a live request.
+        log.warning(f"Comic #{comic_num} not found.")
+
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "NotFound": f"Could not find XKCD comic #{comic_num} locally, and failed requesting from the XKCD API."
+            },
+        )
+
+    log.debug(f"COMIC ({type(_comic)}):\n{_comic}")
+
+    try:
+        ## Load comic image from database
+        _comic_img: comic.XKCDComicImage | None = (
+            xkcd_comic.comic_img.retrieve_img_from_db(comic_num=comic_num)
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading XKCD comic #{comic_num} image from database. Details: {exc}"
+        )
+        log.error(msg)
+
+    if _comic_img is None:
+        ## Comic not found in database, request from API and save
+        log.warning(f"Comic #{comic_num} image not found.")
+
+        _comic_img = xkcd_mod.save_comic_img(comic_obj=_comic)
+
+    ## Encode img bytes so comic image can be rendered on webpage
+    try:
+        img_base64 = xkcd_mod.encode_img_bytes(_comic_img.img)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception converting XKCD comic #{comic_num} image to base64-encoded bytes. Details: {exc}"
+        )
+        log.error(msg)
+
+    ## Build template response
+    template = templates.TemplateResponse(
+        request=request,
+        name="pages/comics_random.html",
+        status_code=status.HTTP_200_OK,
+        context={
+            "page_title": f"#{_comic.comic_num}",
             "comic": _comic,
             "comic_img": img_base64,
         },

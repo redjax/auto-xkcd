@@ -4,9 +4,11 @@
         <div class="uk-grid-small uk-flex-middle" uk-grid>
 
             <div class="uk-width-expand">
-                <h3 class="uk-card-title uk-margin-remove-bottom">{{ comic.title }}</h3>
+                <h3 class="uk-card-title uk-margin-remove-bottom">#{{ comic.comic_num }} {{ comic.title }}</h3>
 
-                <p class="uk-text-meta uk-margin-remove-top"><time date="{{ comic.year }}-{{ comic.month }}-{{ comic.day }}">{{ comic.year }}-{{ comic.month }}-{{ comic.day }}</time></p>
+                <p class="uk-text-meta uk-margin-remove-top"><time
+                        date="{{ comic.year }}-{{ comic.month }}-{{ comic.day }}">{{ comic.year }}-{{ comic.month }}-{{
+                        comic.day }}</time></p>
             </div>
 
         </div>
@@ -21,7 +23,19 @@
     </div>
 
     <div class="uk-card-footer">
-        <a href="#" class="uk-button uk-button-text">...</a>
+
+        {% if comic.alt_text %}<p>alt text: <span class="uk-text-italic">{{ comic.alt_text }}</span></p> {% endif %}
+
+        <hr class="uk-divider">
+
+        <p uk-margin>
+            <a href="https://www.xkcd.com/{{ comic.comic_num }}" class="uk-button uk-button-default"><ion-icon
+                    name="link-outline"></ion-icon> On
+                XKCD</a>
+            <a href="/comics/{{ comic.comic_num }}"
+                class="uk-button uk-button-default{% if page_title == '#' + comic.comic_num|string %} uk-hidden{% endif %}"><ion-icon
+                    name="document-outline"></ion-icon> Comic Page</a>
+        </p>
     </div>
 
 </div>
