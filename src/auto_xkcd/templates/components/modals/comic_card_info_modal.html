@@ -1,5 +1,5 @@
 <!-- Comic info modal button -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#comicInfoModal">
+<button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#comicInfoModal">
     <ion-icon name="information-circle-outline"></ion-icon>
 </button>
 
@@ -13,14 +13,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-start">
+
                 <p>URL: {% if comic.url %}{{ comic.url }}{% else %}<a
                         href="https://xkcd.com/{{ comic.comic_num }}">https://xkcd.com/{{
                         comic.comic_num }}</a>{% endif %}</p>
                 <p>Number: {{ comic.comic_num }}</p>
-                <p>Title: {{ comic.title }}</p>
+                <p>Comic Title: {{ comic.title }}</p>
                 <p>Published: {{ comic.month }}-{{ comic.day }}-{{ comic.year }}</p>
                 {% if comic.alt_text %}<p>Alt Text: {{ comic.alt_text }}</p>{% endif %}
                 {% if comic.transcription %}<p>Transcription: {{ comic.transcription }}</p>{% endif %}
+                <p>Comic Image URL: <a href="{{ comic.img_url }}">{{ comic.img_url }}</a></p>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

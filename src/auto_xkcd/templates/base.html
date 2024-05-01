@@ -23,13 +23,16 @@
     <main>
 
         <!-- Navbar -->
-        {% include "components/nav/nav_main.html" %}
+        <div class="sticky-top">
+            {% include "components/nav/nav_main.html" %}
+        </div>
 
         <!-- Main content block -->
         {% block main_content %}
-        <div class="container py-4">
-            {% endblock main_content %}
+        <div class="container">
+
         </div>
+        {% endblock main_content %}
 
     </main>
 
