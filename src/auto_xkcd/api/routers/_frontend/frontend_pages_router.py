@@ -19,6 +19,7 @@ from api.routers._frontend._responses import FRONTEND_RESPONSES_DICT
 from core import request_client
 from core.config import db_settings, settings
 from core.constants import IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
+from core.dependencies import get_db
 from domain.xkcd import comic
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -111,11 +112,54 @@ def render_home_page(request: Request) -> HTMLResponse:
 
 @router.get("/comics", response_class=HTMLResponse)
 def render_comics_page(request: Request) -> HTMLResponse:
+    with get_db() as session:
+        repo = comic.XKCDComicRepository(session)
+
+        all_comics: list[comic.XKCDComicModel] = repo.get_all()
+
+    comic_img_pairs = []
+
+    for c in all_comics:
+        try:
+            _img: comic.XKCDComicImage | None = (
+                xkcd_comic.comic_img.retrieve_img_from_db(c.comic_num)
+            )
+        except Exception as exc:
+            msg = Exception(
+                f"Unhandled exception getting comic #{c.comic_num} from database. Details: {exc}"
+            )
+            log.error(msg)
+
+            continue
+
+        if _img is None:
+            log.warning(f"Image for comic #{c.comic_num} is None. Skipping.")
+
+            continue
+
+        else:
+            ## Encode img bytes so comic image can be rendered on webpage
+            try:
+                img_base64 = xkcd_mod.encode_img_bytes(_img.img)
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception converting XKCD comic #{c.comic_num} image to base64-encoded bytes. Details: {exc}"
+                )
+                log.error(msg)
+
+                continue
+
+            comic_img_pairs.append({"comic": c, "comic_img": img_base64})
+
     template = templates.TemplateResponse(
         request=request,
         name="pages/comics.html",
         status_code=status.HTTP_200_OK,
-        context={"page_title": "comics"},
+        context={
+            "page_title": "comics",
+            "comic_img_pairs": comic_img_pairs,
+            "current_comic_num": xkcd_comic.current_comic.get_current_comic_metadata().comic_num,
+        },
     )
 
     return template

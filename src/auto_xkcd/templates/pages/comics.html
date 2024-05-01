@@ -3,8 +3,49 @@
 {% block main_content %}
 <section class="uk-section">
     <div class="uk-container">
-        <div class="uk-child-width-expand@s uk-text-center" uk-grid>
-            <p>Page title: {{ page_title }}</p>
+        <div class="uk-flex uk-flex-center">
+
+            <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1" uk-slider="center: true">
+
+                <div class="uk-slider-items uk-grid uk-grid-match"
+                    uk-height-viewport="offset-top: true; offset-bottom: 30">
+
+                    {%- for c in comic_img_pairs %}
+
+                    {% set comic = c.comic %}
+                    {% set comic_img = c.comic_img %}
+
+                    {% if c.comic.comic_num == current_comic_num %}
+                    {% set is_current_comic = true %}
+                    {% else %}
+                    {% set is_current_comic = false %}
+                    {% endif %}
+
+                    <div class="uk-width-3-4">
+                        <div class="uk-cover-container">
+
+                            <!-- Comic card -->
+                            {% include "components/cards/media_cards/comic_card.html" %}
+
+                            <!-- <img src="images/photo.jpg" alt="" uk-cover> -->
+                            <!-- <div class="uk-position-center uk-panel">
+                        <h1>1</h1>
+                    </div> -->
+
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <a class="uk-position-center-left uk-position-small uk-hidden-hover uk-background-secondary" href
+                    uk-slidenav-previous uk-slider-item="previous"></a>
+                <a class="uk-position-center-right uk-position-small uk-hidden-hover uk-background-secondary" href
+                    uk-slidenav-next uk-slider-item="next"></a>
+
+            </div>
+
         </div>
     </div>
 </section>
