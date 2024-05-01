@@ -11,7 +11,7 @@ volumes:
 services:
   rabbitmq:
     image: rabbitmq:management
-    container_name: xkcd_bot-rabbitmq-dev
+    container_name: auto-xkcd-rabbitmq-localdev
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-rabbitmq}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-rabbitmq}
@@ -25,11 +25,11 @@ services:
       - ${RABBITMQ_DATA_DIR:-./data/rabbitmq}:/var/lib/rabbitmq
       - ${RABBITMQ_LOGS_DIR:-./logs/rabbitmq}:/var/log/rabbitmq
       - ./provision/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config
-      - ./provision/rabbitmq/rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./provision/rabbitmq/rabbitmq.enabled_plugins:/etc/rabbitmq/enabled_plugins
 
   redis:
     image: redis
-    container_name: xkcd_bot-redis-dev
+    container_name: auto-xkcd-redis-localdev
     restart: unless-stopped
     command: redis-server --save 20 1 --loglevel warning
     volumes:

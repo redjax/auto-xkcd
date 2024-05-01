@@ -38,7 +38,12 @@ from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
 from red_utils.ext import time_utils
 
-templates: Jinja2Templates = get_templates_dir(templates_dirname="auto_xkcd/templates")
+if settings.container_env:
+    templates_str = "auto_xkcd/templates"
+else:
+    templates_str: str = "src/auto_xkcd/templates"
+
+templates: Jinja2Templates = get_templates_dir(templates_dirname=templates_str)
 
 prefix: str = ""
 tags: list[str] = ["frontend"]

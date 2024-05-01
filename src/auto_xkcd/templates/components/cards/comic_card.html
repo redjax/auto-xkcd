@@ -18,8 +18,11 @@
                 <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary"><ion-icon
                         name="link-outline"></ion-icon></a>
             </li>
+            <!-- <li class="list-inline-item">
+                { comic.month }}-{ comic.day }}-{ comic.year }}
+            </li> -->
             <li class="list-inline-item">
-                {{ comic.month }}-{{ comic.day }}-{{ comic.year }}
+                {% include "components/modals/comic_card_info_modal.html" %}
             </li>
         </ul>
     </div>
