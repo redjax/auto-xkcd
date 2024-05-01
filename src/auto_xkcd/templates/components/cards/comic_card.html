@@ -1,0 +1,27 @@
+<div class="card border-secondary text-center">
+    <div class="card-header text-bg-dark">
+        {% if is_current_comic %}{% include "components/badges/current_comic_badge.html" %}{% endif %} #{{
+        comic.comic_num }}
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ comic.title }}</h5>
+        {% if comic.alt_text %}<p class="card-text">{{ comic.alt_text }}</p>{% endif %}
+
+        <div class="container-fluid">
+            <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid"
+                alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
+        </div>
+    </div>
+    <div class="card-footer text-bg-dark">
+        <ul class="list-inline">
+            <li class="list-inline-item">
+                <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary"><ion-icon
+                        name="link-outline"></ion-icon></a>
+            </li>
+            <li class="list-inline-item">
+                {{ comic.month }}-{{ comic.day }}-{{ comic.year }}
+            </li>
+        </ul>
+    </div>
+
+</div>
