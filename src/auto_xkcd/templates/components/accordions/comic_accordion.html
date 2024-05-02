@@ -1,0 +1,60 @@
+<div class="card border-secondary text-center m-2">
+
+    <div class="accordion accordion-flush" id="comicAccordian">
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                    aria-expanded="true" aria-controls="collapseOne">
+                    #{{ comic.comic_num }} - {{ comic.title }}
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+
+                    <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid card-img-top"
+                        alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
+
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Comic Info
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <div class="card text-bg-dark">
+
+                        <div class="card-header text-center">
+                            #{{ comic.comic_num }} - {{ comic.title }}
+                        </div>
+                        <ul class="list-group">
+                            <li class="list-group-item">Published: {{ comic.month }}-{{ comic.day }}-{{
+                                comic.year }}</li>
+                            <li class="list-group-item">URL: {% if comic.url %}{{ comic.url }}{% else %}<a
+                                    href="https://xkcd.com/{{ comic.comic_num }}">https://xkcd.com/{{
+                                    comic.comic_num }}</a>{% endif %}</li>
+                            {% if comic.alt_text %}<li class="list-group-item">Alt Text: {{ comic.alt_text }}</li>{%
+                            endif
+                            %}
+                            {% if comic.transcription %}<li class="list-group-item">Transcription: {{
+                                comic.transcription }}
+                            </li>{% endif %}
+                            <li class="list-group-item">Comic Image URL: <a href="{{ comic.img_url }}">{{ comic.img_url
+                                    }}</a></li>
+                            <li class="list-group-item">Permalink: <a href="/{{ comic.comic_num }}">/{{ comic.comic_num
+                                    }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

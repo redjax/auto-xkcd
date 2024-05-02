@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-<section class="uk-section">
-    <div class="uk-container">
-        <div class="uk-child-width-expand@s uk-text-center" uk-grid>
-            <p>Page title: {{ page_title }}</p>
-        </div>
-    </div>
+<section class="py-2 text-center container">
+
+    <h2>All Comics</h2>
+
+    <hr>
+
+    {% include "components/carousels/comics_carousel.html" %}
+
 </section>
 {% endblock main_content %}
