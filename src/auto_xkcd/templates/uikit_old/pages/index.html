@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<section class="uk-section">
+    <div class="uk-container">
+
+        <article class="uk-article">
+
+            <!-- Site intro  -->
+            <div class="uk-flex uk-flex-center uk-text-center">
+                <div>
+                    <p class="uk-text-lead">
+                        Frontend for my auto-xkcd API.
+                    </p>
+                    <p>
+                        Use the search icon in the navbar to search for a comic by its
+                        number
+                        (i.e.
+                        42, 150,
+                        2340, ...), or get a random comic using the button below.
+                    </p>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="uk-container">
+                <div class="uk-flex uk-flex-center uk-text-center">
+                    {% include "components/cards/media_cards/comic_card.html" %}
+                </div>
+
+            </div>
+
+            <br>
+
+            <div class="uk-flex uk-flex-center uk-text-center">
+
+                <!-- Random comic card -->
+                <div class="uk-card uk-card-default uk-width-1-2@m">
+
+                    <div class="uk-card-header uk-text-center">
+                        <div class="uk-grid-small uk-flex-middle" uk-grid>
+                            <div class="uk-width-auto">
+
+                                <h3 class="uk-card-title uk-margin-remove-bottom">Random Comic</h3>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="uk-card-body">
+                        <p>Get a random XKCD comic.</p>
+                    </div>
+
+                    <div class="uk-card-footer">
+                        <p uk-margin>
+                            <a class="uk-button uk-button-primary uk-button-large" href="/comics/random"><ion-icon
+                                    name="shuffle-outline"></ion-icon></a>
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </div>
+</section>
+{% endblock main_content %}

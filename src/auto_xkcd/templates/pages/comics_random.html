@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-<section class="uk-section">
+<section class="py-2 text-center container">
+    <div class="row py-lg-4">
 
-    <div class="uk-container">
-        <div class="uk-flex uk-flex-center uk-flex-stretch uk-text-center">
-            {% include "components/cards/media_cards/comic_card.html" %}
+        <!-- Include comic card -->
+        <div class="col-lg-12 col-md-8 col-sm-6 mx-auto">
+            {% include "components/cards/comic_card.html" %}
         </div>
-    </div>
 
+    </div>
 </section>
+
 {% endblock main_content %}

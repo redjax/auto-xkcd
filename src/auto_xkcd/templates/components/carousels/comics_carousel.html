@@ -1,0 +1,38 @@
+<div id="allComicCarousel" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+
+        <!-- Comic images -->
+        {%- for c in comic_img_pairs %}
+
+        {% set comic = c.comic %}
+        {% set comic_img = c.comic_img %}
+
+        {% if comic.comic_num == current_comic_num %}
+        {% set is_current_comic = true %}
+        {% else %}
+        {% set is_current_comic = false %}
+        {% endif %}
+
+        <div class="carousel-item {% if loop.index0 == 0 %}active{% endif %}">
+            <div class="container container-fluid">
+                {% include "components/cards/comic_card.html" %}
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#allComicCarousel" data-bs-slide="prev">
+        <!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span> -->
+        <h1><span class="text-black"><ion-icon name="chevron-back-circle-outline"></ion-icon></span></h1>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#allComicCarousel" data-bs-slide="next">
+        <!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
+        <h1><span class="text-black"><ion-icon name="chevron-forward-circle-outline"></ion-icon></span></h1>
+        <span class="visually-hidden">Next</span>
+    </button>
+
+</div>

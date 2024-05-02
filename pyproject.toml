@@ -60,6 +60,15 @@ dev = ["black>=24.3.0", "ruff>=0.3.4", "pytest-xdist>=3.5.0", "nox>=2024.3.2"]
 start-scrape = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "prod" } }
 start-scrape-dev = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "dev" } }
 
+start-celery-worker = { cmd = "python src/auto_xkcd/start_celery_worker.py", env = { "ENV_FOR_DYNACONF" = "prod" } }
+start-celery-worker-dev = { cmd = "python src/auto_xkcd/start_celery_worker.py", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+start-celery-beat = { cmd = "python src/auto_xkcd/start_celery_beat.py", env = { "ENV_FOR_DYNACONF" = "prod" } }
+start-celery-beat-dev = { cmd = "python src/auto_xkcd/start_celery_beat.py", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
+start-api = { cmd = "python src/auto_xkcd/start_api.py", env = { "ENV_FOR_DYNACONF" = "prod" } }
+start-api-dev = { cmd = "python src/auto_xkcd/start_api.py", env = { "ENV_FOR_DYNACONF" = "dev" } }
+
 get-current = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "prod" } }
 get-current-dev = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "dev" } }
 
@@ -71,24 +80,4 @@ loop-update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c
 
 lint = { cmd = "ruff check ./ --config ruff.ci.toml --fix" }
 
-docker-build-main = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile ." }
-docker-build-main-nocache = { shell = "docker build -t autoxkcd -f containers/auto-xkcd/Dockerfile . --no-cache" }
-
 dockerctl = { shell = "python dockerctl.py" }
-# compose-build-run-main-d = { shell = "./scripts/compose_full.sh" }
-# compose-build-main-d = { shell = "./scripts/compose_build.sh" }
-# compose-build-main-d-nocache = { shell = "./scripts/compose_build_no-cache.sh" }
-# compose-run-main-d = { shell = "./scripts/compose_run.sh" }
-# compose-down-main-d = { shell = "./scripts/compose_down.sh" }
-# compose-logs-main-d = { shell = "./scripts/compose_logs.sh" }
-
-# [tool.pixi.project]
-# channels = ["conda-forge"]
-# platforms = ["linux-64"]
-
-# [tool.pixi.pypi-dependencies]
-# auto-xkcd = { path = ".", editable = true }
-
-# [tool.pixi.environments]
-# default = { solve-group = "default" }
-# docs = { features = ["docs"], solve-group = "default" }

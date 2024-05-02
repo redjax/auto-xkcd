@@ -11,6 +11,7 @@ import httpx
 from loguru import logger as log
 from modules import requests_prefab, xkcd_mod
 
+
 def lookup_img_file(
     search_dir: t.Union[str, Path] = paths.COMIC_IMG_DIR, comic_num: int = None
 ) -> Path | None:

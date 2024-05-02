@@ -38,7 +38,12 @@ from modules import data_mod, msg_mod, xkcd_mod
 from packages import xkcd_comic
 from red_utils.ext import time_utils
 
-templates: Jinja2Templates = get_templates_dir(templates_dirname="auto_xkcd/templates")
+if settings.container_env:
+    templates_str = "auto_xkcd/templates"
+else:
+    templates_str: str = "src/auto_xkcd/templates"
+
+templates: Jinja2Templates = get_templates_dir(templates_dirname=templates_str)
 
 prefix: str = ""
 tags: list[str] = ["frontend"]
@@ -135,7 +140,17 @@ def render_comics_page(request: Request) -> HTMLResponse:
         if _img is None:
             log.warning(f"Image for comic #{c.comic_num} is None. Skipping.")
 
-            continue
+            try:
+                _img = xkcd_comic.comic_img.request_img_from_api(c)
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception requesting missing image for XKCD comic #{c.comic_num}. Details: {exc}"
+                )
+                log.error(msg)
+
+                continue
+
+            img_base64 = xkcd_mod.encode_img_bytes(_img)
 
         else:
             ## Encode img bytes so comic image can be rendered on webpage
@@ -165,17 +180,17 @@ def render_comics_page(request: Request) -> HTMLResponse:
     return template
 
 
-@router.get("/comics/all", response_class=HTMLResponse)
-def render_all_comics_page(request: Request) -> HTMLResponse:
-    count_comics = xkcd_mod.count_comics_in_db()
-    template = templates.TemplateResponse(
-        request=request,
-        name="pages/comics_all.html",
-        status_code=status.HTTP_200_OK,
-        context={"page_title": "all comics", "count": count_comics},
-    )
+# @router.get("/comics/all", response_class=HTMLResponse)
+# def render_all_comics_page(request: Request) -> HTMLResponse:
+#     count_comics = xkcd_mod.count_comics_in_db()
+#     template = templates.TemplateResponse(
+#         request=request,
+#         name="pages/comics_all.html",
+#         status_code=status.HTTP_200_OK,
+#         context={"page_title": "all comics", "count": count_comics},
+#     )
 
-    return template
+#     return template
 
 
 @router.get("/comics/random", response_class=HTMLResponse)
@@ -318,7 +333,7 @@ def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
     ## Build template response
     template = templates.TemplateResponse(
         request=request,
-        name="pages/comics_random.html",
+        name="pages/single_comic.html",
         status_code=status.HTTP_200_OK,
         context={
             "page_title": f"#{_comic.comic_num}",
