@@ -6,29 +6,54 @@
 <!-- Comic info modal -->
 <div class="modal fade" id="comicInfoModal" tabindex="-1" aria-labelledby="comicInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content text-bg-dark">
-            <div class="modal-header">
+        <div class="modal-content">
+
+            <!-- Modal header -->
+            <!-- <div class="modal-header">
                 <h1 class="modal-title fs-5" id="comicInfoModalLabel"><small>#{{ comic.comic_num
                         }}</small> {{ comic.title }}</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            </div> -->
+
+            <!-- <div class="modal-header">
+                <img src="data:image/png;base64,{{ comic_img }}" class="img-thumbnail"
+                    alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
+            </div> -->
+
+            <!-- Modal body -->
             <div class="modal-body text-start">
 
-                <p>URL: {% if comic.url %}{{ comic.url }}{% else %}<a
-                        href="https://xkcd.com/{{ comic.comic_num }}">https://xkcd.com/{{
-                        comic.comic_num }}</a>{% endif %}</p>
-                <p>Number: {{ comic.comic_num }}</p>
-                <p>Comic Title: {{ comic.title }}</p>
-                <p>Published: {{ comic.month }}-{{ comic.day }}-{{ comic.year }}</p>
-                {% if comic.alt_text %}<p>Alt Text: {{ comic.alt_text }}</p>{% endif %}
-                {% if comic.transcription %}<p>Transcription: {{ comic.transcription }}</p>{% endif %}
-                <p>Comic Image URL: <a href="{{ comic.img_url }}">{{ comic.img_url }}</a></p>
+                <div class="card text-bg-dark">
+                    <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid card-img-top"
+                        alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
+
+                    <div class="card-header text-center">
+                        #{{ comic.comic_num }} - {{ comic.title }}
+                    </div>
+                    <ul class="list-group">
+                        <li class="list-group-item">Published: {{ comic.month }}-{{ comic.day }}-{{
+                            comic.year }}</li>
+                        <li class="list-group-item">URL: {% if comic.url %}{{ comic.url }}{% else %}<a
+                                href="https://xkcd.com/{{ comic.comic_num }}">https://xkcd.com/{{
+                                comic.comic_num }}</a>{% endif %}</li>
+                        {% if comic.alt_text %}<li class="list-group-item">Alt Text: {{ comic.alt_text }}</li>{% endif
+                        %}
+                        {% if comic.transcription %}<li class="list-group-item">Transcription: {{ comic.transcription }}
+                        </li>{% endif %}
+                        <li class="list-group-item">Comic Image URL: <a href="{{ comic.img_url }}">{{ comic.img_url
+                                }}</a></li>
+                        <li class="list-group-item">Permalink: <a href="/{{ comic.comic_num }}">/{{ comic.comic_num
+                                }}</a></li>
+                    </ul>
+                </div>
 
             </div>
-            <div class="modal-footer">
+
+            <!-- Modal footer -->
+            <div class="modal-footer text-bg-dark justify-content-center">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
             </div>
+
         </div>
     </div>
 </div>

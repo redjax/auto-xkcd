@@ -323,7 +323,7 @@ def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
     ## Build template response
     template = templates.TemplateResponse(
         request=request,
-        name="pages/comics_random.html",
+        name="pages/single_comic.html",
         status_code=status.HTTP_200_OK,
         context={
             "page_title": f"#{_comic.comic_num}",

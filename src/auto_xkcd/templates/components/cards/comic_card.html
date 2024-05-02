@@ -1,26 +1,44 @@
 <div class="card border-secondary text-center">
+
+    <!-- Card header -->
     <div class="card-header text-bg-dark">
         <div class="row row-cols-3 g-2 g-lg-3">
 
+            <!-- Card buttons -->
             <div class="col text-start">
                 <ul class="list-inline">
+
+                    <!-- XKCD comic link -->
                     <li class="list-inline-item">
                         <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary mt-2"><ion-icon
                                 name="link-outline"></ion-icon></a>
                     </li>
 
+                    <!-- XKCD comic info modal button -->
                     <li class="list-inline-item">
                         {% include "components/modals/comic_card_info_modal.html" %}
                     </li>
+
+                    <!-- If card is shown outside /comics/<comic_num> page, add a button to navigate to /comics page -->
+                    {% if page_title != '#' + comic.comic_num|string %}
+                    <li class="list-inline-item">
+                        <a href="/comics/{{ comic.comic_num }}" class="btn btn-primary mt-2"><ion-icon
+                                name="add-circle-outline"></ion-icon></a>
+                    </li>
+                    {% endif %}
+
                 </ul>
+
             </div>
 
-            <div class="col">
+            <!-- Centered XKCD comic_num title -->
+            <div class="col align-self-center">
                 <h2>
                     #{{ comic.comic_num }}
                 </h2>
             </div>
 
+            <!-- If comic is current XKCD comic, show a "current" badge -->
             <div class="col text-end">
                 <h5>
                     {% if is_current_comic %}{% include "components/badges/current_comic_badge.html" %}{% endif %}
@@ -29,15 +47,26 @@
         </div>
     </div>
 
+    <!-- Comic card body -->
     <div class="card-body">
-        <h5 class="card-title">{{ comic.title }}</h5>
-        {% if comic.alt_text %}<p class="card-text">{{ comic.alt_text }}</p>{% endif %}
 
+        <!-- Card title -->
+        <h5 class="card-title">{{ comic.title }}</h5>
+
+        <!-- Comic image container -->
         <div class="container-fluid">
+            <!-- Display comic image bytes -->
             <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid"
                 alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
+
+            <!-- Show alt text, if it exists -->
+            {% if comic.alt_text %}<p class="card-text"><small class="fst-italic">alt: </small>{{ comic.alt_text }}</p>
+            {% endif %}
         </div>
+
     </div>
+
+    <!-- Card footer -->
     <div class="card-footer text-bg-dark">
         <div class="row row-cols-3 g-2 g-lg-3">
 
