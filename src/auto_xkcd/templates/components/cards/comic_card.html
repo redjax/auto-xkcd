@@ -53,6 +53,8 @@
         <!-- Card title -->
         <h5 class="card-title">{{ comic.title }}</h5>
 
+        <hr>
+
         <!-- Comic image container -->
         <div class="container-fluid">
             <!-- Display comic image bytes -->
@@ -75,6 +77,10 @@
             </div>
 
             <div class="col">
+
+                {% if page_title == 'random comic' or page_title == 'home' %}
+                <a href="/comics/random" class="btn btn-primary btn-lg"><ion-icon name="shuffle-outline"></ion-icon></a>
+                {% endif %}
 
             </div>
 
