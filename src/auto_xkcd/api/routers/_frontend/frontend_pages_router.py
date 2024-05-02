@@ -140,7 +140,17 @@ def render_comics_page(request: Request) -> HTMLResponse:
         if _img is None:
             log.warning(f"Image for comic #{c.comic_num} is None. Skipping.")
 
-            continue
+            try:
+                _img = xkcd_comic.comic_img.request_img_from_api(c)
+            except Exception as exc:
+                msg = Exception(
+                    f"Unhandled exception requesting missing image for XKCD comic #{c.comic_num}. Details: {exc}"
+                )
+                log.error(msg)
+
+                continue
+
+            img_base64 = xkcd_mod.encode_img_bytes(_img)
 
         else:
             ## Encode img bytes so comic image can be rendered on webpage
@@ -170,17 +180,17 @@ def render_comics_page(request: Request) -> HTMLResponse:
     return template
 
 
-@router.get("/comics/all", response_class=HTMLResponse)
-def render_all_comics_page(request: Request) -> HTMLResponse:
-    count_comics = xkcd_mod.count_comics_in_db()
-    template = templates.TemplateResponse(
-        request=request,
-        name="pages/comics_all.html",
-        status_code=status.HTTP_200_OK,
-        context={"page_title": "all comics", "count": count_comics},
-    )
+# @router.get("/comics/all", response_class=HTMLResponse)
+# def render_all_comics_page(request: Request) -> HTMLResponse:
+#     count_comics = xkcd_mod.count_comics_in_db()
+#     template = templates.TemplateResponse(
+#         request=request,
+#         name="pages/comics_all.html",
+#         status_code=status.HTTP_200_OK,
+#         context={"page_title": "all comics", "count": count_comics},
+#     )
 
-    return template
+#     return template
 
 
 @router.get("/comics/random", response_class=HTMLResponse)

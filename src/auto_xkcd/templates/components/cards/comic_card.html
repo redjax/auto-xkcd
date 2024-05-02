@@ -5,13 +5,18 @@
         <div class="row row-cols-3 g-2 g-lg-3">
 
             <!-- Card buttons -->
-            <div class="col text-start">
+            {% if page_title == "comics" %}
+            <div class="col"></div>
+            {% endif %}
+
+            <div class="col text-start" {% if page_title=="comics" %}hidden{% endif %}>
                 <ul class="list-inline">
 
                     <!-- XKCD comic link -->
                     <li class="list-inline-item">
-                        <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary mt-2"><ion-icon
-                                name="link-outline"></ion-icon></a>
+                        <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2"><i
+                                class="bi bi-link-45deg"></i></a>
+                        <!-- <ion-icon name="link-outline"></ion-icon></a> -->
                     </li>
 
                     <!-- XKCD comic info modal button -->
@@ -22,8 +27,10 @@
                     <!-- If card is shown outside /comics/<comic_num> page, add a button to navigate to /comics page -->
                     {% if page_title != '#' + comic.comic_num|string %}
                     <li class="list-inline-item">
-                        <a href="/comics/{{ comic.comic_num }}" class="btn btn-primary mt-2"><ion-icon
-                                name="add-circle-outline"></ion-icon></a>
+                        <a href="/comics/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                        </a>
+                        <!-- <ion-icon name="add-circle-outline"></ion-icon></a> -->
                     </li>
                     {% endif %}
 
@@ -78,9 +85,40 @@
 
             <div class="col">
 
+                <!-- Include random button when on random comic page or home -->
                 {% if page_title == 'random comic' or page_title == 'home' %}
-                <a href="/comics/random" class="btn btn-primary btn-lg"><ion-icon name="shuffle-outline"></ion-icon></a>
+                <a href="/comics/random" class="btn btn-primary btn-lg"><i class="bi bi-shuffle"></i></a>
                 {% endif %}
+
+                <!-- Move header buttons to bottom on certain pages, i.e. the comics page where the slider's chevrons cut them off. -->
+                <div class="col text-center" {% if not page_title=='comics' %}hidden{% endif %}>
+                    <ul class="list-inline">
+
+                        <!-- XKCD comic link -->
+                        <li class="list-inline-item">
+                            <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2"><i
+                                    class="bi bi-link-45deg"></i></a>
+                            <!-- <ion-icon name="link-outline"></ion-icon></a> -->
+                        </li>
+
+                        <!-- XKCD comic info modal button -->
+                        <li class="list-inline-item">
+                            {% include "components/modals/comic_card_info_modal.html" %}
+                        </li>
+
+                        <!-- If card is shown outside /comics/<comic_num> page, add a button to navigate to /comics page -->
+                        {% if page_title != '#' + comic.comic_num|string %}
+                        <li class="list-inline-item">
+                            <a href="/comics/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </a>
+                            <!-- <ion-icon name="add-circle-outline"></ion-icon></a> -->
+                        </li>
+                        {% endif %}
+
+                    </ul>
+
+                </div>
 
             </div>
 
