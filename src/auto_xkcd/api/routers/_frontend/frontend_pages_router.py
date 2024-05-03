@@ -391,3 +391,15 @@ def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
     )
 
     return template
+
+
+@router.get("/admin", response_class=HTMLResponse)
+def render_admin_page(request: Request) -> HTMLResponse:
+    template = templates.TemplateResponse(
+        request=request,
+        name="pages/admin.html",
+        status_code=status.HTTP_200_OK,
+        context={"page_title": "admin"},
+    )
+
+    return template

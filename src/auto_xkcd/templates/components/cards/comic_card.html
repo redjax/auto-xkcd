@@ -15,7 +15,8 @@
                     <!-- XKCD comic link -->
                     <li class="list-inline-item">
                         <a href="https://xkcd.com/{{ comic.comic_num }}"
-                            class="btn btn-outline-light text-white btn-lg mt-2"><i class="bi bi-link-45deg"></i></a>
+                            class="btn btn-outline-light rounded-circle text-white btn-lg mt-2"><i
+                                class="bi bi-link-45deg"></i></a>
                     </li>
 
                     <!-- XKCD comic info modal button -->
@@ -26,7 +27,8 @@
                     <!-- If card is shown outside /comics/<comic_num> page, add a button to navigate to /comics page -->
                     {% if page_title != '#' + comic.comic_num|string %}
                     <li class="list-inline-item">
-                        <a href="/comics/{{ comic.comic_num }}" class="btn btn-outline-light text-white btn-lg mt-2">
+                        <a href="/comics/{{ comic.comic_num }}"
+                            class="btn btn-outline-light rounded-circle text-white btn-lg mt-2">
                             <i class="bi bi-arrows-fullscreen"></i>
                         </a>
                     </li>
@@ -86,7 +88,7 @@
 
                 <!-- Include random button when on random comic page or home -->
                 {% if page_title == 'random comic' or page_title == 'home' %}
-                <a href="/comics/random" class="btn btn-primary btn-lg"><i class="bi bi-shuffle"></i></a>
+                <a href="/comics/random" class="btn btn-primary rounded-circle btn-lg"><i class="bi bi-shuffle"></i></a>
                 {% endif %}
 
                 <!-- Move header buttons to bottom on certain pages, i.e. the comics page where the slider's chevrons cut them off. -->

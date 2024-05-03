@@ -1,5 +1,5 @@
 <!-- Comic info modal button -->
-<button type="button" class="btn btn-outline-light text-white btn-lg mt-2" data-bs-toggle="modal"
+<button type="button" class="btn btn-outline-light rounded-circle text-white btn-lg mt-2" data-bs-toggle="modal"
     data-bs-target="#comic{{ comic.comic_num }}InfoModal">
     <i class="bi bi-info-circle"></i>
 </button>
@@ -10,6 +10,16 @@
     <div class="modal-dialog">
         <div class="modal-content">
 
+            <!-- Modal header -->
+            <div class="modal-header text-bg-dark text-center">
+                <div class="container">
+                    <p class="lead">scroll down for comic info</p>
+                    <small><a class="btn btn-outline-light text-white"
+                            href="#comic{{ comic.comic_num }}MetadataTable"><i
+                                class="bi bi-chevron-compact-down"></i></a></small>
+                </div>
+            </div>
+
             <!-- Modal body -->
             <div class="modal-body text-start">
 
@@ -17,7 +27,7 @@
                     <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid card-img-top"
                         alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
 
-                    <div class="card-header text-center">
+                    <div class="card-header text-center" id="comic{{ comic.comic_num }}MetadataTable">
                         <h1 class="display">
                             #{{ comic.comic_num }} - {{ comic.title }}
                         </h1>
@@ -51,7 +61,7 @@
 
             <!-- Modal footer -->
             <div class="modal-footer text-bg-dark justify-content-center">
-                <button type="button" class="btn btn-lg btn-outline-light text-white" data-bs-dismiss="modal"><i
+                <button type="button" class="btn btn-lg btn-danger text-white" data-bs-dismiss="modal"><i
                         class="bi bi-x-circle"></i></button>
             </div>
 
