@@ -1,11 +1,12 @@
 <!-- Comic info modal button -->
 <button type="button" class="btn btn-outline-light text-white btn-lg mt-2" data-bs-toggle="modal"
-    data-bs-target="#comicInfoModal">
+    data-bs-target="#comic{{ comic.comic_num }}InfoModal">
     <i class="bi bi-info-circle"></i>
 </button>
 
 <!-- Comic info modal -->
-<div class="modal fade" id="comicInfoModal" tabindex="-1" aria-labelledby="comicInfoModalLabel" aria-hidden="true">
+<div class="modal fade" id="comic{{ comic.comic_num }}InfoModal" tabindex="-1"
+    aria-labelledby="comic{{ comic.comic_num }}InfoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
 
