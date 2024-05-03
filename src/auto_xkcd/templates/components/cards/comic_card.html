@@ -4,19 +4,18 @@
     <div class="card-header text-bg-dark">
         <div class="row row-cols-3 g-2 g-lg-3">
 
-            <!-- Card buttons -->
             {% if page_title == "comics" %}
             <div class="col"></div>
             {% endif %}
 
-            <div class="col text-start" {% if page_title=="comics" %}hidden{% endif %}>
+            {% if page_title != "comics" %}
+            <div class="col text-start">
                 <ul class="list-inline">
 
                     <!-- XKCD comic link -->
                     <li class="list-inline-item">
-                        <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2"><i
-                                class="bi bi-link-45deg"></i></a>
-                        <!-- <ion-icon name="link-outline"></ion-icon></a> -->
+                        <a href="https://xkcd.com/{{ comic.comic_num }}"
+                            class="btn btn-outline-light text-white btn-lg mt-2"><i class="bi bi-link-45deg"></i></a>
                     </li>
 
                     <!-- XKCD comic info modal button -->
@@ -27,16 +26,16 @@
                     <!-- If card is shown outside /comics/<comic_num> page, add a button to navigate to /comics page -->
                     {% if page_title != '#' + comic.comic_num|string %}
                     <li class="list-inline-item">
-                        <a href="/comics/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2">
+                        <a href="/comics/{{ comic.comic_num }}" class="btn btn-outline-light text-white btn-lg mt-2">
                             <i class="bi bi-arrows-fullscreen"></i>
                         </a>
-                        <!-- <ion-icon name="add-circle-outline"></ion-icon></a> -->
                     </li>
                     {% endif %}
 
                 </ul>
 
             </div>
+            {% endif %}
 
             <!-- Centered XKCD comic_num title -->
             <div class="col align-self-center">
@@ -96,9 +95,9 @@
 
                         <!-- XKCD comic link -->
                         <li class="list-inline-item">
-                            <a href="https://xkcd.com/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2"><i
+                            <a href="https://xkcd.com/{{ comic.comic_num }}"
+                                class="btn btn-outline-light text-white btn-lg mt-2"><i
                                     class="bi bi-link-45deg"></i></a>
-                            <!-- <ion-icon name="link-outline"></ion-icon></a> -->
                         </li>
 
                         <!-- XKCD comic info modal button -->
@@ -109,10 +108,10 @@
                         <!-- If card is shown outside /comics/<comic_num> page, add a button to navigate to /comics page -->
                         {% if page_title != '#' + comic.comic_num|string %}
                         <li class="list-inline-item">
-                            <a href="/comics/{{ comic.comic_num }}" class="btn btn-primary btn-lg mt-2">
+                            <a href="/comics/{{ comic.comic_num }}"
+                                class="btn btn-outline-light text-white btn-lg mt-2">
                                 <i class="bi bi-arrows-fullscreen"></i>
                             </a>
-                            <!-- <ion-icon name="add-circle-outline"></ion-icon></a> -->
                         </li>
                         {% endif %}
 

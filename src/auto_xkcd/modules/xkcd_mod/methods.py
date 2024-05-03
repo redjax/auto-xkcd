@@ -23,6 +23,7 @@ from sqlalchemy.exc import IntegrityError
 import sqlalchemy.orm as sa
 from utils import serialize_utils
 
+
 def make_comic_request(
     cache_transport: hishel.CacheTransport = request_client.get_cache_transport(),
     request: httpx.Request = None,

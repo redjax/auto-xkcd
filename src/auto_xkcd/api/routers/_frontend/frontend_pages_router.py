@@ -62,6 +62,21 @@ def is_current(comic_num: int = None) -> bool:
         return False
 
 
+@router.get("/error")
+def render_error_page(request: Request):
+    ## Build template response
+    template = templates.TemplateResponse(
+        request=request,
+        name="pages/error/default_404.html",
+        status_code=status.HTTP_404_NOT_FOUND,
+        context={
+            "page_title": "NotFound",
+        },
+    )
+
+    return template
+
+
 @router.get("/", response_class=HTMLResponse)
 def render_home_page(request: Request) -> HTMLResponse:
     try:
@@ -117,6 +132,9 @@ def render_home_page(request: Request) -> HTMLResponse:
 
 @router.get("/comics", response_class=HTMLResponse)
 def render_comics_page(request: Request) -> HTMLResponse:
+    log.debug(f"Request: {request}")
+    log.debug(f"Request dict: {request.__dict__}")
+
     with get_db() as session:
         repo = comic.XKCDComicRepository(session)
 
@@ -165,6 +183,12 @@ def render_comics_page(request: Request) -> HTMLResponse:
                 continue
 
             comic_img_pairs.append({"comic": c, "comic_img": img_base64})
+
+    ## Sort comic_img_pairs by comic_num
+    _comic_img_pairs_sorted = sorted(
+        comic_img_pairs, key=lambda x: x["comic"].comic_num
+    )
+    comic_img_pairs = _comic_img_pairs_sorted
 
     template = templates.TemplateResponse(
         request=request,
@@ -286,6 +310,29 @@ def render_random_comics_page(request: Request) -> HTMLResponse:
 ## Keep at bottom to avoid overriding other URLs
 @router.get("/comics/{comic_num}", response_class=HTMLResponse)
 def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
+    log.debug(f"Request: {request}")
+    log.debug(f"Request dict: {request.__dict__}")
+
+    if not isinstance(comic_num, int):
+        log.error(
+            f"Input comic_num '{comic_num}' it not an integer. Type: ({type(comic_num)})"
+        )
+
+        ## Build template response
+        template = templates.TemplateResponse(
+            request=request,
+            name="pages/error/default_404.html",
+            status_code=status.HTTP_404_NOT_FOUND,
+            context={
+                "page_title": "NotFound",
+                "comic": None,
+                "comic_img": None,
+                "is_current_comic": False,
+            },
+        )
+
+        return template
+
     ## Load/request comic
     _comic: comic.XKCDComic | None = xkcd_comic.comic.get_single_comic(
         comic_num=comic_num
