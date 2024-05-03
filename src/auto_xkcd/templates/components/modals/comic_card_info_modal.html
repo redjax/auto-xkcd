@@ -5,7 +5,7 @@
 </button>
 
 <!-- Comic info modal -->
-<div class="modal fade" id="comic{{ comic.comic_num }}InfoModal" tabindex="-1"
+<div class="modal modal-xl modal-dialog-scrollable fade" id="comic{{ comic.comic_num }}InfoModal" tabindex="-1"
     aria-labelledby="comic{{ comic.comic_num }}InfoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -18,9 +18,13 @@
                         alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
 
                     <div class="card-header text-center">
-                        #{{ comic.comic_num }} - {{ comic.title }}
+                        <h1 class="display">
+                            #{{ comic.comic_num }} - {{ comic.title }}
+                        </h1>
+
+                        <p>Comic Metadata</p>
                     </div>
-                    <ul class="list-group">
+                    <ul class="list-group text-center">
                         <li class="list-group-item">
                             Published: {{ comic.month }}-{{ comic.day }}-{{ comic.year }}
                         </li>
