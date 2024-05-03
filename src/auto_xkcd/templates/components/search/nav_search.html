@@ -1,11 +1,14 @@
 <!-- <form role="search">
     <input class="form-control" type="search" placeholder="Search" aria-label="Search">
 </form> -->
-<form class="form-inline my-2 my-lg-0" action="/comics" method="GET">
+<!-- <form class="form-inline my-2 my-lg-0" action="/comics" method="GET"> -->
+<form class="form-inline my-lg-0" id="navSearchForm">
     <div class="input-group input-group-sm">
-        <input type="text" class="form-control" placeholder="Search comic #" name="comic_num" aria-label="Search">
+        <input type="text" class="form-control" placeholder="Go to comic #" name="comic_num" id="navSearchNumInput"
+            aria-label="Search">
         <div class="input-group-append">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+            <button class="btn btn-outline-light text-white" type="submit" id="navSearchButton"><i
+                    class="bi bi-search"></i></button>
         </div>
     </div>
 </form>

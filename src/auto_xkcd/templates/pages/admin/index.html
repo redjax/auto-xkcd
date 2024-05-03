@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<section class="text-center my-auto">
+    <h1 class="display">Admin</h1>
+</section>
+
+<hr>
+
+<!-- Admin dash container -->
+<div class="container">
+
+    <!-- Admin dash flex -->
+    <div class="d-flex p-2" id="adminDashMain">
+
+        <!-- Stats card -->
+        {% include "pages/admin/components/cards/stats_tbl_card.html" %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock main_content %}

@@ -1,0 +1,36 @@
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Metric</th>
+            <th scope="col">Value</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+
+        <tr>
+            <th scope="row">Current comic</th>
+            <td>{{ current_comic.comic_num }}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">Comics in database</th>
+            <td>{{ db_comic_count }}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">Saved Images</th>
+            <td>{{ comic_img_count }}
+        </tr>
+
+        <tr>
+            <th scope="row">Serialized HTTP Responses</th>
+            <td>{{ serialized_responses_count }}
+        </tr>
+
+        <tr>
+            <th scope="row">Serialized Comics</th>
+            <td>{{ serialized_comics_count }}
+        </tr>
+
+    </tbody>
+</table>

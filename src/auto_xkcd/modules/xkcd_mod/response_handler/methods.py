@@ -10,6 +10,7 @@ import httpx
 from loguru import logger as log
 from utils import serialize_utils
 
+
 def convert_response_to_dict(res: httpx.Response = None) -> dict:
     """Attempt to decode an `httpx.Response` into a dict."""
     assert res, ValueError("Missing an httpx.Response object.")
@@ -130,8 +131,18 @@ def serialize_comic_response_dict(
 
 
 def convert_db_comic_to_comic_obj(db_comic: XKCDComicModel) -> XKCDComic:
+    log.debug(f"Pre-convert comic dict: {db_comic.__dict__}")
     try:
-        _comic: XKCDComic = XKCDComic.model_validate(db_comic)
+        _comic: XKCDComic = XKCDComic.model_validate(db_comic.__dict__)
+
+        if _comic.comic_num is None:
+            log.warning(
+                f"Comic number was not initialized properly from database. Manually appending comic #{db_comic.comic_num}"
+            )
+
+            _comic.comic_num = db_comic.comic_num
+
+        log.debug(f"Converted comic: {_comic}")
 
         return _comic
     except Exception as exc:
