@@ -3,11 +3,18 @@
 {% block main_content %}
 <section class="py-2 text-center container">
 
-    <h2>All Comics</h2>
+    <div class="container-fluid justify-content-center pb-3">
+        <div class="row">
+            <div class="col-lg-12 col-md-8 mx-auto">
+                <h2>All Comics</h2>
 
-    <hr>
+                <hr>
 
-    {% include "components/carousels/comics_carousel.html" %}
+                {% include "components/carousels/comics_carousel.html" %}
+
+            </div>
+        </div>
+    </div>
 
 </section>
 {% endblock main_content %}

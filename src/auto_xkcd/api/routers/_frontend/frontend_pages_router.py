@@ -16,7 +16,7 @@ from api.routers._frontend._responses import FRONTEND_RESPONSES_DICT
 
 # from celery.result import AsyncResult
 # import celeryapp
-from core import request_client
+from core import request_client, paths
 from core.config import db_settings, settings
 from core.constants import IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
 from core.dependencies import get_db
@@ -60,6 +60,21 @@ def is_current(comic_num: int = None) -> bool:
         return True
     else:
         return False
+
+
+@router.get("/error")
+def render_error_page(request: Request):
+    ## Build template response
+    template = templates.TemplateResponse(
+        request=request,
+        name="pages/error/default_404.html",
+        status_code=status.HTTP_404_NOT_FOUND,
+        context={
+            "page_title": "NotFound",
+        },
+    )
+
+    return template
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -166,6 +181,12 @@ def render_comics_page(request: Request) -> HTMLResponse:
 
             comic_img_pairs.append({"comic": c, "comic_img": img_base64})
 
+    ## Sort comic_img_pairs by comic_num
+    _comic_img_pairs_sorted = sorted(
+        comic_img_pairs, key=lambda x: x["comic"].comic_num
+    )
+    comic_img_pairs = _comic_img_pairs_sorted
+
     template = templates.TemplateResponse(
         request=request,
         name="pages/comics.html",
@@ -178,19 +199,6 @@ def render_comics_page(request: Request) -> HTMLResponse:
     )
 
     return template
-
-
-# @router.get("/comics/all", response_class=HTMLResponse)
-# def render_all_comics_page(request: Request) -> HTMLResponse:
-#     count_comics = xkcd_mod.count_comics_in_db()
-#     template = templates.TemplateResponse(
-#         request=request,
-#         name="pages/comics_all.html",
-#         status_code=status.HTTP_200_OK,
-#         context={"page_title": "all comics", "count": count_comics},
-#     )
-
-#     return template
 
 
 @router.get("/comics/random", response_class=HTMLResponse)
@@ -286,6 +294,26 @@ def render_random_comics_page(request: Request) -> HTMLResponse:
 ## Keep at bottom to avoid overriding other URLs
 @router.get("/comics/{comic_num}", response_class=HTMLResponse)
 def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
+    if not isinstance(comic_num, int):
+        log.error(
+            f"Input comic_num '{comic_num}' it not an integer. Type: ({type(comic_num)})"
+        )
+
+        ## Build template response
+        template = templates.TemplateResponse(
+            request=request,
+            name="pages/error/default_404.html",
+            status_code=status.HTTP_404_NOT_FOUND,
+            context={
+                "page_title": "NotFound",
+                "comic": None,
+                "comic_img": None,
+                "is_current_comic": False,
+            },
+        )
+
+        return template
+
     ## Load/request comic
     _comic: comic.XKCDComic | None = xkcd_comic.comic.get_single_comic(
         comic_num=comic_num
@@ -340,6 +368,86 @@ def render_single_comic_page(request: Request, comic_num: int) -> HTMLResponse:
             "comic": _comic,
             "comic_img": img_base64,
             "is_current_comic": is_current(comic_num=_comic.comic_num),
+        },
+    )
+
+    return template
+
+
+@router.get("/admin", response_class=HTMLResponse)
+def render_admin_page(request: Request) -> HTMLResponse:
+    ## Get count of comics in db
+    with get_db() as session:
+        repo = comic.XKCDComicRepository(session)
+
+        all_comics: list[comic.XKCDComicModel] = repo.get_all()
+
+    ## Get current comic
+    try:
+        current_comic = xkcd_comic.current_comic.get_current_comic()
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception getting current XKCD comic for home page. Details: {exc}"
+        )
+        log.error(msg)
+
+        current_comic = None
+
+    ## Attempt to load comic image from db
+    try:
+        ## Load comic image from database
+        comic_img: comic.XKCDComicImage | None = (
+            xkcd_comic.comic_img.retrieve_img_from_db(comic_num=current_comic.comic_num)
+        )
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception loading XKCD comic #{current_comic.comic_num} image from database. Details: {exc}"
+        )
+        log.error(msg)
+
+    if comic_img is None:
+        ## Comic not found in database, request from API and save
+        log.warning(f"Comic #{current_comic.comic_num} image not found.")
+
+        comic_img = xkcd_mod.save_comic_img(comic_obj=current_comic.comic_num)
+
+    ## Encode img bytes so comic image can be rendered on webpage
+    try:
+        img_base64 = xkcd_mod.encode_img_bytes(comic_img.img)
+    except Exception as exc:
+        msg = Exception(
+            f"Unhandled exception converting XKCD comic #{current_comic.comic_num} image to base64-encoded bytes. Details: {exc}"
+        )
+        log.error(msg)
+
+    ## Count image files saved
+    img_list: list[Path] = []
+    for p in paths.COMIC_IMG_DIR.rglob("**/*.png"):
+        img_list.append(p)
+
+    ## Count serialized responses
+    ser_list: list[Path] = []
+    for p in paths.SERIALIZE_COMIC_RESPONSES_DIR.rglob("**/*.msgpack"):
+        ser_list.append(p)
+
+    ## Count serialized comic objects
+    ser_comics_list: list[Path] = []
+    for p in paths.SERIALIZE_COMIC_OBJECTS_DIR.rglob("**/*.msgpack"):
+        ser_comics_list.append(p)
+
+    ## Prepare template
+    template = templates.TemplateResponse(
+        request=request,
+        name="pages/admin/index.html",
+        status_code=status.HTTP_200_OK,
+        context={
+            "page_title": "admin",
+            "db_comic_count": len(all_comics),
+            "current_comic": current_comic,
+            "comic_img": img_base64,
+            "comic_img_count": len(img_list),
+            "serialized_responses_count": len(ser_list),
+            "serialized_comics_count": len(ser_comics_list),
         },
     )
 
