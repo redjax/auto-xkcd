@@ -21,13 +21,14 @@ services:
     working_dir: /app
     command: ["python", "src/auto_xkcd/start_api.py"]
 
-    #   ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
-    #   # entrypoint: ["pwd"]
-    #   # entrypoint: ["ls", "-la", "."]
-    #   # entrypoint: ["ls", "-la", "/app"]
+    ## Debugging entrypoints. Only uncomment 1 'entrypoint:' at a time
+    # entrypoint: ["pwd"]
+    # entrypoint: ["ls", "-la", "."]
+    # entrypoint: ["ls", "-la", "/app"]
 
     volumes:
       - ../src:/app/src
+      - ../src/auto_xkcd/templates:/app/src/auto_xkcd/templates
       - ${AUTOXKCD_DATA_DIR:-./container_data/dev/auto-xkcd/data}:/app/.data
       - ${AUTOXKCD_LOGS_DIR:-./container_data/dev/auto-xkcd/logs}:/app/logs
     ports:

@@ -60,13 +60,14 @@
 
         <!-- Card title -->
         <h5 class="card-title">{{ comic.title }}</h5>
+        <span><small><i class="bi bi-calendar3"></i> {{ comic.month }}-{{ comic.day }}-{{ comic.year }}</small></span>
 
         <hr>
 
         <!-- Comic image container -->
         <div class="container-fluid">
             <!-- Display comic image bytes -->
-            <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid"
+            <img src="data:image/png;base64,{{ comic_img }}" class="img-fluid object-fit-scale"
                 alt="{% if comic.alt_text %}{{ comic.alt_text }}{% else %}Rendered Image{% endif %}">
 
             <!-- Show alt text, if it exists -->
