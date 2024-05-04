@@ -32,6 +32,8 @@ services:
       - ${AUTOXKCD_LOGS_DIR:-./container_data/dev/auto-xkcd/logs}:/app/logs
     ports:
       - ${UVICORN_HOST_PORT:-8080}:8000
+    expose:
+      - 8000
     environment:
       ENV_FOR_DYNACONF: dev
       DYNACONF_ENV: dev

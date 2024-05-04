@@ -8,14 +8,30 @@
 <hr>
 
 <!-- Admin dash container -->
-<div class="container">
+<div class="container-fluid" id="adminDashMain">
 
-    <!-- Admin dash flex -->
-    <div class="d-flex p-2" id="adminDashMain">
+    <div class="row">
 
-        <!-- Stats card -->
-        {% include "pages/admin/components/cards/stats_tbl_card.html" %}
+        <div class="col p-2">
 
+            {% include "pages/admin/components/cards/backend_stats_card.html" %}
+
+        </div>
+
+        <div class="col p-2">
+            <div class="card">
+                <div class="card-header text-center text-bg-dark">
+                    <span><i class="bi bi-toggles"></i></span> Admin Controls
+                </div>
+
+                <div class="card-body">
+
+                </div>
+
+                <div class="card-footer text-center text-bg-dark">
+
+                </div>
+            </div>
         </div>
 
     </div>
