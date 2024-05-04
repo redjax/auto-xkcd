@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import typing as t
 from pathlib import Path
 import platform
 import shutil
 
 import nox
+
+from dataclasses import dataclass, field
 
 nox.options.default_venv_backend = "venv"
 nox.options.reuse_existing_virtualenvs = True
@@ -15,27 +18,86 @@ nox.options.error_on_missing_interpreters = False
 ## Define sessions to run when no session is specified
 nox.sessions = ["lint", "export", "tests"]
 
-INIT_COPY_FILES: list[dict[str, str]] = [
+
+@dataclass
+class CopyFileDefinition:
+    src: t.Union[str, Path] = field(default=None)
+    dst: t.Union[str, Path] = field(default=None)
+
+    def __post_init__(self):  # noqa: D105
+        try:
+            self.src = Path(f"{self.src}")
+        except Exception as exc:
+            raise Exception(
+                f"Unhandled exception converting src to Path. Details: {exc}"
+            )
+
+        try:
+            self.dst = Path(f"{self.dst}")
+        except Exception as exc:
+            raise Exception(
+                f"Unhandled exception converting dst to Path. Details: {exc}"
+            )
+
+
+# INIT_COPY_FILES: list[dict[str, str]] = [
+#     ## App config
+#     {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
+#     {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
+#     {"src": "config/db/settings.toml", "dest": "config/db/settings.local.toml"},
+#     {"src": "config/db/settings.secrets", "dest": "config/db/.secrets.local.toml"},
+#     {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
+#     {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
+#     {"src": "config/celery/settings.toml", "dest": "config/celery/settings.local.toml"},
+#     ## Compose env files
+#     {
+#         "src": "containers/env_files/dev.example.env",
+#         "dest": "containers/env_files/dev.env",
+#     },
+#     {
+#         "src": "containers/env_files/prod.example.env",
+#         "dest": "containers/env_files/prod.env",
+#     },
+#     {
+#         "src": "containers/devcontainers/minio/.env.example",
+#         "dest": "containers/devcontainers/minio/.env",
+#     },
+# ]
+
+INIT_COPY_FILES: list[CopyFileDefinition] = [
     ## App config
-    {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
-    {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
+    CopyFileDefinition(src="config/.secrets.example.toml", dst="config/.secrets.toml"),
+    CopyFileDefinition(src="config/settings.toml", dst="config/settings.local.toml"),
+    CopyFileDefinition(
+        src="config/db/settings.toml", dst="config/db/settings.local.toml"
+    ),
+    CopyFileDefinition(
+        src="config/db/.secrets.toml", dst="config/db/.secrets.local.toml"
+    ),
+    CopyFileDefinition(
+        src="config/minio/.secrets.example.toml", dst="config/minio/.secrets.toml"
+    ),
+    CopyFileDefinition(
+        src="config/minio/settings.toml", dst="config/minio/settings.local.toml"
+    ),
+    CopyFileDefinition(
+        src="config/celery/settings.toml", dst="config/celery/settings.local.toml"
+    ),
     ## Compose env files
-    {
-        "src": "containers/env_files/dev.example.env",
-        "dest": "containers/env_files/dev.env",
-    },
-    {
-        "src": "containers/env_files/prod.example.env",
-        "dest": "containers/env_files/prod.env",
-    },
-    {
-        "src": "containers/devcontainers/minio/.env.example",
-        "dest": "containers/devcontainers/minio/.env",
-    },
-    # {"src": ".env.example", "dest": ".env"},
-    {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
-    {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
+    CopyFileDefinition(
+        src="containers/env_files/dev.example.env",
+        dst="containers/env_files/dev.env",
+    ),
+    CopyFileDefinition(
+        src="containers/env_files/prod.example.env",
+        dst="containers/env_files/prod.env",
+    ),
+    CopyFileDefinition(
+        src="containers/devcontainers/minio/.env.example",
+        dst="containers/devcontainers/minio/.env",
+    ),
 ]
+
 INIT_MKDIRS: list[Path] = [
     Path("containers/env_files"),
     Path("containers/containers/devcontainers"),
@@ -43,9 +105,10 @@ INIT_MKDIRS: list[Path] = [
     Path("containers/container_data/dev"),
     Path("containers/container_data/prod"),
 ]
-INIT_TOUCH_FILES: list[dict[str, Path]] = [
-    {"path": Path("./testfile.txt"), "content": "This is a minio test file."}
-]
+# INIT_TOUCH_FILES: list[dict[str, Path]] = [
+#     {"path": Path("./testfile.txt"), "content": "This is a minio test file."}
+# ]
+INIT_TOUCH_FILES: list[dict[str, Path]] = []
 ## Define versions to test
 PY_VERSIONS: list[str] = ["3.12", "3.11"]
 ## Set PDM version to install throughout
@@ -212,6 +275,62 @@ def run_pre_commit_nbstripout(session: nox.Session):
     session.run("pre-commit", "run", "nbstripout")
 
 
+# @nox.session(python=DEFAULT_PYTHON, name="init-setup")
+# def run_initial_setup(session: nox.Session):
+#     if INIT_MKDIRS is None:
+#         print(f"INIT_MKDIRS is empty. Skipping.")
+#         pass
+
+#     else:
+#         for d in INIT_MKDIRS:
+#             if not d.exists():
+#                 try:
+#                     d.mkdir(parents=True, exist_ok=True)
+#                 except Exception as exc:
+#                     msg = Exception(
+#                         f"Unhandled exception creating directory '{d}'. Details: {exc}"
+#                     )
+#                     print(f"[ERROR] {msg}")
+
+#                     pass
+
+#     if INIT_COPY_FILES is None:
+#         print(f"INIT_COPY_FILES is empty. Skipping")
+#         pass
+
+#     else:
+
+#         for pair_dict in INIT_COPY_FILES:
+#             src = Path(pair_dict["src"])
+#             dest = Path(pair_dict["dest"])
+#             if not dest.exists():
+#                 print(f"Copying {src} to {dest}")
+#                 try:
+#                     shutil.copy(src, dest)
+#                 except Exception as exc:
+#                     msg = Exception(
+#                         f"Unhandled exception copying file from '{src}' to '{dest}'. Details: {exc}"
+#                     )
+#                     print(f"[ERROR] {msg}")
+
+#     if INIT_TOUCH_FILES is None:
+#         print(f"INIT_TOUCH_FILES is empty. Skipping.")
+#         pass
+#     else:
+#         for f_dict in INIT_TOUCH_FILES:
+#             if not f_dict["path"].exists():
+#                 try:
+#                     with open(f_dict["path"], "w") as f:
+#                         f.write(f_dict["content"])
+#                 except Exception as exc:
+#                     msg = Exception(
+#                         f"Unhandled exception creating file '{f_dict['path']}. Details: {exc}"
+#                     )
+#                     print(f"[ERROR] {msg}")
+
+#                     raise msg
+
+
 @nox.session(python=DEFAULT_PYTHON, name="init-setup")
 def run_initial_setup(session: nox.Session):
     if INIT_MKDIRS is None:
@@ -237,16 +356,15 @@ def run_initial_setup(session: nox.Session):
 
     else:
 
-        for pair_dict in INIT_COPY_FILES:
-            src = Path(pair_dict["src"])
-            dest = Path(pair_dict["dest"])
-            if not dest.exists():
-                print(f"Copying {src} to {dest}")
+        for pair in INIT_COPY_FILES:
+            if not pair.dst.exists():
+                print(f"Copying {pair.src} to {pair.dst}")
+
                 try:
-                    shutil.copy(src, dest)
+                    shutil.copy(pair.src, pair.dst)
                 except Exception as exc:
                     msg = Exception(
-                        f"Unhandled exception copying file from '{src}' to '{dest}'. Details: {exc}"
+                        f"Unhandled exception copying file from '{pair.src}' to '{pair.dst}'. Details: {exc}"
                     )
                     print(f"[ERROR] {msg}")
 

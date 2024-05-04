@@ -21,6 +21,9 @@ from core.config import db_settings, settings
 from core.constants import IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
 from core.dependencies import get_db
 from domain.xkcd import comic
+from domain.api.api_responses.frontend_responses import DirSizeResponse
+from utils.path_utils import get_dir_size
+
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import (
@@ -435,6 +438,20 @@ def render_admin_page(request: Request) -> HTMLResponse:
     for p in paths.SERIALIZE_COMIC_OBJECTS_DIR.rglob("**/*.msgpack"):
         ser_comics_list.append(p)
 
+    img_dir_stat = DirSizeResponse(dir_path=paths.COMIC_IMG_DIR)
+    res_serialize_dir_stat = DirSizeResponse(
+        dir_path=paths.SERIALIZE_COMIC_RESPONSES_DIR
+    )
+    comic_serialize_dir_stat = DirSizeResponse(
+        dir_path=paths.SERIALIZE_COMIC_OBJECTS_DIR
+    )
+
+    dir_stat_list: list[DirSizeResponse] = [
+        img_dir_stat,
+        res_serialize_dir_stat,
+        comic_serialize_dir_stat,
+    ]
+
     ## Prepare template
     template = templates.TemplateResponse(
         request=request,
@@ -448,6 +465,7 @@ def render_admin_page(request: Request) -> HTMLResponse:
             "comic_img_count": len(img_list),
             "serialized_responses_count": len(ser_list),
             "serialized_comics_count": len(ser_comics_list),
+            "dir_stats_list": dir_stat_list,
         },
     )
 
