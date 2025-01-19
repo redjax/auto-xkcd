@@ -19,26 +19,30 @@ import xkcdapi.request_client
 def main():
     log.info("XKCD API requests testing.")
     
-    xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController(use_cache=True, force_cache=True)
+    xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController(cache_ttl=86400)
     
-    log.info("Requesting current XKCD comic")
-    current_comic = xkcd_api_controller.get_current_comic()
-    log.info(f'Current comic: {current_comic}')
-    
-    current_comic_img = xkcd_api_controller.get_comic_img(comic=current_comic)
-    log.info(f"Comic image: {current_comic_img}")
-    
-    while True:
-        # rand_comic_num: int = random.randint(1, current_comic.num)
-        rand_comic_num: int = random.randint(403, 405)
+    with xkcd_api_controller as api_ctl:
+        log.info("Requesting current XKCD comic")
+        current_comic = api_ctl.get_current_comic()
+        log.debug(f"Current comic: {current_comic}")
         
-        if rand_comic_num in xkcd_domain.constants.IGNORE_COMIC_NUMS:
-            log.warning(f"Rolled ignored number: {rand_comic_num}. Re-rolling")
-            continue
-        else:
-            break
+        current_comic_img = api_ctl.get_comic_img(comic=current_comic)
+        log.info(f"Comic image: {current_comic_img}")
         
-    log.debug(f"Random comic number: {rand_comic_num}")
+        while True:
+            rand_comic_num: int = random.randint(1, current_comic.num)
+            
+            if rand_comic_num in xkcd_domain.constants.IGNORE_COMIC_NUMS:
+                log.warning(f"Rolled ignored number: {rand_comic_num}. Re-rolling")
+                continue
+            else:
+                break
+        
+        log.debug(f"Random comic number: {rand_comic_num}")
+        
+        log.info(f"Requesting comic and image for comic #{rand_comic_num}")
+        comic, comic_img = api_ctl.get_comic_and_img(comic_num=rand_comic_num)
+        log.success(f"Comic: {comic}, image: {comic_img}")
 
 
 if __name__ == "__main__":

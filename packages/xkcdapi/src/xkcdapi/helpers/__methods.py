@@ -10,7 +10,7 @@ from loguru import logger as log
 def return_comic_num_url(comic_num: t.Union[int, str] = None) -> str:
     if not comic_num:
         raise ValueError("Missing a comic number")
-    if not isinstance(comic_num, int) or not isinstance(comic_num, str):
+    if not isinstance(comic_num, int) and not isinstance(comic_num, str):
         raise TypeError(f"Invalid type for comic_num: ({type(comic_num)}). Must be an int or str.")
 
     ## Build URL from input comic_num
