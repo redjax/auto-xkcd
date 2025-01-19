@@ -1,0 +1,124 @@
+[default]
+
+fastapi_debug = false
+fastapi_title = "Auto XKCD"
+fastapi_summary = "Auto XKCD project API."
+fastapi_description = "Backend API for Auto XKCD app. https://github.com/redjax/auto-xkcd"
+fastapi_version = "0.1.0"
+fastapi_openapi_url = "/openapi.json"
+fastapi_redirect_slashes = true
+fastapi_docs_url = "/docs"
+fastapi_redoc_url = "/redoc"
+fastapi_openapi_prefix = ""
+fastapi_root_path = ""
+fastapi_root_path_in_servers = true
+
+## Include custom admin router
+fastapi_include_admin_router = false
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = false
+uvicorn_log_level = "INFO"
+
+[demo]
+
+fastapi_debug = false
+fastapi_title = "Auto XKCD - Demo"
+fastapi_summary = "[Demo] Auto XKCD project API."
+fastapi_description = "[Demo] Backend API for Auto XKCD app. https://github.com/redjax/auto-xkcd"
+fastapi_version = "0.1.0"
+fastapi_openapi_url = "/openapi.json"
+fastapi_redirect_slashes = true
+fastapi_docs_url = "/docs"
+fastapi_redoc_url = "/redoc"
+fastapi_openapi_prefix = ""
+fastapi_root_path = ""
+fastapi_root_path_in_servers = true
+
+## Include custom admin router
+fastapi_include_admin_router = true
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = true
+uvicorn_log_level = "DEBUG"
+
+[dev]
+
+fastapi_debug = false
+fastapi_title = "Auto XKCD - Dev"
+fastapi_summary = "[Dev] Auto XKCD project API."
+fastapi_description = "[Dev] Backend API for Auto XKCD app. https://github.com/redjax/auto-xkcd"
+fastapi_version = "0.1.0"
+fastapi_openapi_url = "/openapi.json"
+fastapi_redirect_slashes = true
+fastapi_docs_url = "/docs"
+fastapi_redoc_url = "/redoc"
+fastapi_openapi_prefix = ""
+fastapi_root_path = ""
+fastapi_root_path_in_servers = true
+
+## Include custom admin router
+fastapi_include_admin_router = true
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = true
+uvicorn_log_level = "DEBUG"
+
+[rc]
+
+fastapi_debug = false
+fastapi_title = "Auto XKCD - RC"
+fastapi_summary = "[RC] Auto XKCD project API."
+fastapi_description = "[RC] Backend API for Auto XKCD app. https://github.com/redjax/auto-xkcd"
+fastapi_version = "0.1.0"
+fastapi_openapi_url = "/openapi.json"
+fastapi_redirect_slashes = true
+fastapi_docs_url = "/docs"
+fastapi_redoc_url = "/redoc"
+fastapi_openapi_prefix = ""
+fastapi_root_path = ""
+fastapi_root_path_in_servers = true
+
+## Include custom admin router
+fastapi_include_admin_router = true
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = true
+uvicorn_log_level = "DEBUG"
+
+[prod]
+
+fastapi_debug = false
+fastapi_title = "Auto XKCD"
+fastapi_summary = "Auto XKCD project API."
+fastapi_description = "Backend API for Auto XKCD app. https://github.com/redjax/auto-xkcd"
+fastapi_version = "0.1.0"
+fastapi_openapi_url = "/openapi.json"
+fastapi_redirect_slashes = true
+fastapi_docs_url = "/docs"
+fastapi_redoc_url = "/redoc"
+fastapi_openapi_prefix = ""
+fastapi_root_path = ""
+fastapi_root_path_in_servers = true
+
+## Include custom admin router
+fastapi_include_admin_router = true
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = false
+uvicorn_log_level = "WARNING"
