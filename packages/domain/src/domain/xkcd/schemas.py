@@ -8,6 +8,19 @@ from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigD
 from .constants import XKCD_URL_BASE
 
 
+class XkcdComicImgBase(BaseModel):
+    num: t.Union[str, int] = Field(default=None)
+    img_bytes: bytes = Field(default=None, repr=False)
+    
+    
+class XkcdComicImgIn(XkcdComicImgBase):
+    pass
+
+
+class XkcdComicImgOut(XkcdComicImgBase):
+    id: int
+    
+
 class XkcdComicBase(BaseModel):
     year: str = Field(default=None)
     month: str = Field(default=None)

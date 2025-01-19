@@ -72,20 +72,22 @@ class XkcdApiController(AbstractContextManager):
         comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=current_comic_res_dict)
         ## Create XkcdComicIn object
         comic: xkcd_domain.XkcdComicIn = comic_res.return_comic_obj()
-        log.debug(f"Comic ({type(comic)}): {comic}")
-        
+                
         return comic
         
     def get_comic(self, comic_num: t.Union[int, str]):
         raise NotImplementedError("Requesting comic by comic number not implemented yet")
 
-    def get_comic_img(self, comic_img_url: str):
-        comic_img_res: httpx.Response = request_client.request_xkcd_comic_img(img_url=comic_img_url, use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+    def get_comic_img(self, comic: t.Union[xkcd_domain.XkcdComicIn, xkcd_domain.XkcdComicOut]):
+        comic_img_res: httpx.Response = request_client.request_xkcd_comic_img(img_url=comic.img_url, use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
         
         if comic_img_res.status_code != 200:
             log.warning(f"Non-200 response: [{comic_img_res.status_code}: {comic_img_res.reason_phrase}]")
             
             return
+
+        img_bytes: bytes = comic_img_res.content
         
-        comic_img_res_dict: dict = http_lib.decode_response(response=comic_img_res)
-        log.debug(f"Comig image response dict: {comic_img_res_dict}")
+        comic_img: xkcd_domain.XkcdComicImgIn = xkcd_domain.XkcdComicImgIn(num=comic.num, img_bytes=img_bytes)
+        
+        return comic_img

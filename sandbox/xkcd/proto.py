@@ -28,4 +28,8 @@ if __name__ == "__main__":
     xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController(use_cache=True, force_cache=True)
     
     log.info("Requesting current XKCD comic")
-    xkcd_api_controller.get_current_comic()
+    current_comic = xkcd_api_controller.get_current_comic()
+    log.info(f'Current comic: {current_comic}')
+    
+    comic_img = xkcd_api_controller.get_comic_img(comic=current_comic)
+    log.info(f"Comic image: {comic_img}")
