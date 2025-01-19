@@ -51,7 +51,7 @@ def comic_num_req(comic_num: t.Union[int, str] = None) -> httpx.Request:
     
     
 def current_comic_req() -> httpx.Request:
-    _url: str = return_comic_num_url()
+    _url: str = return_current_comic_url()
     
     try:
         ## Build the request
