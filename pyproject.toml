@@ -8,11 +8,13 @@ dependencies = [
     "coreutils-lib",
     "database-lib",
     "depends-lib",
+    "domain",
     "dynaconf>=3.2.6",
     "http-lib",
     "loguru>=0.7.3",
     "settings-lib",
     "setup-lib",
+    "xkcdapi",
 ]
 
 [dependency-groups]
@@ -23,7 +25,7 @@ dev = [
 ]
 
 [tool.uv.workspace]
-members = ["libs/*"]
+members = ["libs/*", "packages/xkcdapi", "packages/domain"]
 
 [tool.uv.sources]
 coreutils-lib = { workspace = true }
@@ -32,6 +34,8 @@ depends-lib = { workspace = true }
 http-lib = { workspace = true }
 settings-lib = { workspace = true }
 setup-lib = { workspace = true }
+xkcdapi = { workspace = true }
+domain = { workspace = true }
 
 
 [build-system]

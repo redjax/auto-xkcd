@@ -6,5 +6,6 @@
         "./libs/http-lib/src",
         "./libs/settings-lib/src",
         "./libs/setup-lib/src",
+        "./packages/xkcdapi/src"
     ]
 }

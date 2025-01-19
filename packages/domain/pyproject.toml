@@ -1,0 +1,28 @@
+[project]
+name = "domain"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "redjax", email = "no@none.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "database-lib",
+    "depends-lib",
+    "pydantic>=2.10.5",
+    "settings-lib",
+    "sqlalchemy>=2.0.37",
+]
+
+[project.scripts]
+domain = "domain:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+database-lib = { workspace = true }
+depends-lib = { workspace = true }
+settings-lib = { workspace = true }
