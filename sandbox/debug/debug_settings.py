@@ -1,13 +1,14 @@
-from settings import (
-    LOGGING_SETTINGS,
-    DB_SETTINGS,
-    APP_SETTINGS,
-    CELERY_SETTINGS,
-    FASTAPI_SETTINGS,
-    UVICORN_SETTINGS,
-)
+from __future__ import annotations
 
 from dynaconf import Dynaconf
+from settings import (
+    APP_SETTINGS,
+    CELERY_SETTINGS,
+    DB_SETTINGS,
+    FASTAPI_SETTINGS,
+    LOGGING_SETTINGS,
+    UVICORN_SETTINGS,
+)
 
 LOOP_CONFS: list = [
     {"name": "logging", "obj": LOGGING_SETTINGS},

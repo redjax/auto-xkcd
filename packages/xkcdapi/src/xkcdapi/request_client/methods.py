@@ -1,15 +1,19 @@
-from loguru import logger as log
+from __future__ import annotations
 
-import typing as t
 import json
+import typing as t
+
+from xkcdapi.helpers import (
+    comic_num_req,
+    current_comic_req,
+    return_comic_num_url,
+    return_current_comic_url,
+)
 
 import core_utils
 import http_lib
-
-from xkcdapi.helpers import comic_num_req, current_comic_req, return_comic_num_url, return_current_comic_url
-
 import httpx
-
+from loguru import logger as log
 
 def request_current_xkcd_comic(use_cache: bool = False, force_cache: bool = False, follow_redirects: bool = False) -> httpx.Response:
     req: httpx.Request = current_comic_req()

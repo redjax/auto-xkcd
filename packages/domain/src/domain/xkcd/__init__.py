@@ -1,5 +1,11 @@
-from . import constants
+from __future__ import annotations
 
-from .schemas import XkcdComicIn, XkcdComicOut
-from .schemas import XkcdApiResponseIn, XkcdApiResponseOut
-from .schemas import XkcdComicImgIn, XkcdComicImgOut
+from . import constants
+from .schemas import (
+    XkcdApiResponseIn,
+    XkcdApiResponseOut,
+    XkcdComicImgIn,
+    XkcdComicImgOut,
+    XkcdComicIn,
+    XkcdComicOut,
+)

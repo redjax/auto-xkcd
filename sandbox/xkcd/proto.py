@@ -1,21 +1,20 @@
-from loguru import logger as log
-
-import typing as t
-
-import db_lib
-import db_lib.demo_db
-import http_lib
-from depends import db_depends
-import xkcdapi
-import settings
-import setup
-import core_utils
-import xkcdapi.controllers
-import xkcdapi.request_client
-from domain import xkcd as xkcd_domain
+from __future__ import annotations
 
 import random
+import typing as t
 
+import core_utils
+import db_lib
+import db_lib.demo_db
+from depends import db_depends
+from domain import xkcd as xkcd_domain
+import http_lib
+from loguru import logger as log
+import settings
+import setup
+import xkcdapi
+import xkcdapi.controllers
+import xkcdapi.request_client
 
 def main():
     log.info("XKCD API requests testing.")

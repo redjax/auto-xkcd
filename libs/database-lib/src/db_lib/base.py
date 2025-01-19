@@ -42,6 +42,7 @@ class BaseRepository(t.Generic[T]):
 
         Returns:
             The list of successfully added objects.
+
         """
         try:
             self.session.add_all(objs)

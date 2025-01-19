@@ -1,19 +1,30 @@
-from loguru import logger as log
-import typing as t
+from __future__ import annotations
+
 from contextlib import AbstractContextManager, contextmanager
 import json
 from pathlib import Path
+import typing as t
 
-from domain.xkcd.constants import CURRENT_XKCD_URL, IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
-from domain import xkcd as xkcd_domain
-import http_lib
-from depends import db_depends
-import db_lib
-from xkcdapi.helpers import current_comic_req, comic_num_req, return_comic_num_url, return_current_comic_url
 from xkcdapi import request_client
+from xkcdapi.helpers import (
+    comic_num_req,
+    current_comic_req,
+    return_comic_num_url,
+    return_current_comic_url,
+)
 
+import db_lib
+from depends import db_depends
+from domain import xkcd as xkcd_domain
+from domain.xkcd.constants import (
+    CURRENT_XKCD_URL,
+    IGNORE_COMIC_NUMS,
+    XKCD_URL_BASE,
+    XKCD_URL_POSTFIX,
+)
+import http_lib
 import httpx
-
+from loguru import logger as log
 
 class XkcdApiController(AbstractContextManager):
     def __init__(self, use_cache: bool = True, force_cache: bool = True, follow_redirects: bool = True):

@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 import datetime as dt
 import typing as t
 
-from loguru import logger as log
-
-from core_utils import hash_utils
-from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict, computed_field
 from .constants import XKCD_URL_BASE
 
+from core_utils import hash_utils
+from loguru import logger as log
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    computed_field,
+    field_validator,
+)
 
 class XkcdComicImgBase(BaseModel):
     num: t.Union[str, int] = Field(default=None)
