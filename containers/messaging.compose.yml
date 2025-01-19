@@ -1,0 +1,62 @@
+---
+volumes:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  auto-xkcd_devnet:
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: auto-xkcd_redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-redis}"]
+    env_file:
+      - ./envs/dev/messaging.env
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+    volumes:
+      - ${REDIS_DATA_DIR:-redis_data}:/data
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    networks:
+      - auto-xkcd_devnet
+
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: auto-xkcd_redis-commander
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./envs/dev/messaging.env
+  #   environment:
+  #     REDIS_HOSTS: redis
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: redis:6379
+  #     REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+  #     HTTP_USER: ${REDIS_COMMANDER_HTTP_USER:-admin}
+  #     HTTP_PASSWORD: ${REDIS_COMMANDER_HTTP_PASSWORD:-admin}
+  #   ports:
+  #     - ${REDIS_COMMANDER_PORT:-8081}:8081
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - auto-xkcd_devnet
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: auto-xkcd_rabbitmq
+    restart: unless-stopped
+    env_file:
+      - ./envs/dev/messaging.env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-rabbitmq}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-rabbitmq}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-rabbitmq}
+    volumes:
+      - ${RABBITMQ_DATA_DIR:-rabbitmq_data}:/var/lib/rabbitmq
+    ports:
+      - ${RABBITMQ_AMPQ_PORT:-5672}:5672
+      - ${RABBITMQ_HTTP_PORT:-15672}:15672
+    networks:
+      - auto-xkcd_devnet

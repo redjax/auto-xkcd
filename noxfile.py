@@ -1,245 +1,183 @@
 from __future__ import annotations
 
-import typing as t
+from contextlib import contextmanager
+import importlib.util
+import logging
+import os
 from pathlib import Path
 import platform
 import shutil
+import typing as t
 
 import nox
 
-from dataclasses import dataclass, field
-
-nox.options.default_venv_backend = "venv"
+## Set nox options
+if importlib.util.find_spec("uv"):
+    nox.options.default_venv_backend = "uv|virtualenv"
+else:
+    nox.options.default_venv_backend = "virtualenv"
 nox.options.reuse_existing_virtualenvs = True
 nox.options.error_on_external_run = False
 nox.options.error_on_missing_interpreters = False
 # nox.options.report = True
 
 ## Define sessions to run when no session is specified
-nox.sessions = ["lint", "export", "tests"]
+nox.sessions = ["ruff-lint", "export"]
 
+## Create logger for this module
+log: logging.Logger = logging.getLogger("nox")
 
-@dataclass
-class CopyFileDefinition:
-    src: t.Union[str, Path] = field(default=None)
-    dst: t.Union[str, Path] = field(default=None)
-
-    def __post_init__(self):  # noqa: D105
-        try:
-            self.src = Path(f"{self.src}")
-        except Exception as exc:
-            raise Exception(
-                f"Unhandled exception converting src to Path. Details: {exc}"
-            )
-
-        try:
-            self.dst = Path(f"{self.dst}")
-        except Exception as exc:
-            raise Exception(
-                f"Unhandled exception converting dst to Path. Details: {exc}"
-            )
-
-
-# INIT_COPY_FILES: list[dict[str, str]] = [
-#     ## App config
-#     {"src": "config/.secrets.example.toml", "dest": "config/.secrets.toml"},
-#     {"src": "config/settings.toml", "dest": "config/settings.local.toml"},
-#     {"src": "config/db/settings.toml", "dest": "config/db/settings.local.toml"},
-#     {"src": "config/db/settings.secrets", "dest": "config/db/.secrets.local.toml"},
-#     {"src": "config/minio/.secrets.example.toml", "dest": "config/minio/.secrets.toml"},
-#     {"src": "config/minio/settings.toml", "dest": "config/minio/settings.local.toml"},
-#     {"src": "config/celery/settings.toml", "dest": "config/celery/settings.local.toml"},
-#     ## Compose env files
-#     {
-#         "src": "containers/env_files/dev.example.env",
-#         "dest": "containers/env_files/dev.env",
-#     },
-#     {
-#         "src": "containers/env_files/prod.example.env",
-#         "dest": "containers/env_files/prod.env",
-#     },
-#     {
-#         "src": "containers/devcontainers/minio/.env.example",
-#         "dest": "containers/devcontainers/minio/.env",
-#     },
-# ]
-
-INIT_COPY_FILES: list[CopyFileDefinition] = [
-    ## App config
-    CopyFileDefinition(src="config/.secrets.example.toml", dst="config/.secrets.toml"),
-    CopyFileDefinition(src="config/settings.toml", dst="config/settings.local.toml"),
-    CopyFileDefinition(
-        src="config/db/settings.toml", dst="config/db/settings.local.toml"
-    ),
-    CopyFileDefinition(
-        src="config/db/.secrets.toml", dst="config/db/.secrets.local.toml"
-    ),
-    CopyFileDefinition(
-        src="config/minio/.secrets.example.toml", dst="config/minio/.secrets.toml"
-    ),
-    CopyFileDefinition(
-        src="config/minio/settings.toml", dst="config/minio/settings.local.toml"
-    ),
-    CopyFileDefinition(
-        src="config/celery/settings.toml", dst="config/celery/settings.local.toml"
-    ),
-    ## Compose env files
-    CopyFileDefinition(
-        src="containers/env_files/dev.example.env",
-        dst="containers/env_files/dev.env",
-    ),
-    CopyFileDefinition(
-        src="containers/env_files/prod.example.env",
-        dst="containers/env_files/prod.env",
-    ),
-    CopyFileDefinition(
-        src="containers/devcontainers/minio/.env.example",
-        dst="containers/devcontainers/minio/.env",
-    ),
-]
-
-INIT_MKDIRS: list[Path] = [
-    Path("containers/env_files"),
-    Path("containers/containers/devcontainers"),
-    Path("containers/container_data"),
-    Path("containers/container_data/dev"),
-    Path("containers/container_data/prod"),
-]
-# INIT_TOUCH_FILES: list[dict[str, Path]] = [
-#     {"path": Path("./testfile.txt"), "content": "This is a minio test file."}
-# ]
-INIT_TOUCH_FILES: list[dict[str, Path]] = []
 ## Define versions to test
 PY_VERSIONS: list[str] = ["3.12", "3.11"]
-## Set PDM version to install throughout
-PDM_VER: str = "2.11.2"
-## Set paths to lint with the lint session
-LINT_PATHS: list[str] = ["src", "tests", "./noxfile.py"]
-
 ## Get tuple of Python ver ('maj', 'min', 'mic')
-PY_VER_TUPLE = platform.python_version_tuple()
+PY_VER_TUPLE: tuple[str, str, str] = platform.python_version_tuple()
 ## Dynamically set Python version
 DEFAULT_PYTHON: str = f"{PY_VER_TUPLE[0]}.{PY_VER_TUPLE[1]}"
 
 ## Set directory for requirements.txt file output
-REQUIREMENTS_OUTPUT_DIR: Path = Path("./requirements")
-## Ensure REQUIREMENTS_OUTPUT_DIR path exists
-if not REQUIREMENTS_OUTPUT_DIR.exists():
+REQUIREMENTS_OUTPUT_DIR: Path = Path(".")
+
+# this VENV_DIR constant specifies the name of the dir that the `dev`
+# session will create, containing the virtualenv;
+# the `resolve()` makes it portable
+VENV_DIR = Path("./.venv").resolve()
+
+LINT_PATHS: list[str] = ["src", "packages", "libs", "applications", "scripts", "sandbox"]
+
+def install_uv_project(session: nox.Session, external: bool = False) -> None:
+    """Method to install uv and the current project in a nox session."""
+    log.info("Installing uv in session")
+    session.install("uv")
+    log.info("Syncing uv project")
+    session.run("uv", "sync", external=external)
+    log.info("Installing project")
+    session.run("uv", "pip", "install", ".", external=external)
+
+@contextmanager
+def cd(new_dir) -> t.Generator[None, t.Any, None]: # type: ignore
+    """Context manager to change a directory before executing command."""
+    prev_dir: str = os.getcwd()
+    os.chdir(os.path.expanduser(new_dir))
     try:
-        REQUIREMENTS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    except Exception as exc:
-        msg = Exception(
-            f"Unable to create requirements export directory: '{REQUIREMENTS_OUTPUT_DIR}'. Details: {exc}"
-        )
-        print(msg)
+        yield
+    finally:
+        os.chdir(prev_dir)
+        
 
-        REQUIREMENTS_OUTPUT_DIR: Path = Path(".")
+@nox.session(name="dev-env", tags=["setup"])
+def dev(session: nox.Session) -> None:
+    """Sets up a python development environment for the project.
 
+    Run this on a fresh clone of the repository to automate building the project with uv.
+    """
+    install_uv_project(session, external=True)
+    
+@nox.session(python=[DEFAULT_PYTHON], name="ruff-lint", tags=["ruff", "clean", "lint"])
+def run_linter(session: nox.Session, lint_paths: list[str] = LINT_PATHS):
+    """Nox session to run Ruff code linting."""
+    if not Path("ruff.toml").exists():
+        if not Path("pyproject.toml").exists():
+            log.warning(
+                """No ruff.toml file found. Make sure your pyproject.toml has a [tool.ruff] section!
 
-@nox.session(python=PY_VERSIONS, name="build-env")
-@nox.parametrize("pdm_ver", [PDM_VER])
-def setup_base_testenv(session: nox.Session, pdm_ver: str):
-    print(f"Default Python: {DEFAULT_PYTHON}")
-    session.install(f"pdm>={pdm_ver}")
+If your pyproject.toml does not have a [tool.ruff] section, ruff's defaults will be used.
+Double check imports in _init_.py files, ruff removes unused imports by default.
+"""
+            )
 
-    print("Installing dependencies with PDM")
-    session.run("pdm", "sync")
-    session.run("pdm", "install")
+    session.install("ruff")
 
-
-@nox.session(python=[DEFAULT_PYTHON], name="lint")
-def run_linter(session: nox.Session):
-    session.install("ruff", "black")
-
-    for d in LINT_PATHS:
+    log.info("Linting code")
+    for d in lint_paths:
         if not Path(d).exists():
-            print(f"Skipping lint path '{d}', could not find path")
+            log.warning(f"Skipping lint path '{d}', could not find path")
             pass
         else:
             lint_path: Path = Path(d)
-            print(f"Running ruff imports sort on '{d}'")
+            log.info(f"Running ruff imports sort on '{d}'")
             session.run(
                 "ruff",
+                "check",
+                lint_path,
                 "--select",
                 "I",
                 "--fix",
-                lint_path,
             )
 
-            print(f"Formatting '{d}' with Black")
-            session.run(
-                "black",
-                lint_path,
-            )
-
-            print(f"Running ruff checks on '{d}' with --fix")
+            log.info(f"Running ruff checks on '{d}' with --fix")
             session.run(
                 "ruff",
-                "--config",
-                "ruff.ci.toml",
+                "check",
                 lint_path,
                 "--fix",
             )
 
-
-@nox.session(python=[DEFAULT_PYTHON], name="export")
-@nox.parametrize("pdm_ver", [PDM_VER])
-def export_requirements(session: nox.Session, pdm_ver: str):
-    session.install(f"pdm>={pdm_ver}")
-
-    print("Exporting production requirements")
-    session.run(
-        "pdm",
-        "export",
-        "--prod",
-        "-o",
-        f"{REQUIREMENTS_OUTPUT_DIR}/requirements.txt",
-        "--without-hashes",
-    )
-
-    print("Exporting development requirements")
-    session.run(
-        "pdm",
-        "export",
-        "-d",
-        "-o",
-        f"{REQUIREMENTS_OUTPUT_DIR}/requirements.dev.txt",
-        "--without-hashes",
-    )
-
-    print("Exporting docs requirements")
-    session.run(
-        "pdm",
-        "export",
-        "-G",
-        "docs",
-        "--no-default",
-        "-o",
-        "docs/requirements.txt",
-        "--without-hashes",
-    )
-
-    # print("Exporting CI requirements")
+    # log.info("Linting noxfile.py")
     # session.run(
-    #     "pdm",
-    #     "export",
-    #     "--group",
-    #     "ci",
-    #     "-o",
-    #     f"{REQUIREMENTS_OUTPUT_DIR}/requirements.ci.txt",
-    #     "--without-hashes",
+    #     "ruff",
+    #     "check",
+    #     f"{Path('./noxfile.py')}",
+    #     "--fix",
     # )
+    
+    ## Find stray Python files not in src/, .venv/, or .nox/
+    all_python_files = [f for f in Path("./").rglob("*.py") if ".venv" not in f.parts and ".nox" not in f.parts and "src" not in f.parts]
+    log.info(f"Found [{len(all_python_files)}] Python file(s) to lint")
+    for py_file in all_python_files:
+        log.info(f"Linting Python file: {py_file}")
+        session.run(
+            "ruff",
+            "check",
+            str(py_file),
+            "--fix"
+        )
+    
+@nox.session(python=[DEFAULT_PYTHON], name="vulture-check", tags=["quality"])
+def run_vulture_check(session: nox.Session):
+    session.install(f"vulture")
 
+    log.info("Checking for dead code with vulture")
+    for p in LINT_PATHS:
+        log.info(f"Vulture scanning path: {p}")
+        session.run("vulture", str(p), "--min-confidence", "100")
+    
 
-@nox.session(python=PY_VERSIONS, name="tests")
-@nox.parametrize("pdm_ver", [PDM_VER])
-def run_tests(session: nox.Session, pdm_ver: str):
-    session.install(f"pdm>={pdm_ver}")
-    session.run("pdm", "install")
+@nox.session(python=[DEFAULT_PYTHON], name="uv-export")
+@nox.parametrize("requirements_output_dir", REQUIREMENTS_OUTPUT_DIR)
+def export_requirements(session: nox.Session, requirements_output_dir: Path):
+    ## Ensure REQUIREMENTS_OUTPUT_DIR path exists
+    if not requirements_output_dir.exists():
+        try:
+            requirements_output_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as exc:
+            msg = Exception(
+                f"Unable to create requirements export directory: '{requirements_output_dir}'. Details: {exc}"
+            )
+            log.error(msg)
+
+            requirements_output_dir: Path = Path("./")
+
+    session.install(f"uv")
+
+    log.info("Exporting production requirements")
+    session.run(
+        "uv",
+        "pip",
+        "compile",
+        "pyproject.toml",
+        "-o",
+        str(REQUIREMENTS_OUTPUT_DIR / "requirements.txt"),
+    )
+
+## Run pytest with xdist, allowing concurrent tests
+@nox.session(python=DEFAULT_PYTHON, name="tests")
+def run_tests(session: nox.Session):
+    install_uv_project(session)
+    session.install("pytest-xdist")
 
     print("Running Pytest tests")
     session.run(
-        "pdm",
+        "uv",
         "run",
         "pytest",
         "-n",
@@ -250,193 +188,25 @@ def run_tests(session: nox.Session, pdm_ver: str):
     )
 
 
-@nox.session(python=DEFAULT_PYTHON, name="pre-commit-all")
-def run_pre_commit_all(session: nox.Session):
-    session.install("pre-commit")
-    session.run("pre-commit")
+@nox.session(name="init-clone-setup")
+def run_init_clone_setup(session: nox.Session):
+    install_uv_project(session)
 
-    print("Running all pre-commit hooks")
-    session.run("pre-commit", "run")
-
-
-@nox.session(python=DEFAULT_PYTHON, name="pre-commit-update")
-def run_pre_commit_autoupdate(session: nox.Session):
-    session.install(f"pre-commit")
-
-    print("Running pre-commit autoupdate")
-    session.run("pre-commit", "autoupdate")
-
-
-@nox.session(python=DEFAULT_PYTHON, name="pre-commit-nbstripout")
-def run_pre_commit_nbstripout(session: nox.Session):
-    session.install(f"pre-commit")
-
-    print("Running nbstripout pre-commit hook")
-    session.run("pre-commit", "run", "nbstripout")
-
-
-# @nox.session(python=DEFAULT_PYTHON, name="init-setup")
-# def run_initial_setup(session: nox.Session):
-#     if INIT_MKDIRS is None:
-#         print(f"INIT_MKDIRS is empty. Skipping.")
-#         pass
-
-#     else:
-#         for d in INIT_MKDIRS:
-#             if not d.exists():
-#                 try:
-#                     d.mkdir(parents=True, exist_ok=True)
-#                 except Exception as exc:
-#                     msg = Exception(
-#                         f"Unhandled exception creating directory '{d}'. Details: {exc}"
-#                     )
-#                     print(f"[ERROR] {msg}")
-
-#                     pass
-
-#     if INIT_COPY_FILES is None:
-#         print(f"INIT_COPY_FILES is empty. Skipping")
-#         pass
-
-#     else:
-
-#         for pair_dict in INIT_COPY_FILES:
-#             src = Path(pair_dict["src"])
-#             dest = Path(pair_dict["dest"])
-#             if not dest.exists():
-#                 print(f"Copying {src} to {dest}")
-#                 try:
-#                     shutil.copy(src, dest)
-#                 except Exception as exc:
-#                     msg = Exception(
-#                         f"Unhandled exception copying file from '{src}' to '{dest}'. Details: {exc}"
-#                     )
-#                     print(f"[ERROR] {msg}")
-
-#     if INIT_TOUCH_FILES is None:
-#         print(f"INIT_TOUCH_FILES is empty. Skipping.")
-#         pass
-#     else:
-#         for f_dict in INIT_TOUCH_FILES:
-#             if not f_dict["path"].exists():
-#                 try:
-#                     with open(f_dict["path"], "w") as f:
-#                         f.write(f_dict["content"])
-#                 except Exception as exc:
-#                     msg = Exception(
-#                         f"Unhandled exception creating file '{f_dict['path']}. Details: {exc}"
-#                     )
-#                     print(f"[ERROR] {msg}")
-
-#                     raise msg
-
-
-@nox.session(python=DEFAULT_PYTHON, name="init-setup")
-def run_initial_setup(session: nox.Session):
-    if INIT_MKDIRS is None:
-        print(f"INIT_MKDIRS is empty. Skipping.")
-        pass
-
-    else:
-        for d in INIT_MKDIRS:
-            if not d.exists():
-                try:
-                    d.mkdir(parents=True, exist_ok=True)
-                except Exception as exc:
-                    msg = Exception(
-                        f"Unhandled exception creating directory '{d}'. Details: {exc}"
-                    )
-                    print(f"[ERROR] {msg}")
-
-                    pass
-
-    if INIT_COPY_FILES is None:
-        print(f"INIT_COPY_FILES is empty. Skipping")
-        pass
-
-    else:
-
-        for pair in INIT_COPY_FILES:
-            if not pair.dst.exists():
-                print(f"Copying {pair.src} to {pair.dst}")
-
-                try:
-                    shutil.copy(pair.src, pair.dst)
-                except Exception as exc:
-                    msg = Exception(
-                        f"Unhandled exception copying file from '{pair.src}' to '{pair.dst}'. Details: {exc}"
-                    )
-                    print(f"[ERROR] {msg}")
-
-    if INIT_TOUCH_FILES is None:
-        print(f"INIT_TOUCH_FILES is empty. Skipping.")
-        pass
-    else:
-        for f_dict in INIT_TOUCH_FILES:
-            if not f_dict["path"].exists():
-                try:
-                    with open(f_dict["path"], "w") as f:
-                        f.write(f_dict["content"])
-                except Exception as exc:
-                    msg = Exception(
-                        f"Unhandled exception creating file '{f_dict['path']}. Details: {exc}"
-                    )
-                    print(f"[ERROR] {msg}")
-
-                    raise msg
-
-
-@nox.session(python=DEFAULT_PYTHON, name="new-dynaconf-config")
-def create_new_dynaconf_config(session: nox.session):
-    CONFIG_ROOT: str = "config"
-
-    def prompt_config_name(config_root: str = CONFIG_ROOT) -> str:
-        try:
-            new_conf: str = input(f"New config path: {config_root}/")
-            return f"{CONFIG_ROOT}/{new_conf}"
-
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception getting new config path. Details: {exc}"
-            )
-            print(f"[ERROR] {msg}")
-
-            raise exc
-
-    init_files: list[str] = [
-        ".secrets.toml",
-        ".secrets.example.toml",
-        "settings.toml",
-        "settings.local.toml",
+    copy_paths = [
+        {
+            "src": "./config/settings.toml",
+            "dest": "./config/settings.local.toml"
+        },
+        {
+            "src": "./config/.secrets.toml",
+            "dest": "./config/.secrets.local.toml"
+        }
     ]
-    new_file_contents: str = f"[default]\n\n[dev]\n\n[prod]\n"
-    config_dir: str = prompt_config_name()
+    
+    for p in copy_paths:
+        if not Path(p["dest"]).exists():
+            log.info(f"Copying {p['src']} to {p['dest']}")
+            shutil.copyfile(p["src"], p["dest"])
 
-    if not Path(config_dir).exists():
-        print(f"Creating path '{config_dir}'")
-        try:
-            Path(config_dir).mkdir(parents=True, exist_ok=True)
-        except Exception as exc:
-            msg = Exception(
-                f"Unhandled exception creating path '{config_dir}'. Details: {exc}"
-            )
-            print(f"[ERROR] {msg}")
-
-            raise exc
-
-    for f in init_files:
-        f_path: Path = Path(f"{config_dir}/{f}")
-
-        if not f_path.exists():
-            print(f"Creating file '{f_path}'")
-
-            try:
-                with open(f_path, "w") as _f:
-                    _f.write(new_file_contents)
-            except Exception as exc:
-                msg = Exception(
-                    f"Unhandled exception creating file '{f_path}'. Details: {exc}"
-                )
-                print(f"[ERROR] {msg}")
-
-                raise exc
+        else:
+            log.info(f"{p['dest']} already exists, skipping copy")

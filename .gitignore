@@ -66,6 +66,8 @@ db.sqlite3-journal
 *.sqlite
 *.sqlite3
 *.db
+*.duck
+*.duckdb
 
 # Flask stuff:
 instance/
@@ -182,28 +184,15 @@ cython_debug/
 .python-version
 
 ## Dynaconf
-**/.secrets.toml
 **/*.local.toml
 
 !**/*.example.toml
 !**/.*.example.toml
 
-## Jupyter
-#  Uncomment to ignore Jupyter notebooks, i.e. if
-#  pre-hook is not configured and you don't want to
-#  commit notebook with output.
-
-# *.ipynb
-
 ## Ignore mkdocs builds
 site/
 
-.data
-docker_data/
-
-!**/.gitkeep
-# pixi environments
-.pixi
-*.egg-info
-
-**/*_bak
+## Ignore direnv environment files
+.direnv/.*
+.direnv/**/.*
+!.direnv/*.*example*
