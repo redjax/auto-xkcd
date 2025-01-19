@@ -23,25 +23,25 @@ services:
     networks:
       - auto-xkcd_devnet
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: auto-xkcd_redis-commander
-    restart: unless-stopped
-    env_file:
-      - ./envs/dev/messaging.env
-    environment:
-      REDIS_HOSTS: redis
-      REDIS_HOST: redis
-      REDIS_PORT: redis:6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
-      HTTP_USER: ${REDIS_COMMANDER_HTTP_USER:-admin}
-      HTTP_PASSWORD: ${REDIS_COMMANDER_HTTP_PASSWORD:-admin}
-    ports:
-      - ${REDIS_COMMANDER_PORT:-8081}:8081
-    depends_on:
-      - redis
-    networks:
-      - auto-xkcd_devnet
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: auto-xkcd_redis-commander
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./envs/dev/messaging.env
+  #   environment:
+  #     REDIS_HOSTS: redis
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: redis:6379
+  #     REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+  #     HTTP_USER: ${REDIS_COMMANDER_HTTP_USER:-admin}
+  #     HTTP_PASSWORD: ${REDIS_COMMANDER_HTTP_PASSWORD:-admin}
+  #   ports:
+  #     - ${REDIS_COMMANDER_PORT:-8081}:8081
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - auto-xkcd_devnet
 
   rabbitmq:
     image: rabbitmq:management
