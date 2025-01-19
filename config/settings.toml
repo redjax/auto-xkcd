@@ -1,20 +1,13 @@
 [default]
-
-env = "prod"
-container_env = false
 log_level = "INFO"
-logs_dir = "logs"
+tz = "Etc/UTC"
+
+[demo]
 
 [dev]
-
-env = "dev"
-container_env = false
 log_level = "DEBUG"
-logs_dir = "logs/dev"
+
+[rc]
 
 [prod]
-
-env = "prod"
-container_env = false
-log_level = "INFO"
-logs_dir = "logs"
+log_level = "WARNING"

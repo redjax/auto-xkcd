@@ -1,19 +1,43 @@
 [default]
 
-UVICORN_APP = "api._main:app"
-UVICORN_HOST = "0.0.0.0"
-UVICORN_PORT = 8000
-UVICORN_ROOT_PATH = "/"
-UVICORN_RELOAD = false
-UVICORN_LOG_LEVEL = "INFO"
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = false
+uvicorn_log_level = "INFO"
+
+[demo]
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = true
+uvicorn_log_level = "DEBUG"
 
 [dev]
 
-UVICORN_APP = "api._main:app"
-UVICORN_HOST = "0.0.0.0"
-UVICORN_PORT = 8080
-UVICORN_ROOT_PATH = "/"
-UVICORN_RELOAD = true
-UVICORN_LOG_LEVEL = "DEBUG"
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = true
+uvicorn_log_level = "DEBUG"
+
+[rc]
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = true
+uvicorn_log_level = "DEBUG"
 
 [prod]
+
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = false
+uvicorn_log_level = "WARNING"

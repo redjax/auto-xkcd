@@ -1,0 +1,32 @@
+[project]
+name = "xkcdapi"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "redjax", email = "no@none.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "database-lib",
+    "depends-lib",
+    "hishel>=0.1.1",
+    "http-lib",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "pydantic>=2.10.5",
+    "settings-lib",
+]
+
+[project.scripts]
+xkcdapi = "xkcdapi:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+http-lib = { workspace = true }
+database-lib = { workspace = true }
+settings-lib = { workspace = true }
+depends-lib = { workspace = true }

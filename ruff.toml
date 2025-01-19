@@ -25,13 +25,21 @@ lint.ignore = [
     "D101", ## missing-docstring-in-public-class
     "D102", ## missing-docstring-in-public-method
     "D103", ## Missing docstring in public function
+    "D105", ## Missing docstring in magic method
     "D106", ## missing-docstring-in-public-nested-class
+    "D107", ## Missing docstring in __init__
+    "D200", ## One-line docstring should fit on one line
     "D203", ## one-blank-line-before-class
+    "D205", ## 1 blank line required between summary line and description
     "D213", ## multi-line-summary-second-line
+    "D401", ## First line of docstring should be in imperative mood
+    "E402", ## Module level import not at top of file
     "D406", ## Section name should end with a newline
     "D407", ## Missing dashed underline after section
+    "D414", ## Section has no content
+    "D417", ## Missing argument descriptions in the docstring for [variables]
     "E501", ## Line too long
-    "E402", ## Module level import not at top of file
+    "E722", ## Do note use bare `except`
     "F401", ## imported but unused
 ]
 
@@ -45,7 +53,6 @@ lint.fixable = [
     "D",    ## pydocstyle
     "E",    ## pycodestyle-error
     "E402", ## Module level import not at top of file
-    "E501", ## Line too long
     # "F",  ## pyflakes
     "F401", ## unused imports
     # "G",  ## flake8-logging-format
@@ -105,9 +112,6 @@ exclude = [
 [lint.per-file-ignores]
 "__init__.py" = ["D104"]
 
-## Allow unused variables when underscore-prefixed.
-# dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 [lint.mccabe]
 max-complexity = 10
 
@@ -118,7 +122,7 @@ force-wrap-aliases = true
 ## Use a single line after each import block.
 lines-after-imports = 1
 ## Use a single line between direct and from import
-lines-between-types = 1
+# lines-between-types = 1
 ## Order imports by type, which is determined by case,
 #  in addition to alphabetically.
 order-by-type = true

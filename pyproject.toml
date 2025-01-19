@@ -1,83 +1,47 @@
 [project]
 name = "auto-xkcd"
 version = "0.1.0"
-description = "Default template for PDM package"
-authors = [{ name = "redjax", email = "none@none.com" }]
-dependencies = [
-    "httpx>=0.27.0",
-    "hishel>=0.0.24",
-    "sqlalchemy>=2.0.29",
-    "pendulum>=3.0.0",
-    "pydantic>=2.6.4",
-    "pydantic-settings>=2.2.1",
-    "loguru>=0.7.2",
-    "red-utils>=0.2.18",
-    "msgpack>=1.0.8",
-    "pandas>=2.2.1",
-    "dynaconf>=3.2.5",
-    "minio>=7.2.5",
-    "chardet>=5.2.0",
-    "fastparquet>=2024.2.0",
-    "click>=8.1.7",
-    "python-telegram-bot>=21.1",
-    "ibis-framework[duckdb,pandas]>=8.0.0",
-    "fastapi>=0.110.2",
-    "uvicorn[standard]>=0.29.0",
-    "celery[librabbitmq,msgpack,redis,sqlalchemy]>=5.4.0",
-    "redis>=5.0.3",
-    "jinja2>=3.1.3",
-    "pillow>=10.3.0",
-]
-requires-python = ">=3.11"
+description = "Add your description here"
 readme = "README.md"
-license = { text = "MIT" }
-
-[project.optional-dependencies]
-docs = [
-    "pygments>=2.17.2",
-    "mkdocs>=1.5.3",
-    "mkdocs-material>=9.5.17",
-    "mkdocstrings[python]>=0.24.3",
-    "markdown-include>=0.8.1",
-    "mkdocs-gen-files>=0.5.0",
-    "mkdocs-autorefs>=1.0.1",
-    "mkdocs-section-index>=0.3.8",
-    "mkdocs-literate-nav>=0.6.1",
+requires-python = ">=3.11"
+dependencies = [
+    "coreutils-lib",
+    "database-lib",
+    "depends-lib",
+    "domain",
+    "dynaconf>=3.2.6",
+    "http-lib",
+    "loguru>=0.7.3",
+    "settings-lib",
+    "setup-lib",
+    "xkcdapi",
 ]
+
+[dependency-groups]
+dev = [
+    "nox>=2024.10.9",
+    "pytest-xdist>=3.6.1",
+    "ruff>=0.9.2",
+]
+
+[tool.uv.workspace]
+members = ["libs/*", "packages/xkcdapi", "packages/domain"]
+
+[tool.uv.sources]
+coreutils-lib = { workspace = true }
+database-lib = { workspace = true }
+depends-lib = { workspace = true }
+http-lib = { workspace = true }
+settings-lib = { workspace = true }
+setup-lib = { workspace = true }
+xkcdapi = { workspace = true }
+domain = { workspace = true }
+
+
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-
-[tool.pdm]
-distribution = true
-
-[tool.pdm.dev-dependencies]
-dev = ["black>=24.3.0", "ruff>=0.3.4", "pytest-xdist>=3.5.0", "nox>=2024.3.2"]
-
-[tool.pdm.scripts]
-
-start-scrape = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "prod" } }
-start-scrape-dev = { cmd = "python src/auto_xkcd/cli.py pipelines scrape --overwrite-serial --loop-requests --max-loops 0 --loop-pause 3600", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-start-celery-worker = { cmd = "python src/auto_xkcd/start_celery_worker.py", env = { "ENV_FOR_DYNACONF" = "prod" } }
-start-celery-worker-dev = { cmd = "python src/auto_xkcd/start_celery_worker.py", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-start-celery-beat = { cmd = "python src/auto_xkcd/start_celery_beat.py", env = { "ENV_FOR_DYNACONF" = "prod" } }
-start-celery-beat-dev = { cmd = "python src/auto_xkcd/start_celery_beat.py", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-start-api = { cmd = "python src/auto_xkcd/start_api.py", env = { "ENV_FOR_DYNACONF" = "prod" } }
-start-api-dev = { cmd = "python src/auto_xkcd/start_api.py", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-get-current = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "prod" } }
-get-current-dev = { cmd = "python src/auto_xkcd/cli.py pipelines get-current", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-update-db = { cmd = "python src/auto_xkcd/cli.py pipelines update-db", env = { "ENV_FOR_DYNACONF" = "prod" } }
-update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-loop-update-db = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c", env = { "ENV_FOR_DYNACONF" = "prod" } }
-loop-update-db-dev = { cmd = "python src/auto_xkcd/cli.py pipelines update-db -c", env = { "ENV_FOR_DYNACONF" = "dev" } }
-
-lint = { cmd = "ruff check ./ --config ruff.ci.toml --fix" }
-
-dockerctl = { shell = "python dockerctl.py" }
+[tool.pytest.ini_options]
+filterwarnings = ["error", "ignore::UserWarning"]
+testpaths = ["tests"]
