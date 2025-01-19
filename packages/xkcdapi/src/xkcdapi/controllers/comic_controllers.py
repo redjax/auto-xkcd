@@ -9,6 +9,7 @@ import http_lib
 from depends import db_depends
 import db_lib
 from xkcdapi.helpers import current_comic_req, comic_num_req, return_comic_num_url, return_current_comic_url
+from xkcdapi import request_client
 
 import httpx
 
@@ -57,12 +58,12 @@ class XkcdApiController(AbstractContextManager):
         return http_controller
 
     def get_current_comic(self):
-        req: httpx.Request = current_comic_req()
+        current_comic_res: httpx.Response = request_client.request_current_xkcd_comic(use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+
+        if current_comic_res.status_code != 200:
+            log.warning(f"Non-200 response: [{current_comic_res.status_code}: {current_comic_res.reason_phrase}]")
+            
+            return
         
-        try:
-            with self._get_http_controller() as http_ctl:
-                res = http_ctl.send_request(request=req)
-                log.debug(f"Current comic response: [{res.status_code}: {res.reason_phrase}]")
-        except Exception as exc:
-            log.error(f"({type(exc)}) Error requesting current comic. Details: {exc}")
-            raise exc
+        current_comic_res_dict: dict = http_lib.decode_response(response=current_comic_res)
+        log.debug(f"Current comic response dict: {current_comic_res_dict}")
