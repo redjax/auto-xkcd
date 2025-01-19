@@ -1,0 +1,13 @@
+[default]
+log_level = "INFO"
+tz = "Etc/UTC"
+
+[demo]
+
+[dev]
+log_level = "DEBUG"
+
+[rc]
+
+[prod]
+log_level = "WARNING"

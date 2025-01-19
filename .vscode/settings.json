@@ -1,0 +1,10 @@
+{
+    "python.analysis.extraPaths": [
+        "./libs/coreutils-lib/src",
+        "./libs/database-lib/src",
+        "./libs/depends-lib/src",
+        "./libs/http-lib/src",
+        "./libs/settings-lib/src",
+        "./libs/setup-lib/src",
+    ]
+}
