@@ -10,6 +10,7 @@ import xkcdapi
 import settings
 import setup
 import core_utils
+import xkcdapi.controllers
 import xkcdapi.request_client
 
 
@@ -20,5 +21,11 @@ if __name__ == "__main__":
     db_engine = db_depends.get_db_engine(db_uri)
     setup.setup_database(engine=db_engine)
     
+    print(f"Log level: {settings.LOGGING_SETTINGS.get('LOG_LEVEL')}")
+    
     log.info("XKCD API requests testing.")
-    current_comic_response = xkcdapi.request_client.request_current_xkcd_comic()
+    
+    xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController(use_cache=True, force_cache=True)
+    
+    log.info("Requesting current XKCD comic")
+    xkcd_api_controller.get_current_comic()
