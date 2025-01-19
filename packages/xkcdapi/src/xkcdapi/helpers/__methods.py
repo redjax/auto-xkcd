@@ -2,7 +2,7 @@ from loguru import logger as log
 import typing as t
 
 import http_lib
-from xkcdapi.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX, CURRENT_XKCD_URL
+from domain.xkcd.constants import XKCD_URL_BASE, XKCD_URL_POSTFIX, CURRENT_XKCD_URL
 
 import httpx
 
