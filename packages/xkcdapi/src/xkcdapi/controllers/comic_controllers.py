@@ -59,35 +59,50 @@ class XkcdApiController(AbstractContextManager):
         return http_controller
 
     def get_current_comic(self) -> xkcd_domain.XkcdComicIn:
-        current_comic_res: httpx.Response = request_client.request_current_xkcd_comic(use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+        res: httpx.Response = request_client.request_current_xkcd_comic(use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
 
-        if current_comic_res.status_code != 200:
-            log.warning(f"Non-200 response: [{current_comic_res.status_code}: {current_comic_res.reason_phrase}]")
+        if res.status_code != 200:
+            log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
             
             return
         
         ## Create dict from response
-        current_comic_res_dict: dict = http_lib.decode_response(response=current_comic_res)
+        res_dict: dict = http_lib.decode_response(response=res)
         ## Create XkcdApiResponseIn object
-        comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=current_comic_res_dict)
+        comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=res_dict)
         ## Create XkcdComicIn object
         comic: xkcd_domain.XkcdComicIn = comic_res.return_comic_obj()
                 
         return comic
         
     def get_comic(self, comic_num: t.Union[int, str]):
-        raise NotImplementedError("Requesting comic by comic number not implemented yet")
+        res = request_client.request_xkcd_comic(num=comic_num, use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+        
+        if res.status_code != 200:
+            log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
+            
+        ## Create dict from response
+        res_dict: dict=  http_lib.decode_response(response=res)
+        ## Create XkcdApiResponseIn object
+        comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=res_dict)
+        ## Create XkcdComiIn object
+        comic: xkcd_domain.XkcdComicIn = comic_res.return_comic_obj()
+        
+        return comic
 
     def get_comic_img(self, comic: t.Union[xkcd_domain.XkcdComicIn, xkcd_domain.XkcdComicOut]):
-        comic_img_res: httpx.Response = request_client.request_xkcd_comic_img(img_url=comic.img_url, use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+        res: httpx.Response = request_client.request_xkcd_comic_img(img_url=comic.img_url, use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
         
-        if comic_img_res.status_code != 200:
-            log.warning(f"Non-200 response: [{comic_img_res.status_code}: {comic_img_res.reason_phrase}]")
+        if res.status_code != 200:
+            log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
             
             return
 
-        img_bytes: bytes = comic_img_res.content
+        img_bytes: bytes = res.content
         
         comic_img: xkcd_domain.XkcdComicImgIn = xkcd_domain.XkcdComicImgIn(num=comic.num, img_bytes=img_bytes)
         
         return comic_img
+    
+    def get_comic_and_img(self, comic_num: t.Union[int, str]):
+        ...

@@ -12,6 +12,34 @@ import setup
 import core_utils
 import xkcdapi.controllers
 import xkcdapi.request_client
+from domain import xkcd as xkcd_domain
+
+import random
+
+
+def main():
+    log.info("XKCD API requests testing.")
+    
+    xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController(use_cache=True, force_cache=True)
+    
+    log.info("Requesting current XKCD comic")
+    current_comic = xkcd_api_controller.get_current_comic()
+    log.info(f'Current comic: {current_comic}')
+    
+    current_comic_img = xkcd_api_controller.get_comic_img(comic=current_comic)
+    log.info(f"Comic image: {current_comic_img}")
+    
+    while True:
+        # rand_comic_num: int = random.randint(1, current_comic.num)
+        rand_comic_num: int = random.randint(403, 405)
+        
+        if rand_comic_num in xkcd_domain.constants.IGNORE_COMIC_NUMS:
+            log.warning(f"Rolled ignored number: {rand_comic_num}. Re-rolling")
+            continue
+        else:
+            break
+        
+    log.debug(f"Random comic number: {rand_comic_num}")
 
 
 if __name__ == "__main__":
@@ -21,15 +49,4 @@ if __name__ == "__main__":
     db_engine = db_depends.get_db_engine(db_uri)
     setup.setup_database(engine=db_engine)
     
-    print(f"Log level: {settings.LOGGING_SETTINGS.get('LOG_LEVEL')}")
-    
-    log.info("XKCD API requests testing.")
-    
-    xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController(use_cache=True, force_cache=True)
-    
-    log.info("Requesting current XKCD comic")
-    current_comic = xkcd_api_controller.get_current_comic()
-    log.info(f'Current comic: {current_comic}')
-    
-    comic_img = xkcd_api_controller.get_comic_img(comic=current_comic)
-    log.info(f"Comic image: {comic_img}")
+    main()

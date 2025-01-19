@@ -1,1 +1,1 @@
-from .methods import request_current_xkcd_comic, request_xkcd_comic_img
+from .methods import request_current_xkcd_comic, request_xkcd_comic_img, request_xkcd_comic
