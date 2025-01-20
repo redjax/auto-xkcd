@@ -12,8 +12,6 @@ from xkcdapi.helpers import (
     return_current_comic_url,
 )
 
-import db_lib
-from depends import db_depends
 from domain import xkcd as xkcd_domain
 from domain.xkcd.constants import (
     CURRENT_XKCD_URL,
@@ -89,7 +87,7 @@ class XkcdApiController(AbstractContextManager):
                 
         return comic
         
-    def get_comic(self, comic_num: t.Union[int, str]):
+    def get_comic(self, comic_num: t.Union[int, str]) -> xkcd_domain.XkcdComicIn:
         req: httpx.Request = comic_num_req(comic_num=comic_num)
         
         with self.http_controller as http_ctl:
@@ -107,7 +105,7 @@ class XkcdApiController(AbstractContextManager):
         
         return comic
 
-    def get_comic_img(self, comic: t.Union[xkcd_domain.XkcdComicIn, xkcd_domain.XkcdComicOut]):
+    def get_comic_img(self, comic: t.Union[xkcd_domain.XkcdComicIn, xkcd_domain.XkcdComicOut]) -> xkcd_domain.XkcdComicImgIn:
         req: httpx.Request = http_lib.build_request(url=comic.img_url)
         
         with self.http_controller as http_ctl:
