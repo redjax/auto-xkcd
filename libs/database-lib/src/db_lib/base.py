@@ -42,6 +42,7 @@ class BaseRepository(t.Generic[T]):
 
         Returns:
             The list of successfully added objects.
+
         """
         try:
             self.session.add_all(objs)
@@ -51,7 +52,7 @@ class BaseRepository(t.Generic[T]):
             for obj in objs:
                 self.session.refresh(obj)
                 
-            # self.session.commit()
+            self.session.commit()
                 
             return objs
         except Exception as exc:

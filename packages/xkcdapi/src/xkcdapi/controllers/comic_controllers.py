@@ -1,25 +1,34 @@
-from loguru import logger as log
-import typing as t
+from __future__ import annotations
+
 from contextlib import AbstractContextManager, contextmanager
 import json
 from pathlib import Path
+import typing as t
 
-from domain.xkcd.constants import CURRENT_XKCD_URL, IGNORE_COMIC_NUMS, XKCD_URL_BASE, XKCD_URL_POSTFIX
+from xkcdapi.helpers import (
+    comic_num_req,
+    current_comic_req,
+    return_comic_num_url,
+    return_current_comic_url,
+)
+
 from domain import xkcd as xkcd_domain
+from domain.xkcd.constants import (
+    CURRENT_XKCD_URL,
+    IGNORE_COMIC_NUMS,
+    XKCD_URL_BASE,
+    XKCD_URL_POSTFIX,
+)
 import http_lib
-from depends import db_depends
-import db_lib
-from xkcdapi.helpers import current_comic_req, comic_num_req, return_comic_num_url, return_current_comic_url
-from xkcdapi import request_client
-
 import httpx
-
+from loguru import logger as log
 
 class XkcdApiController(AbstractContextManager):
-    def __init__(self, use_cache: bool = True, force_cache: bool = True, follow_redirects: bool = True):
+    def __init__(self, use_cache: bool = True, force_cache: bool = True, cache_ttl: int = 900, follow_redirects: bool = True):
         
         self.use_cache = use_cache
         self.force_cache = force_cache
+        self.cache_ttl = cache_ttl
         self.follow_redirects = follow_redirects
         
         ## HTTP controller
@@ -54,38 +63,88 @@ class XkcdApiController(AbstractContextManager):
         return return_comic_num_url(comic_num=comic_num)
 
     def _get_http_controller(self):
-        http_controller: http_lib.HttpxController = http_lib.get_http_controller(use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+        http_controller: http_lib.HttpxController = http_lib.get_http_controller(use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects, cache_ttl=self.cache_ttl)
         
         return http_controller
 
     def get_current_comic(self) -> xkcd_domain.XkcdComicIn:
-        current_comic_res: httpx.Response = request_client.request_current_xkcd_comic(use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+        req: httpx.Request = current_comic_req()
+        
+        with self.http_controller as http_ctl:
+            res = http_ctl.send_request(req)
 
-        if current_comic_res.status_code != 200:
-            log.warning(f"Non-200 response: [{current_comic_res.status_code}: {current_comic_res.reason_phrase}]")
+        if res.status_code != 200:
+            log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
             
             return
         
         ## Create dict from response
-        current_comic_res_dict: dict = http_lib.decode_response(response=current_comic_res)
+        res_dict: dict = http_lib.decode_response(response=res)
         ## Create XkcdApiResponseIn object
-        comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=current_comic_res_dict)
+        comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=res_dict)
         ## Create XkcdComicIn object
         comic: xkcd_domain.XkcdComicIn = comic_res.return_comic_obj()
-        log.debug(f"Comic ({type(comic)}): {comic}")
-        
+                
         return comic
         
-    def get_comic(self, comic_num: t.Union[int, str]):
-        raise NotImplementedError("Requesting comic by comic number not implemented yet")
-
-    def get_comic_img(self, comic_img_url: str):
-        comic_img_res: httpx.Response = request_client.request_xkcd_comic_img(img_url=comic_img_url, use_cache=self.use_cache, force_cache=self.force_cache, follow_redirects=self.follow_redirects)
+    def get_comic(self, comic_num: t.Union[int, str]) -> xkcd_domain.XkcdComicIn:
+        req: httpx.Request = comic_num_req(comic_num=comic_num)
         
-        if comic_img_res.status_code != 200:
-            log.warning(f"Non-200 response: [{comic_img_res.status_code}: {comic_img_res.reason_phrase}]")
+        with self.http_controller as http_ctl:
+            res = http_ctl.send_request(request=req)
+        
+        if res.status_code != 200:
+            log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
             
-            return
+        ## Create dict from response
+        res_dict: dict = http_lib.decode_response(response=res)
+        ## Create XkcdApiResponseIn object
+        comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=res_dict)
+        ## Create XkcdComiIn object
+        comic: xkcd_domain.XkcdComicIn = comic_res.return_comic_obj()
         
-        comic_img_res_dict: dict = http_lib.decode_response(response=comic_img_res)
-        log.debug(f"Comig image response dict: {comic_img_res_dict}")
+        return comic
+
+    def get_comic_img(self, comic: t.Union[xkcd_domain.XkcdComicIn, xkcd_domain.XkcdComicOut]) -> xkcd_domain.XkcdComicImgIn:
+        req: httpx.Request = http_lib.build_request(url=comic.img_url)
+        
+        with self.http_controller as http_ctl:
+            res: httpx.Response = http_ctl.send_request(request=req)
+        
+            if res.status_code != 200:
+                log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
+                
+                return
+
+            img_bytes: bytes = res.content
+            
+            comic_img: xkcd_domain.XkcdComicImgIn = xkcd_domain.XkcdComicImgIn(num=comic.num, img_bytes=img_bytes)
+            
+            return comic_img
+    
+    def get_comic_and_img(self, comic_num: t.Union[int, str]) -> t.Tuple[xkcd_domain.XkcdComicIn, xkcd_domain.XkcdComicImgIn]:
+        log.debug(f"Request comic #{comic_num}")
+        try:
+            comic: xkcd_domain.XkcdComicImgIn = self.get_comic(comic_num=comic_num)
+        except Exception as exc:
+            msg = f'({type(exc)}) Error requesting comic #{comic_num}. Details: {exc}'
+            log.error(msg)
+            
+            raise exc
+        
+        if not comic:
+            raise ValueError(f"Error getting comic #{comic_num}")
+        
+        log.debug(f"Request image for comic #{comic_num}")
+        try:
+            comic_img: xkcd_domain.XkcdComicImgIn = self.get_comic_img(comic=comic)
+        except Exception as exc:
+            msg = f"({type(exc)}) Error requesting image for comic #{comic_num}. Details: {exc}"
+            log.error(msg)
+            
+            raise exc
+        
+        if not comic_img:
+            raise ValueError(f"Error getting image for comic #{comic.num}")
+        
+        return comic, comic_img

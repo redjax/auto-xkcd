@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 IGNORE_COMIC_NUMS: list[int] = [404]
 
 XKCD_URL_BASE: str = "https://xkcd.com"

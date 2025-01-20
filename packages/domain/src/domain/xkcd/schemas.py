@@ -1,12 +1,33 @@
+from __future__ import annotations
+
 import datetime as dt
 import typing as t
 
-from loguru import logger as log
-
-from core_utils import hash_utils
-from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict, computed_field
 from .constants import XKCD_URL_BASE
 
+from core_utils import hash_utils
+from loguru import logger as log
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    computed_field,
+    field_validator,
+)
+
+class XkcdComicImgBase(BaseModel):
+    num: t.Union[str, int] = Field(default=None)
+    img_bytes: bytes = Field(default=None, repr=False)
+    
+    
+class XkcdComicImgIn(XkcdComicImgBase):
+    pass
+
+
+class XkcdComicImgOut(XkcdComicImgBase):
+    id: int
+    
 
 class XkcdComicBase(BaseModel):
     year: str = Field(default=None)
@@ -46,6 +67,8 @@ class XkcdComicIn(XkcdComicBase):
 
 class XkcdComicOut(XkcdComicBase):
     id: int
+    
+    img_saved: bool
 
 
 class XkcdApiResponseBase(BaseModel):
@@ -71,4 +94,38 @@ class XkcdApiResponseIn(XkcdApiResponseBase):
 
 
 class XkcdApiResponseOut(XkcdApiResponseBase):
+    id: int
+
+
+class XkcdComicWithImgBase(BaseModel):
+    comic: XkcdComicIn
+    comic_img: XkcdComicImgIn
+
+    @property
+    def num(self) -> int:
+        return self.comic.num
+    
+    @property
+    def img_url(self) -> str:
+        return self.comic.img_url
+
+
+class XkcdComicWithImgIn(XkcdComicWithImgBase):
+    pass
+
+
+class XkcdComicWithImgOut(XkcdComicWithImgBase):
+    id: int
+
+
+class XkcdCurrentComicMetadataBase(BaseModel):
+    num: int
+    last_updated: t.Union[str, dt.datetime]
+    
+
+class XkcdCurrentComicMetadataIn(XkcdCurrentComicMetadataBase):
+    pass
+
+
+class XkcdCurrentComicMetadataOut(XkcdCurrentComicMetadataBase):
     id: int

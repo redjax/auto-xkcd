@@ -1,10 +1,11 @@
-from loguru import logger as log
+from __future__ import annotations
 
+import db_lib
+from depends import db_depends
+import http_lib
+from loguru import logger as log
 import settings
 import setup
-from depends import db_depends
-import db_lib
-import http_lib
 
 if __name__ == "__main__":
     setup.setup_loguru_logging(
