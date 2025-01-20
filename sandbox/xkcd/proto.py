@@ -95,105 +95,91 @@ def main(db_engine: sa.Engine):
     ## Get current comic & img
     current_comic, current_comic_img = demo_current_comic()
     if not current_comic:
-        log.warning(f"Failed getting current comit")
+        log.warning(f"Failed getting current comic")
     else:
         log.success(f"Current comic: {current_comic}")
-
-    ## Save current comic to db
-    try:
-        xkcdapi.db_client.save_comic_to_db(comic=current_comic, engine=db_engine)
-    except Exception as exc:
-        msg = f"({type(exc)}) Error saving current comic to database. Details: {exc}"
-        log.error(msg)
         
-        raise exc
-    
     if not current_comic_img:
         log.warning(f"Failed getting image for current comic")
     else:
         log.success(f"Current comic image: {current_comic_img.num}")
     
-    ## Save current comic img to db
-    try:
-        xkcdapi.db_client.save_comic_img_to_db(comic_img=current_comic_img, engine=db_engine)
-    except Exception as exc:
-        msg = f"({type(exc)}) Error saving current comic image to database. Details: {exc}"
-        log.error(msg)
-        
-        raise exc
+    ## Save comic and image at the same time
+    db_current_comic, db_current_comic_img = xkcdapi.db_client.save_comic_and_img_to_db(comic=current_comic, comic_img=current_comic_img, engine=db_engine)
+    log.debug(f"Saved current comic: {db_current_comic} and curret comic image: {db_current_comic_img}")
 
-    ## Request random comic & img
-    comic, comic_img = demo_random_comic(current_comic_num=current_comic.num)
+    # ## Request random comic & img
+    # comic, comic_img = demo_random_comic(current_comic_num=current_comic.num)
     
-    if not comic:
-        log.warning(f"Failed getting random comic.")
-    else:
-        log.success(f"Random comic: {comic}")
+    # if not comic:
+    #     log.warning(f"Failed getting random comic.")
+    # else:
+    #     log.success(f"Random comic: {comic}")
     
-    ## Save random comic
-    try:
-        xkcdapi.db_client.save_comic_to_db(comic=comic, engine=db_engine)
-    except Exception as exc:
-        msg = f"({type(exc)}) Error saving comic to database. Details: {exc}"
-        log.error(msg)
+    # ## Save random comic
+    # try:
+    #     xkcdapi.db_client.save_comic_to_db(comic=comic, engine=db_engine)
+    # except Exception as exc:
+    #     msg = f"({type(exc)}) Error saving comic to database. Details: {exc}"
+    #     log.error(msg)
         
-        raise exc
+    #     raise exc
     
-    if not comic_img:
-        log.warning(f"Failed getting random comic image")
-    else:
-        log.success(f"Random comic image: {comic_img}")
+    # if not comic_img:
+    #     log.warning(f"Failed getting random comic image")
+    # else:
+    #     log.success(f"Random comic image: {comic_img}")
     
-    ## Save random comic img
-    try:
-        xkcdapi.db_client.save_comic_img_to_db(comic_img=comic_img, engine=db_engine)
-    except Exception as exc:
-        msg = f"({type(exc)}) Error saving comic image to database. Details: {exc}"
-        log.error(msg)
+    # ## Save random comic img
+    # try:
+    #     xkcdapi.db_client.save_comic_img_to_db(comic_img=comic_img, engine=db_engine)
+    # except Exception as exc:
+    #     msg = f"({type(exc)}) Error saving comic image to database. Details: {exc}"
+    #     log.error(msg)
         
-        raise exc
+    #     raise exc
     
-    ## Request multiple random comics & imgs
-    comics, comic_imgs = demo_multiple_comics(num_rand_comics=3, current_comic_num=current_comic.num)
-    comics.append(current_comic)
-    comic_imgs.append(current_comic_img)
+    # ## Request multiple random comics & imgs
+    # comics, comic_imgs = demo_multiple_comics(num_rand_comics=3, current_comic_num=current_comic.num)
+    # comics.append(current_comic)
+    # comic_imgs.append(current_comic_img)
     
-    if (not comics) or (isinstance(comics, list) and len(comics) == 0):
-        log.warning("List of random comics is empty, there may have been an error requesting multiple comics.")
-    else:
-        log.success(f"Requested [{len(comics)}] random comic(s)")
+    # if (not comics) or (isinstance(comics, list) and len(comics) == 0):
+    #     log.warning("List of random comics is empty, there may have been an error requesting multiple comics.")
+    # else:
+    #     log.success(f"Requested [{len(comics)}] random comic(s)")
         
-        for c in comics:
-            log.debug(f"Comic: {c}")
+    #     for c in comics:
+    #         log.debug(f"Comic: {c}")
         
-    ## Save multiple comics to database
-    try:
-        db_comics = xkcdapi.db_client.save_multiple_comics_to_db(comics=comics, engine=db_engine)
-    except Exception as exc:
-        msg = f"({type(exc)}) Error saving [{len(comics)}] comic(s) to database. Details: {exc}"
-        log.error(msg)
+    # ## Save multiple comics to database
+    # try:
+    #     db_comics = xkcdapi.db_client.save_multiple_comics_to_db(comics=comics, engine=db_engine)
+    # except Exception as exc:
+    #     msg = f"({type(exc)}) Error saving [{len(comics)}] comic(s) to database. Details: {exc}"
+    #     log.error(msg)
         
-        raise exc
+    #     raise exc
     
-    log.debug(f"Saved [{len(db_comics)}] comic(s) to the database")
-    log.debug(f"Saved comics: {db_comics}")
+    # log.debug(f"Saved [{len(db_comics)}] comic(s) to the database")
+    # log.debug(f"Saved comics: {db_comics}")
         
-    if (not comic_imgs) or (isinstance(comic_imgs, list) and len(comic_imgs) == 0):
-        log.warning("List of random comic images is empty, there may have been an error requesting multiple comics.")
-    else:
-        log.success(f"Requested [{len(comic_imgs)}] random comic image(s)")
+    # if (not comic_imgs) or (isinstance(comic_imgs, list) and len(comic_imgs) == 0):
+    #     log.warning("List of random comic images is empty, there may have been an error requesting multiple comics.")
+    # else:
+    #     log.success(f"Requested [{len(comic_imgs)}] random comic image(s)")
     
-    ## Save multiple comic images to database
-    try:
-        db_comic_imgs = xkcdapi.db_client.save_multiple_comic_imgs_to_db(comic_imgs=comic_imgs, engine=db_engine)
-    except Exception as exc:
-        msg = f"({type(exc)}) Error saving [{len(comics)}] comic image(s) to database. Details: {exc}"
-        log.error(msg)
+    # ## Save multiple comic images to database
+    # try:
+    #     db_comic_imgs = xkcdapi.db_client.save_multiple_comic_imgs_to_db(comic_imgs=comic_imgs, engine=db_engine)
+    # except Exception as exc:
+    #     msg = f"({type(exc)}) Error saving [{len(comics)}] comic image(s) to database. Details: {exc}"
+    #     log.error(msg)
         
-        raise exc
+    #     raise exc
     
-    log.debug(f"Saved [{len(db_comic_imgs)}] comic image(s) to the database")
-    log.debug(f"Saved comic images: {db_comic_imgs}")
+    # log.debug(f"Saved [{len(db_comic_imgs)}] comic image(s) to the database")
+    # log.debug(f"Saved comic images: {db_comic_imgs}")
 
 
 if __name__ == "__main__":

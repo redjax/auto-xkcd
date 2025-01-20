@@ -121,6 +121,14 @@ def save_comic_img_to_db(comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so
     comic_img_out: xkcd_domain.XkcdComicImgOut = xkcd_domain.XkcdComicImgOut(**db_comic_img.__dict__)
     
     return comic_img_out
+
+
+def save_comic_and_img_to_db(comic: xkcd_domain.XkcdComicIn, comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> t.Tuple[xkcd_domain.XkcdComicOut | None, xkcd_domain.XkcdComicImgOut | None]:
+    """Save a comic and image at the same time."""
+    comic: xkcd_domain.XkcdComicOut = save_comic_to_db(comic=comic, session_pool=session_pool, engine=engine)
+    comic_img: xkcd_domain.XkcdComicImgOut = save_comic_img_to_db(comic_img=comic_img, session_pool=session_pool, engine=engine)
+    
+    return comic, comic_img
     
 
 def save_multiple_comics_to_db(comics: list[xkcd_domain.XkcdComicIn], session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> list[xkcd_domain.XkcdComicOut]:
