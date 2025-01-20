@@ -3,12 +3,14 @@ from loguru import logger as log
 import typing as t
 import db_lib
 from depends import db_depends
+from core_utils import time_utils
 
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 import sqlalchemy.exc as sa_exc
 
 from domain import xkcd as xkcd_domain
+
 
 def return_session_pool(engine: sa.Engine) -> so.sessionmaker[so.Session]:
     if engine is None:
@@ -17,11 +19,94 @@ def return_session_pool(engine: sa.Engine) -> so.sessionmaker[so.Session]:
     return db_depends.get_session_pool(engine=engine)
 
 
+def update_db_current_comic_metadata(comic_metadata: xkcd_domain.XkcdCurrentComicMetadataIn, session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> xkcd_domain.XkcdCurrentComicMetadataOut:
+    """Save/overwrite current XKCD comic metadata in the database.
+    
+    Params:
+        comic_metadata (XkcdCurrentComicMetadataIn): The XkcdCurrentComicMetadataIn schema for the current comic's metadata (number & last updated).
+        session_pool (sqlalchemy.orm.sessionmaker[sqlalchemy.orm.Session]): An initialized SQLAlchemy sessionmaker object. If session_pool=None, a default session pool
+            will be initialized from the app's database settings.
+        engine (sqlalchemy.Engine): An initialized SQLAlchemy Engine. If engine=None, a default Engine will be initialized from the app's database settings.
+        
+    Returns:
+        (XkcdCurrentcomicMetadataOut): A schema representing the saved comic metadata for the current XKCD comic in the database.
+
+    """
+    if not isinstance(comic_metadata, xkcd_domain.XkcdCurrentComicMetadataIn):
+        raise TypeError(f"comic_metadata must be an instance of XkcdCurrentComicMetadataIn. Got: ({type(comic_metadata)})")
+    
+    if not comic_metadata.last_updated:
+        log.warning(f"The 'last_updated' property of the current comic metadata object is empty. Setting a timestamp before converting & saving.")
+        comic_metadata.last_updated = time_utils.get_ts()
+    
+    session_pool: so.sessionmaker[so.Session] = return_session_pool(engine=engine)
+        
+    try:
+        with session_pool() as session:
+            repo = xkcd_domain.XkcdCurrentComicMetadataRepository(session)
+            
+            comic_metadata_model: xkcd_domain.XkcdCurrentComicMetadataModel = xkcd_domain.XkcdCurrentComicMetadataModel(num=comic_metadata.num, last_updated=comic_metadata.last_updated)
+            db_comic_metadata: xkcd_domain.XkcdCurrentComicMetadataModel = repo.create_or_update(comic_metadata=comic_metadata_model)
+            
+    except Exception as exc:
+        msg = f"({type(exc)}) Error saving/updating current comic metadata in the database. Details: {exc}"
+        log.error(msg)
+        
+        raise exc
+    
+    if not db_comic_metadata:
+        raise ValueError("db_comic_metadata should not have been none, a database error occurred while saving/updating current comic metadata.")
+    
+    log.debug(f"Converting db comic to XkcdCurrentComicMetadataOut.")
+    log.debug(f"Database model: {db_comic_metadata.__dict__}")
+    
+    comic_metadata_out: xkcd_domain.XkcdCurrentComicMetadataOut = xkcd_domain.XkcdCurrentComicMetadataOut(**db_comic_metadata.__dict__)
+    
+    return comic_metadata_out
+    
+
+def get_current_comic_metadata_from_db(session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> xkcd_domain.XkcdCurrentComicMetadataOut | None:
+    """Retrieve metadata about the last known 'current' XKCD comic from the database.
+    
+    Params:
+        session_pool (sqlalchemy.orm.sessionmaker[sqlalchemy.orm.Session]): An initialized SQLAlchemy sessionmaker object. If session_pool=None, a default session pool
+            will be initialized from the app's database settings.
+        engine (sqlalchemy.Engine): An initialized SQLAlchemy Engine. If engine=None, a default Engine will be initialized from the app's database settings.
+        
+    Returns:
+        (XkcdCurrentcomicMetadataOut): A schema representing the saved comic metadata for the current XKCD comic in the database.
+    
+    """
+    session_pool: so.sessionmaker[so.Session] = return_session_pool(engine=engine)
+    
+    try:
+        with session_pool() as session:
+            repo = xkcd_domain.XkcdCurrentComicMetadataRepository(session)
+            
+            db_comic_metadata = repo.get(id=1)
+            
+    except Exception as exc:
+        msg = f"({type(exc)}) Error saving/updating current comic metadata in the database. Details: {exc}"
+        log.error(msg)
+        
+        raise exc
+    
+    if not db_comic_metadata:
+        raise ValueError("db_comic_metadata should not have been none, a database error occurred while saving/updating current comic metadata.")
+    
+    log.debug(f"Converting db comic to XkcdCurrentComicMetadataOut.")
+    log.debug(f"Database model: {db_comic_metadata.__dict__}")
+    
+    comic_metadata_out: xkcd_domain.XkcdCurrentComicMetadataOut = xkcd_domain.XkcdCurrentComicMetadataOut(**db_comic_metadata.__dict__)
+    
+    return comic_metadata_out
+
+
 def save_comic_to_db(comic: xkcd_domain.XkcdComicIn, session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> xkcd_domain.XkcdComicOut:
     """Save a single XKCD comic to the database.
     
     Params:
-        comic (xkcd_domain.XkcdComicIn): The XkcdComicIn schema for a comic to save to the database.
+        comic (XkcdComicIn): The XkcdComicIn schema for a comic to save to the database.
         session_pool (sqlalchemy.orm.sessionmaker[sqlalchemy.orm.Session]): An initialized SQLAlchemy sessionmaker object. If session_pool=None, a default session pool
             will be initialized from the app's database settings.
         engine (sqlalchemy.Engine): An initialized SQLAlchemy Engine. If engine=None, a default Engine will be initialized from the app's database settings.
@@ -74,7 +159,7 @@ def save_comic_img_to_db(comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so
     """Save a single XKCD comic image to the database.
     
     Params:
-        comic_img (xkcd_domain.XkcdComicImgIn): The XkcdComicImgIn schema for a comic image to save to the database.
+        comic_img (XkcdComicImgIn): The XkcdComicImgIn schema for a comic image to save to the database.
         session_pool (sqlalchemy.orm.sessionmaker[sqlalchemy.orm.Session]): An initialized SQLAlchemy sessionmaker object. If session_pool=None, a default session pool
             will be initialized from the app's database settings.
         engine (sqlalchemy.Engine): An initialized SQLAlchemy Engine. If engine=None, a default Engine will be initialized from the app's database settings.

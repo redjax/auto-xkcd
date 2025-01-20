@@ -43,7 +43,7 @@ class XkcdComicModel(db_lib.Base):
     comic_num_hash: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
 
 
-class CurrentComicMetaModel(db_lib.Base):
+class XkcdCurrentComicMetadataModel(db_lib.Base):
     __tablename__ = "current_comic_meta"
     __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
 

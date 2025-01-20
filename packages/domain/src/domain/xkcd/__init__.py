@@ -12,5 +12,8 @@ from .schemas import (
     XkcdComicOut,
 )
 from .schemas import XkcdComicWithImgIn, XkcdComicWithImgOut
+from .schemas import XkcdCurrentComicMetadataIn, XkcdCurrentComicMetadataOut
 from .models import XkcdComicModel, XkcdComicImageModel
+from .models import XkcdCurrentComicMetadataModel
 from .repository import XkcdComicRepository, XkcdComicImageRepository
+from .repository import XkcdCurrentComicMetadataRepository
