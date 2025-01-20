@@ -99,7 +99,7 @@ class XkcdApiController(AbstractContextManager):
             log.warning(f"Non-200 response: [{res.status_code}: {res.reason_phrase}]")
             
         ## Create dict from response
-        res_dict: dict=  http_lib.decode_response(response=res)
+        res_dict: dict = http_lib.decode_response(response=res)
         ## Create XkcdApiResponseIn object
         comic_res: xkcd_domain.XkcdApiResponseIn = xkcd_domain.XkcdApiResponseIn(response_content=res_dict)
         ## Create XkcdComiIn object

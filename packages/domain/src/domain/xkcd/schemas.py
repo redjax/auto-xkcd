@@ -67,6 +67,8 @@ class XkcdComicIn(XkcdComicBase):
 
 class XkcdComicOut(XkcdComicBase):
     id: int
+    
+    img_saved: bool
 
 
 class XkcdApiResponseBase(BaseModel):
@@ -92,4 +94,25 @@ class XkcdApiResponseIn(XkcdApiResponseBase):
 
 
 class XkcdApiResponseOut(XkcdApiResponseBase):
+    id: int
+
+
+class XkcdComicWithImgBase(BaseModel):
+    comic: XkcdComicIn
+    comic_img: XkcdComicImgIn
+
+    @property
+    def num(self) -> int:
+        return self.comic.num
+    
+    @property
+    def img_url(self) -> str:
+        return self.comic.img_url
+
+
+class XkcdComicWithImgIn(XkcdComicWithImgBase):
+    pass
+
+
+class XkcdComicWithImgOut(XkcdComicWithImgBase):
     id: int
