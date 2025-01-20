@@ -116,3 +116,14 @@ class XkcdComicWithImgIn(XkcdComicWithImgBase):
 
 class XkcdComicWithImgOut(XkcdComicWithImgBase):
     id: int
+
+
+class CurrentXkcdComicBase(BaseModel):
+    year: str = Field(default=None)
+    month: str = Field(default=None)
+    day: str = Field(default=None)
+    num: int = Field(default=None)
+    title: str = Field(default=None)
+    transcript: str | None = Field(default=None)
+    alt_text: str = Field(default=None, alias="alt")
+    img_url: str = Field(default=None, alias="img")

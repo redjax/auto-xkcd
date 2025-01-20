@@ -88,13 +88,22 @@ def setup_loguru_logging(
     valid_log_fmts: list[str] = ["basic", "detailed"]
 
     fmt_basic: str = "{time:YY-MM-DD HH:mm:ss} [{level}]: {message}"
+    fmt_basic_color: str = "<blue>{time:YY-MM-DD HH:mm:ss}</> [<yellow>{level}</>]: {message}"
+    
     fmt_detailed: str = "{time:YYYY-MM-DD HH:mm:ss} | [{level}] | ({module}.{function}:{line}) | > {message}"
+    fmt_detailed_color: str = "<blue>{time:YYYY-MM-DD HH:mm:ss}</> | [<yellow>{level}</>] | (<cyan>{module}.{function}:{line}</>) | > {message}"
     
     match log_fmt.lower():
         case "basic":
-            fmt = fmt_basic        
+            if colorize:
+                fmt = fmt_basic_color
+            else:
+                fmt = fmt_basic        
         case "detailed":
-            fmt = fmt_detailed
+            if colorize:
+                fmt = fmt_detailed_color
+            else:
+                fmt = fmt_detailed
         case _:
             raise ValueError(f"Unknown log_fmt: '{log_fmt}'. Must be one of {valid_log_fmts}")
             
