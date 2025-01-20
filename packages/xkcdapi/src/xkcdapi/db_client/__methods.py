@@ -208,7 +208,19 @@ def save_comic_img_to_db(comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so
 
 
 def save_comic_and_img_to_db(comic: xkcd_domain.XkcdComicIn, comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> t.Tuple[xkcd_domain.XkcdComicOut | None, xkcd_domain.XkcdComicImgOut | None]:
-    """Save a comic and image at the same time."""
+    """Save a comic and image at the same time.
+    
+    Params:
+        comic (XkcdComicIn): The XkcdComicIn schema for a comic to save to the database.
+        comic_img (XkcdComicImgIn): The XkcdComicImgIn schema for a comic image to save to the database.
+        session_pool (sqlalchemy.orm.sessionmaker[sqlalchemy.orm.Session]): An initialized SQLAlchemy sessionmaker object. If session_pool=None, a default session pool
+            will be initialized from the app's database settings.
+        engine (sqlalchemy.Engine): An initialized SQLAlchemy Engine. If engine=None, a default Engine will be initialized from the app's database settings.
+    
+    Returns:
+        (Tuple[xkcd_domain.XkcdComicOut | None, xkcd_domain.XkcdComicImgOut | None]): A tuple containing the saved XKCD comic and its image.
+
+    """
     comic: xkcd_domain.XkcdComicOut = save_comic_to_db(comic=comic, session_pool=session_pool, engine=engine)
     comic_img: xkcd_domain.XkcdComicImgOut = save_comic_img_to_db(comic_img=comic_img, session_pool=session_pool, engine=engine)
     
@@ -374,7 +386,19 @@ def save_multiple_comic_imgs_to_db(comic_imgs: list[xkcd_domain.XkcdComicImgIn],
 
 
 def save_multiple_comics_and_imgs_to_db(comics: list[xkcd_domain.XkcdComicIn], comic_imgs: list[xkcd_domain.XkcdComicImgIn], session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> t.Tuple[list[xkcd_domain.XkcdComicOut] | None, list[xkcd_domain.XkcdComicImgOut] | None]:
-    """Save a comic and image at the same time."""
+    """Save multiple comics and images to the database at once.
+    
+    Params:
+        comics (list[XkcdComicIn]): A list of XkcdComicIn objects to convert to database models, filter existing, and save any that do not exist.
+        comic_imgs (list[XkcdComicImgIn]): List of XkcdComicImgIn schemas that will be converted to XkcdComicImageModel database models (if they do not exist in the database already).
+        session_pool (sqlalchemy.orm.sessionmaker[sqlalchemy.orm.Session]): An initialized SQLAlchemy sessionmaker object. If session_pool=None, a default session pool
+            will be initialized from the app's database settings.
+        engine (sqlalchemy.Engine): An initialized SQLAlchemy Engine. If engine=None, a default Engine will be initialized from the app's database settings.
+    
+    Returns:
+        (Tuple[list[xkcd_domain.XkcdComicOut] | None, list[xkcd_domain.XkcdComicImgOut] | None]): A tuple of the saved XkcdComicOut and XkcdComicImgOut objects.
+
+    """
     comics: list[xkcd_domain.XkcdComicOut] = save_multiple_comics_to_db(comics=comics, session_pool=session_pool, engine=engine)
     comic_imgs: list[xkcd_domain.XkcdComicImgOut] = save_multiple_comic_imgs_to_db(comic_imgs=comic_imgs, session_pool=session_pool, engine=engine)
     
