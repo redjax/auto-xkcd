@@ -1,16 +1,15 @@
-from loguru import logger as log
+from __future__ import annotations
 
 import typing as t
+
+from core_utils import time_utils
 import db_lib
 from depends import db_depends
-from core_utils import time_utils
-
-import sqlalchemy as sa
-import sqlalchemy.orm as so
-import sqlalchemy.exc as sa_exc
-
 from domain import xkcd as xkcd_domain
-
+from loguru import logger as log
+import sqlalchemy as sa
+import sqlalchemy.exc as sa_exc
+import sqlalchemy.orm as so
 
 def return_session_pool(engine: sa.Engine) -> so.sessionmaker[so.Session]:
     if engine is None:

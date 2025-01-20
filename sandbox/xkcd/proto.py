@@ -12,12 +12,11 @@ import http_lib
 from loguru import logger as log
 import settings
 import setup
+import sqlalchemy as sa
 import xkcdapi
 import xkcdapi.controllers
 import xkcdapi.db_client
 import xkcdapi.request_client
-
-import sqlalchemy as sa
 
 DEMO_CACHE_TTL: int = 86400
 

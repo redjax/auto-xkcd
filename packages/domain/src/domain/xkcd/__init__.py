@@ -1,19 +1,21 @@
 from __future__ import annotations
 
 from . import constants
-from .schemas import (
-    XkcdApiResponseIn,
-    XkcdApiResponseOut
+from .models import XkcdComicImageModel, XkcdComicModel, XkcdCurrentComicMetadataModel
+from .repository import (
+    XkcdComicImageRepository,
+    XkcdComicRepository,
+    XkcdCurrentComicMetadataRepository,
 )
 from .schemas import (
+    XkcdApiResponseIn,
+    XkcdApiResponseOut,
     XkcdComicImgIn,
     XkcdComicImgOut,
     XkcdComicIn,
     XkcdComicOut,
+    XkcdComicWithImgIn,
+    XkcdComicWithImgOut,
+    XkcdCurrentComicMetadataIn,
+    XkcdCurrentComicMetadataOut,
 )
-from .schemas import XkcdComicWithImgIn, XkcdComicWithImgOut
-from .schemas import XkcdCurrentComicMetadataIn, XkcdCurrentComicMetadataOut
-from .models import XkcdComicModel, XkcdComicImageModel
-from .models import XkcdCurrentComicMetadataModel
-from .repository import XkcdComicRepository, XkcdComicImageRepository
-from .repository import XkcdCurrentComicMetadataRepository

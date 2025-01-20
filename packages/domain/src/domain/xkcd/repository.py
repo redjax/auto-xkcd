@@ -1,13 +1,14 @@
-from loguru import logger as log
+from __future__ import annotations
+
 import typing as t
 
-import db_lib
 from .models import XkcdComicImageModel, XkcdComicModel, XkcdCurrentComicMetadataModel
 
+import db_lib
+from loguru import logger as log
 import sqlalchemy as sa
-import sqlalchemy.orm as so
 import sqlalchemy.exc as sa_exc
-
+import sqlalchemy.orm as so
 
 class XkcdComicRepository(db_lib.base.BaseRepository[XkcdComicModel]):
     def __init__(self, session: so.Session):

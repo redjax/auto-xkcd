@@ -1,22 +1,22 @@
-from loguru import logger as log
+from __future__ import annotations
 
 import typing as t
 
-import http_lib
 from core_utils import time_utils
-import setup
-import settings
 import db_lib
 from depends import db_depends
-import xkcdapi
 from domain import xkcd as xkcd_domain
-import xkcdapi.db_client
-import xkcdapi.request_client
-import xkcdapi.controllers
-
+import http_lib
 import httpx
+from loguru import logger as log
+import settings
+import setup
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+import xkcdapi
+import xkcdapi.controllers
+import xkcdapi.db_client
+import xkcdapi.request_client
 
 def request_and_update_current_comic_metadata(cache_ttl: int = 900, session_pool: so.sessionmaker[so.Session] | None = None, db_engine: sa.Engine | None = None):
     log.info("Updating current XKCD comic metadata in database.")

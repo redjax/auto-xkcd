@@ -1,12 +1,12 @@
-from loguru import logger as log
+from __future__ import annotations
 
 from datetime import datetime
+
 import db_lib
-
+from loguru import logger as log
 import sqlalchemy as sa
-import sqlalchemy.orm as so
 import sqlalchemy.exc as sa_exc
-
+import sqlalchemy.orm as so
 
 class XkcdComicModel(db_lib.Base):
     """Table model for XKCD comics.
