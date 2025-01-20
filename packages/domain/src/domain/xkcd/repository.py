@@ -15,6 +15,9 @@ class XkcdComicRepository(db_lib.base.BaseRepository[XkcdComicModel]):
         
     def get_by_num(self, comic_num: int) -> XkcdComicModel | None:
         return self.session.query(XkcdComicModel).filter(XkcdComicModel.num == comic_num).one_or_none()
+    
+    def get_multiple_by_num(self, comic_nums: list[int]) -> list[XkcdComicModel] | None:
+        return self.session.query(XkcdComicModel).filter(XkcdComicModel.num.in_(comic_nums)).all()
 
 
 class XkcdComicImageRepository(db_lib.base.BaseRepository[XkcdComicModel]):
@@ -23,3 +26,6 @@ class XkcdComicImageRepository(db_lib.base.BaseRepository[XkcdComicModel]):
         
     def get_by_num(self, comic_num: int) -> XkcdComicImageModel | None:
         return self.session.query(XkcdComicImageModel).filter(XkcdComicImageModel.num == comic_num).one_or_none()
+
+    def get_multiple_by_num(self, comic_nums: list[int]) -> list[XkcdComicImageModel] | None:
+        return self.session.query(XkcdComicImageModel).filter(XkcdComicImageModel.num.in_(comic_nums)).all()
