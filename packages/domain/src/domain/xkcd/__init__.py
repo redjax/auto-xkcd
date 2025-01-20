@@ -13,4 +13,4 @@ from .schemas import (
 )
 from .schemas import XkcdComicWithImgIn, XkcdComicWithImgOut
 from .models import XkcdComicModel, XkcdComicImageModel
-from .repository import XkcdComicRepository
+from .repository import XkcdComicRepository, XkcdComicImageRepository

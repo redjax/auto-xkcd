@@ -60,4 +60,7 @@ class XkcdComicImageModel(db_lib.Base):
     id: so.Mapped[db_lib.annotated.INT_PK]
 
     num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
-    img: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+    img_bytes: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
+    
+    def __repr__(self):
+        return f"XkcdComicImageModel(id={self.id or None}, num={self.num})"

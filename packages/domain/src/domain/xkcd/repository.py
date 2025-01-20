@@ -12,8 +12,14 @@ import sqlalchemy.exc as sa_exc
 class XkcdComicRepository(db_lib.base.BaseRepository[XkcdComicModel]):
     def __init__(self, session: so.Session):
         super().__init__(session, XkcdComicModel)
+        
+    def get_by_num(self, comic_num: int) -> XkcdComicModel | None:
+        return self.session.query(XkcdComicModel).filter(XkcdComicModel.num == comic_num).one_or_none()
 
 
 class XkcdComicImageRepository(db_lib.base.BaseRepository[XkcdComicModel]):
     def __init__(self, session: so.Session):
         super().__init__(session, XkcdComicImageModel)
+        
+    def get_by_num(self, comic_num: int) -> XkcdComicImageModel | None:
+        return self.session.query(XkcdComicImageModel).filter(XkcdComicImageModel.num == comic_num).one_or_none()
