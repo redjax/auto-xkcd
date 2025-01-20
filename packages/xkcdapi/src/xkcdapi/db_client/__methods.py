@@ -287,3 +287,11 @@ def save_multiple_comic_imgs_to_db(comic_imgs: list[xkcd_domain.XkcdComicImgIn],
     log.debug(f"Converted [{len(comic_imgs_out)}] comic image model(s) to XkcdComicImgOut object(s)")
     
     return comic_imgs_out
+
+
+def save_multiple_comics_and_imgs_to_db(comics: list[xkcd_domain.XkcdComicIn], comic_imgs: list[xkcd_domain.XkcdComicImgIn], session_pool: so.sessionmaker[so.Session] | None = None, engine: sa.Engine | None = None) -> t.Tuple[list[xkcd_domain.XkcdComicOut] | None, list[xkcd_domain.XkcdComicImgOut] | None]:
+    """Save a comic and image at the same time."""
+    comics: list[xkcd_domain.XkcdComicOut] = save_multiple_comics_to_db(comics=comics, session_pool=session_pool, engine=engine)
+    comic_imgs: list[xkcd_domain.XkcdComicImgOut] = save_multiple_comic_imgs_to_db(comic_imgs=comic_imgs, session_pool=session_pool, engine=engine)
+    
+    return comics, comic_imgs
