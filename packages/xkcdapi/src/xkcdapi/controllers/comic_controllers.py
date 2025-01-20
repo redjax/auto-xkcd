@@ -12,8 +12,6 @@ from xkcdapi.helpers import (
     return_current_comic_url,
 )
 
-import db_lib
-from depends import db_depends
 from domain import xkcd as xkcd_domain
 from domain.xkcd.constants import (
     CURRENT_XKCD_URL,
