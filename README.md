@@ -1,5 +1,36 @@
 # Auto XKCD <!-- omit in toc -->
 
+<!-- Repo image -->
+<p align="center">
+  <a href="https://github.com/redjax/auto-xkcd">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://imgs.xkcd.com/comics/shouldnt_be_hard.png">
+      <img src="https://imgs.xkcd.com/comics/shouldnt_be_hard.png" height="200">
+    </picture>
+  </a>
+</p>
+
+<!-- Git Badges -->
+<p align="center">
+  <a href="https://github.com/redjax/auto-xkcd">
+    <img alt="Created At" src="https://img.shields.io/github/created-at/redjax/auto-xkcd">
+  </a>
+  <a href="https://github.com/redjax/auto-xkcd/commit">
+    <img alt="Last Commit" src="https://img.shields.io/github/last-commit/redjax/auto-xkcd">
+  </a>
+  <a href="https://github.com/redjax/auto-xkcd/commit">
+    <img alt="Commits this year" src="https://img.shields.io/github/commit-activity/y/redjax/auto-xkcd">
+  </a>
+  <a href="https://github.com/redjax/auto-xkcd">
+    <img alt="Repo size" src="https://img.shields.io/github/repo-size/redjax/auto-xkcd">
+  </a>
+  <!-- ![GitHub Latest Release](https://img.shields.io/github/release-date/redjax/auto-xkcd) -->
+  <!-- ![GitHub commits since latest release](https://img.shields.io/github/commits-since/redjax/auto-xkcd/latest) -->
+  <!-- ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redjax/auto-xkcd/tests.yml) -->
+</p>
+
+---
+
 Python monorepo for interacting with the [XKCD JSON API](https://xkcd.com/json.html).
 
 ## Description <!-- omit in toc -->
