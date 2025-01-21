@@ -1,4 +1,1 @@
 from __future__ import annotations
-
-from .scheduled_tasks import TASK_SCHEDULE_hourly_current_comic_check
-from .tasks import task_current_comic, task_save_current_comic

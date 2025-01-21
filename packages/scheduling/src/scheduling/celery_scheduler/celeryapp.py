@@ -34,7 +34,11 @@ INCLUDE_TASK_PATHS: list[str] = [
 ## List of scheduled task dicts to add to Celery beat's schedule
 BEAT_SCHEDULED_TASKS: list = [
     ## Request & save current XKCD comic every hour
-    celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_hourly_current_comic_check
+    celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_hourly_current_comic_check,
+    ## Demo: request and save current XKCD comic every minute
+    # celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_minutely_current_comic_check,
+    ## Refresh current comic metadata in database every 5 minutes
+    celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_5m_update_current_comic_metadata
 ]
 
 app: Celery = Celery(
