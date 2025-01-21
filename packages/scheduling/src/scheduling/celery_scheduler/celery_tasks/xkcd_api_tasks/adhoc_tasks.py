@@ -45,7 +45,9 @@ def task_adhoc_request_comic(num: int) -> dict | None:
     xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController()
     
     try:
-        comic: xkcd_domain.XkcdComicIn = xkcd_api_controller.get_comic(comic_num=num)
+        with xkcd_api_controller as api_ctl:
+            comic: xkcd_domain.XkcdComicIn = api_ctl.get_comic(comic_num=num)
+
         if not comic:
             log.warning("comic is None, indicating an error requesting the comic from the XKCD API.")
             return

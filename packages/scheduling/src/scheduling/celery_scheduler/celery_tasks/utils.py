@@ -1,18 +1,73 @@
 from loguru import logger as log
 from celery.result import AsyncResult
 from celery import Celery
-
-from .xkcd_api_tasks import tasks as xkcd_api_tasks, scheduled_tasks as xkcd_api_scheduled_tasks, adhoc_tasks as xkcd_api_adhoc_tasks
+import typing as t
 
 from scheduling.celery_scheduler import celeryapp, check_task
 
 
-def execute_celery_task(task_name: str) -> dict | None:
+def execute_celery_task(task_name: str, timeout: int = 30, *args, **kwargs) -> AsyncResult:
+    """Execute a Celery task by its name, passing optional arguments.
+
+    Params:
+        task_name (str): The name of the Celery task to execute.
+        timeout (int): Maximum time (in seconds) to wait for the task result. Defaults to 30.
+        *args: Positional arguments to pass to the task.
+        **kwargs: Keyword arguments to pass to the task.
+
+    Returns:
+        (AsyncResult): The Celery async result object for the task.
+
+    Raises:
+        ValueError: If task_name is not provided.
+        Exception: If there is an error executing the task.
+
+    """
     if not task_name:
-        raise  ValueError("Missing task_name, which should be the name of a celery task.")
+        raise ValueError("Missing task_name, which should be the name of a Celery task.")
     
-    log.debug(f"Attempting to execute Celery task: {task_name}")
+    log.info(f"Attempting to execute Celery task: {task_name} with args: {args} and kwargs: {kwargs}")
     
+    try:
+        # Send the task
+        async_res: AsyncResult = celeryapp.app.send_task(task_name, args=args, kwargs=kwargs)
+        
+        log.info(f"Task {task_name} submitted with ID: {async_res.id}")
+        return async_res
+    except Exception as exc:
+        msg = f"({type(exc)}) Error executing Celery task '{task_name}'. Details: {exc}"
+        log.error(msg)
+        raise exc
+
+
+def watch_celery_task(async_res: AsyncResult, timeout: int = 30) -> t.Any:
+    """Monitor and retrieve the result of a Celery task.
+
+    Params:
+        async_res (AsyncResult): The Celery async result object.
+        timeout (int): Maximum time (in seconds) to wait for the task result. Defaults to 30.
+
+    Returns:
+        (Any): The result of the task.
+
+    Raises:
+        TimeoutError: If the task does not complete within the timeout period.
+        Exception: If there is an error retrieving the result.
+
+    """
+    try:
+        log.info(f"Waiting for task {async_res.id} to complete...")
+        result = async_res.get(timeout=timeout)
+        log.info(f"Task {async_res.id} completed with result: {result}")
+        return result
+    except TimeoutError:
+        log.warning(f"Task {async_res.id} did not complete within {timeout} seconds.")
+        raise
+    except Exception as exc:
+        msg = f"({type(exc)}) Error retrieving result for task {async_res.id}. Details: {exc}"
+        log.error(msg)
+        raise
+
     
 def get_celery_tasks_list(celery_app: Celery = celeryapp.app, hide_celery_tasks: bool = True) -> list[str] | None:
     """Return list of Celery tasks your app is aware of."""

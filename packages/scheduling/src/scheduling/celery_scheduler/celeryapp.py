@@ -4,6 +4,8 @@ from functools import lru_cache
 import typing as t
 
 from scheduling.celery_scheduler.celery_tasks.xkcd_api_tasks import (
+    tasks as celery_xkcd_api_tasks,
+    adhoc_tasks as celery_xkcd_api_adhoc_tasks,
     scheduled_tasks as celery_xkcd_api_scheduled_tasks,
 )
 from scheduling.celery_scheduler.celeryconfig import (
@@ -28,6 +30,7 @@ from settings.celery_settings import CELERY_SETTINGS
 ## Add paths Celery should look for tasks in
 INCLUDE_TASK_PATHS: list[str] = [
     "scheduling.celery_scheduler.celery_tasks.xkcd_api_tasks.scheduled_tasks",
+    "scheduling.celery_scheduler.celery_tasks.xkcd_api_tasks.adhoc_tasks",
     "scheduling.celery_scheduler.celery_tasks.xkcd_api_tasks.tasks",
 ]
 
