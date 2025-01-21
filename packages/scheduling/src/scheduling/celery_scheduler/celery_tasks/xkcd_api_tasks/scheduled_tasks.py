@@ -1,5 +1,6 @@
-from celery.schedules import crontab
+from __future__ import annotations
 
+from celery.schedules import crontab
 
 ## Check for new XKCD comic every hour
 TASK_SCHEDULE_hourly_current_comic_check = {

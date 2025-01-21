@@ -1,4 +1,4 @@
-from loguru import logger as log
+from __future__ import annotations
 
 from pathlib import Path
 import time
@@ -8,20 +8,16 @@ from celery import current_app
 from celery.result import AsyncResult
 import db_lib
 import depends
-
-import xkcdapi
 from domain import xkcd as xkcd_domain
-
 import httpx
-
+from loguru import logger as log
+import sqlalchemy as sa
+import sqlalchemy.exc as sa_exc
+import sqlalchemy.orm as so
+import xkcdapi
 import xkcdapi.controllers
 import xkcdapi.db_client
 import xkcdapi.request_client
-
-import sqlalchemy as sa
-import sqlalchemy.orm as so
-import sqlalchemy.exc as sa_exc
-
 
 @current_app.task(name="request_current_comic")
 def task_current_comic() -> dict:

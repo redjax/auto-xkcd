@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 
-import db_lib
 from celery import Celery
+import db_lib
 from loguru import logger as log
 from scheduling.celery_scheduler import (
     CelerySettings,
