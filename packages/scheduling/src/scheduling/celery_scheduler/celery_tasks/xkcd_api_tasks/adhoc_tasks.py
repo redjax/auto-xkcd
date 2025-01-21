@@ -6,6 +6,7 @@ from depends import db_depends
 from domain import xkcd as xkcd_domain
 import xkcdapi
 import xkcdapi.controllers
+import xkcdapi.db_client
 
 
 @log.catch
@@ -33,7 +34,7 @@ def task_adhoc_current_comic() -> dict:
 
 @log.catch
 @current_app.task(name="adhoc-request-comic")
-def task_adhoc_request_comic(num: int) -> dict | None:
+def task_adhoc_request_comic(num: int, save: bool = False) -> dict | None:
     if not num:
         raise ValueError("Missing input comic number ('num' param)")
     if num in xkcd_domain.constants.IGNORE_COMIC_NUMS:
@@ -45,18 +46,26 @@ def task_adhoc_request_comic(num: int) -> dict | None:
     xkcd_api_controller: xkcdapi.controllers.XkcdApiController = xkcdapi.controllers.XkcdApiController()
     
     try:
-        with xkcd_api_controller as api_ctl:
-            comic: xkcd_domain.XkcdComicIn = api_ctl.get_comic(comic_num=num)
+        comic, comic_img = xkcd_api_controller.get_comic_and_img(comic_num=num)
 
         if not comic:
             log.warning("comic is None, indicating an error requesting the comic from the XKCD API.")
             return
         
         log.success(f"Retrieved XKCD comic #{num} from the XKCD API.")
-        
-        return comic.model_dump()
     except Exception as exc:
         msg = f"({type(exc)}) Error requesting XKCD comic #{num}. Details: {exc}"
         log.error(msg)
         
         raise exc
+    
+    if not save:
+        return comic.model_dump()
+    
+    log.debug(f"Saving comic #{comic.num} to database.")
+    # engine = db_depends.get_db_engine()
+    
+    db_comic, db_comic_img = xkcdapi.db_client.save_comic_and_img_to_db(comic=comic, comic_img=comic_img)
+    log.success(f"Saved comic #{db_comic.num} and its image to the database.")
+    
+    return comic.model_dump()

@@ -81,3 +81,11 @@ def run_celery_update_current_comic_metadata_task():
     result = watch_celery_task(celery_task)
     
     print(f"Celery task 'update_current_comic_metadata' result: {result}")
+    
+
+@tasks_call_app.command(name="get-comic")
+def run_celery_get_comic_task(num: t.Annotated[int, Parameter(name=["comic_num", "--num", "-n"], help="The number of an XKCD comic strip to request.")], save: t.Annotated[bool, Parameter(name="save", help="When True, current comic & img will be saved to the database. When False, the current comic metadata will be returned.")] = False):
+    celery_task: AsyncResult = execute_celery_task(task_name="adhoc-request-comic", num=num, save=save, celery_app=CELERY_APP)
+    result = watch_celery_task(celery_task)
+    
+    print(f"Celery task 'adhoc-request-current-comic' result: {result}")
