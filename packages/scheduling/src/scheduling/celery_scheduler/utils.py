@@ -1,8 +1,10 @@
-from loguru import logger as log
-from celery.result import AsyncResult
-from celery import Celery
+from __future__ import annotations
+
 import typing as t
 
+from celery import Celery
+from celery.result import AsyncResult
+from loguru import logger as log
 
 def execute_celery_task(task_name: str, celery_app: Celery, *args, **kwargs) -> AsyncResult:
     """Execute a Celery task by its name, passing optional arguments.

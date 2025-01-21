@@ -5,8 +5,8 @@ import typing as t
 
 from .celery import celery_app
 from .db import db_app
-# from .weather import weather_app
 
+# from .weather import weather_app
 from cyclopts import App, Group, Parameter
 from loguru import logger as log
 

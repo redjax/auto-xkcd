@@ -1,13 +1,13 @@
-from loguru import logger as log
+from __future__ import annotations
 
 from celery import current_app, shared_task
 import db_lib
 from depends import db_depends
 from domain import xkcd as xkcd_domain
+from loguru import logger as log
 import xkcdapi
 import xkcdapi.controllers
 import xkcdapi.db_client
-
 
 @log.catch
 @current_app.task(name="adhoc-current-comic")

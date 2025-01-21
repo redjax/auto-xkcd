@@ -4,9 +4,9 @@ from functools import lru_cache
 import typing as t
 
 from scheduling.celery_scheduler.celery_tasks.xkcd_api_tasks import (
-    tasks as celery_xkcd_api_tasks,
     adhoc_tasks as celery_xkcd_api_adhoc_tasks,
     scheduled_tasks as celery_xkcd_api_scheduled_tasks,
+    tasks as celery_xkcd_api_tasks,
 )
 from scheduling.celery_scheduler.celeryconfig import (
     CelerySettings,

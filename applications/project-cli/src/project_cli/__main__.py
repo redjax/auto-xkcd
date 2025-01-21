@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from weather_cli.main import app as cli_app
-
 from cyclopts import App
 from loguru import logger as log
+from weather_cli.main import app as cli_app
 
 def start_cli():
     try:

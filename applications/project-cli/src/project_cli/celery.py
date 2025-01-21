@@ -6,9 +6,6 @@ from celery import Celery
 from celery.result import AsyncResult
 from cyclopts import App, Group, Parameter
 from domain import xkcd as xcd_domain
-
-from scheduling.celery_scheduler.utils import get_celery_tasks_list, watch_celery_task, execute_celery_task
-
 from loguru import logger as log
 from scheduling.celery_scheduler import (
     CelerySettings,
@@ -16,6 +13,11 @@ from scheduling.celery_scheduler import (
     celeryapp,
     check_task,
     start_celery,
+)
+from scheduling.celery_scheduler.utils import (
+    execute_celery_task,
+    get_celery_tasks_list,
+    watch_celery_task,
 )
 
 CELERY_APP: Celery = celeryapp.app

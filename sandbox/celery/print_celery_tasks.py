@@ -1,7 +1,12 @@
-from scheduling.celery_scheduler import celeryapp
-from celery import current_app
-from scheduling.celery_scheduler.celery_tasks import get_celery_tasks_list, execute_celery_task, watch_celery_task
+from __future__ import annotations
 
+from celery import current_app
+from scheduling.celery_scheduler import celeryapp
+from scheduling.celery_scheduler.celery_tasks import (
+    execute_celery_task,
+    get_celery_tasks_list,
+    watch_celery_task,
+)
 
 print(f"All Celery tasks: {get_celery_tasks_list(hide_celery_tasks=False)}")
 print(f"Custom Celery tasks only: {get_celery_tasks_list()}")
