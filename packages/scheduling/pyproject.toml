@@ -1,0 +1,36 @@
+[project]
+name = "scheduling"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "redjax", email = "no@none.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "celery>=5.4.0",
+    "coreutils-lib",
+    "database-lib",
+    "domain",
+    "http-lib",
+    "psycopg2-binary>=2.9.10",
+    "redis>=5.2.1",
+    "settings-lib",
+    "sqlalchemy>=2.0.37",
+    "xkcdapi",
+]
+
+[project.scripts]
+scheduling = "scheduling:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+settings-lib = { workspace = true }
+database-lib = { workspace = true }
+http-lib = { workspace = true }
+xkcdapi = { workspace = true }
+domain = { workspace = true }
+coreutils-lib = { workspace = true }
