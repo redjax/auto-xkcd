@@ -4,9 +4,9 @@ from pathlib import Path
 import time
 import typing as t
 
-from core_utils import time_utils
 from celery import current_app
 from celery.result import AsyncResult
+from core_utils import time_utils
 import db_lib
 import depends
 from domain import xkcd as xkcd_domain
