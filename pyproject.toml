@@ -12,6 +12,7 @@ dependencies = [
     "dynaconf>=3.2.6",
     "http-lib",
     "loguru>=0.7.3",
+    "project-cli",
     "scheduling",
     "settings-lib",
     "setup-lib",
@@ -26,7 +27,7 @@ dev = [
 ]
 
 [tool.uv.workspace]
-members = ["libs/*", "packages/xkcdapi", "packages/domain", "packages/scheduling"]
+members = ["libs/*", "packages/xkcdapi", "packages/domain", "packages/scheduling", "applications/project-cli"]
 
 [tool.uv.sources]
 coreutils-lib = { workspace = true }
@@ -38,6 +39,7 @@ setup-lib = { workspace = true }
 xkcdapi = { workspace = true }
 domain = { workspace = true }
 scheduling = { workspace = true }
+project-cli = { workspace = true }
 
 
 [build-system]

@@ -70,6 +70,9 @@ class XkcdApiController(AbstractContextManager):
     def get_current_comic(self) -> xkcd_domain.XkcdComicIn:
         req: httpx.Request = current_comic_req()
         
+        if not self.http_controller:
+            self.http_controller = self._get_http_controller()
+
         with self.http_controller as http_ctl:
             res = http_ctl.send_request(req)
 
@@ -89,6 +92,9 @@ class XkcdApiController(AbstractContextManager):
         
     def get_comic(self, comic_num: t.Union[int, str]) -> xkcd_domain.XkcdComicIn:
         req: httpx.Request = comic_num_req(comic_num=comic_num)
+        
+        if not self.http_controller:
+            self.http_controller = self._get_http_controller()
         
         with self.http_controller as http_ctl:
             res = http_ctl.send_request(request=req)
