@@ -12,6 +12,7 @@ dependencies = [
     "dynaconf>=3.2.6",
     "http-lib",
     "loguru>=0.7.3",
+    "scheduling",
     "settings-lib",
     "setup-lib",
     "xkcdapi",
@@ -25,7 +26,7 @@ dev = [
 ]
 
 [tool.uv.workspace]
-members = ["libs/*", "packages/xkcdapi", "packages/domain"]
+members = ["libs/*", "packages/xkcdapi", "packages/domain", "packages/scheduling"]
 
 [tool.uv.sources]
 coreutils-lib = { workspace = true }
@@ -36,6 +37,7 @@ settings-lib = { workspace = true }
 setup-lib = { workspace = true }
 xkcdapi = { workspace = true }
 domain = { workspace = true }
+scheduling = { workspace = true }
 
 
 [build-system]
