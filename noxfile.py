@@ -210,3 +210,10 @@ def run_init_clone_setup(session: nox.Session):
 
         else:
             log.info(f"{p['dest']} already exists, skipping copy")
+
+@nox.session(name="count-loc")
+def count_lines_of_code(session: nox.Session):
+    session.install("pygount")
+    
+    log.info("Counting lines of code with pygount")
+    session.run("pygount", "--format=summary", "./")
