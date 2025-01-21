@@ -73,7 +73,7 @@ def task_save_current_comic(engine: sa.Engine | None = None) -> t.Tuple[dict | N
     else:
         comic_img_out_dict = db_current_comic_img.model_dump()
         
-    log.debug(f"Current comic: {db_current_comic}, current comic image: {db_current_comic_img}")
+    # log.debug(f"Current comic: {db_current_comic}, current comic image: {db_current_comic_img}")
     
     return comic_out_dict, comic_img_out_dict
 

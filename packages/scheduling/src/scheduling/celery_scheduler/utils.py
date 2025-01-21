@@ -3,15 +3,12 @@ from celery.result import AsyncResult
 from celery import Celery
 import typing as t
 
-from scheduling.celery_scheduler import celeryapp, check_task
 
-
-def execute_celery_task(task_name: str, timeout: int = 30, *args, **kwargs) -> AsyncResult:
+def execute_celery_task(task_name: str, celery_app: Celery, *args, **kwargs) -> AsyncResult:
     """Execute a Celery task by its name, passing optional arguments.
 
     Params:
         task_name (str): The name of the Celery task to execute.
-        timeout (int): Maximum time (in seconds) to wait for the task result. Defaults to 30.
         *args: Positional arguments to pass to the task.
         **kwargs: Keyword arguments to pass to the task.
 
@@ -25,12 +22,14 @@ def execute_celery_task(task_name: str, timeout: int = 30, *args, **kwargs) -> A
     """
     if not task_name:
         raise ValueError("Missing task_name, which should be the name of a Celery task.")
+    if not celery_app:
+        raise ValueError("Missing a Celery app to send task to.")
     
     log.info(f"Attempting to execute Celery task: {task_name} with args: {args} and kwargs: {kwargs}")
     
     try:
         # Send the task
-        async_res: AsyncResult = celeryapp.app.send_task(task_name, args=args, kwargs=kwargs)
+        async_res: AsyncResult = celery_app.send_task(task_name, args=args, kwargs=kwargs)
         
         log.info(f"Task {task_name} submitted with ID: {async_res.id}")
         return async_res
@@ -58,7 +57,7 @@ def watch_celery_task(async_res: AsyncResult, timeout: int = 30) -> t.Any:
     try:
         log.info(f"Waiting for task {async_res.id} to complete...")
         result = async_res.get(timeout=timeout)
-        log.info(f"Task {async_res.id} completed with result: {result}")
+        log.info(f"Task {async_res.id} completed with result.")
         return result
     except TimeoutError:
         log.warning(f"Task {async_res.id} did not complete within {timeout} seconds.")
@@ -69,13 +68,16 @@ def watch_celery_task(async_res: AsyncResult, timeout: int = 30) -> t.Any:
         raise
 
     
-def get_celery_tasks_list(celery_app: Celery = celeryapp.app, hide_celery_tasks: bool = True) -> list[str] | None:
+def get_celery_tasks_list(celery_app: Celery, include_celery_tasks: bool = False) -> list[str] | None:
     """Return list of Celery tasks your app is aware of."""
+    if not celery_app:
+        raise ValueError("Missing a celery_app to get tasks from.")
+
     try:
-        if hide_celery_tasks:
-            celery_tasks: list[str] = [name for name in celery_app.tasks.keys() if not name.startswith('celery.')]
-        else:
+        if include_celery_tasks:
             celery_tasks: list[str] = [name for name in celery_app.tasks.keys()]
+        else:
+            celery_tasks: list[str] = [name for name in celery_app.tasks.keys() if not name.startswith('celery.')]
 
         return celery_tasks
     except Exception as exc:

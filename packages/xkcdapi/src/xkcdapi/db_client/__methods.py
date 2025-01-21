@@ -186,7 +186,7 @@ def save_comic_img_to_db(comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so
             
             comic_img_model: xkcd_domain.XkcdComicImageModel = xkcd_domain.XkcdComicImageModel(**comic_img.model_dump())
             
-            log.debug(f"Saving image for comic: {comic_img}")
+            # log.debug(f"Saving image for comic: {comic_img}")
             db_comic_img: xkcd_domain.XkcdComicImageModel = repo.create(comic_img_model)
             session.refresh(db_comic_img)
 
@@ -200,7 +200,7 @@ def save_comic_img_to_db(comic_img: xkcd_domain.XkcdComicImgIn, session_pool: so
         raise ValueError("db_comic_img should not have been none, a database error occurred while saving new comic image.")
     
     log.debug(f"Converting db comic image to XkcdComicImgOut.")
-    log.debug(f"Database model: {db_comic_img.__repr__()}")
+    # log.debug(f"Database model: {db_comic_img.__repr__()}")
     
     comic_img_out: xkcd_domain.XkcdComicImgOut = xkcd_domain.XkcdComicImgOut(**db_comic_img.__dict__)
     
