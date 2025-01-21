@@ -1,0 +1,23 @@
+[project]
+name = "project-cli"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "redjax", email = "no@none.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "cyclopts>=3.3.0",
+    "settings-lib",
+]
+
+[project.scripts]
+project-cli = "project_cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+settings-lib = { workspace = true }
