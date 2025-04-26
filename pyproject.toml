@@ -12,6 +12,7 @@ dependencies = [
     "dynaconf>=3.2.6",
     "http-lib",
     "loguru>=0.7.3",
+    "minio>=7.2.15",
     "project-cli",
     "scheduling",
     "settings-lib",
