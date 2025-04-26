@@ -1,13 +1,49 @@
-[default]
-log_level = "INFO"
+[app]
 tz = "Etc/UTC"
 
-[demo]
+[logging]
+log_level = "INFO"
 
-[dev]
-log_level = "DEBUG"
+[celery]
+celery_broker_host = "localhost"
+celery_broker_port = 5672
+celery_broker_username = "guest"
+celery_broker_vhost = "/"
+celery_backend_host = "localhost"
+celery_backend_port = 6379
 
-[rc]
+[database]
+db_type = "sqlite"
+db_drivername = "sqlite+pysqlite"
+db_username = ""
+# Set in .secrets.toml
+# db_password = ""
+db_host = ""
+db_port = ""
+db_database = "db.sqlite3"
+db_echo = false
 
-[prod]
-log_level = "WARNING"
+[fastapi]
+fastapi_debug = false
+fastapi_title = "Auto XKCD"
+fastapi_summary = "Auto XKCD project API."
+fastapi_description = "Backend API for Auto XKCD app. https://github.com/redjax/auto-xkcd"
+fastapi_version = "0.1.0"
+fastapi_openapi_url = "/openapi.json"
+fastapi_redirect_slashes = true
+fastapi_docs_url = "/docs"
+fastapi_redoc_url = "/redoc"
+fastapi_openapi_prefix = ""
+fastapi_root_path = ""
+fastapi_root_path_in_servers = true
+
+## Include custom admin router
+fastapi_include_admin_router = false
+
+[uvicorn]
+uvicorn_app = "api.main:fastapi_app"
+uvicorn_host = "0.0.0.0"
+uvicorn_port = 8000
+uvicorn_root_path = "/"
+uvicorn_reload = false
+uvicorn_log_level = "INFO"
