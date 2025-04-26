@@ -35,6 +35,14 @@ db_echo = false
 # db_database = "autoxkcd_dev"
 # db_echo = true
 
+## MySQL
+# db_type = "mysql"
+# db_drivername = "mysql+pymysql"
+# db_username = "mysql"
+# db_host = "localhost"
+# db_port = 3306
+# db_database = "autoxkcd_dev"
+
 [fastapi]
 fastapi_debug = false
 fastapi_title = "Auto XKCD"
