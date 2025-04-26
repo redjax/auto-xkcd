@@ -22,9 +22,10 @@ from celery import Celery
 from celery.result import AsyncResult
 from celery.schedules import crontab
 from loguru import logger as log
-from settings.app_settings import APP_SETTINGS
-from settings.celery_settings import CELERY_SETTINGS
+import settings
 
+APP_SETTINGS = settings.get_namespace("app")
+CELERY_SETTINGS = settings.get_namespace("celery")
 # log.debug(f"Celery settings: {CELERY_SETTINGS.as_dict()}")
 
 ## Add paths Celery should look for tasks in
@@ -41,7 +42,7 @@ BEAT_SCHEDULED_TASKS: list = [
     ## Demo: request and save current XKCD comic every minute
     # celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_minutely_current_comic_check,
     ## Refresh current comic metadata in database every 5 minutes
-    celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_5m_update_current_comic_metadata
+    celery_xkcd_api_scheduled_tasks.TASK_SCHEDULE_5m_update_current_comic_metadata,
 ]
 
 app: Celery = Celery(
