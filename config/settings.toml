@@ -13,6 +13,7 @@ celery_backend_host = "localhost"
 celery_backend_port = 6379
 
 [database]
+## Local SQLite
 db_type = "sqlite"
 db_drivername = "sqlite+pysqlite"
 db_username = ""
@@ -22,6 +23,17 @@ db_host = ""
 db_port = ""
 db_database = "db.sqlite3"
 db_echo = false
+
+## Postgres
+# db_type = "postgres"
+# db_drivername = "postgresql+psycopg2"
+# db_username = "postgres"
+# # Set in .secrets.toml
+# # db_password = ""
+# db_host = "localhost"
+# db_port = "5432"
+# db_database = "autoxkcd_dev"
+# db_echo = true
 
 [fastapi]
 fastapi_debug = false
