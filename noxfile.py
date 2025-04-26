@@ -42,7 +42,15 @@ REQUIREMENTS_OUTPUT_DIR: Path = Path(".")
 # the `resolve()` makes it portable
 VENV_DIR = Path("./.venv").resolve()
 
-LINT_PATHS: list[str] = ["src", "packages", "libs", "applications", "scripts", "sandbox"]
+LINT_PATHS: list[str] = [
+    "src",
+    "packages",
+    "libs",
+    "applications",
+    "scripts",
+    "sandbox",
+]
+
 
 def install_uv_project(session: nox.Session, external: bool = False) -> None:
     """Method to install uv and the current project in a nox session."""
@@ -53,8 +61,9 @@ def install_uv_project(session: nox.Session, external: bool = False) -> None:
     log.info("Installing project")
     session.run("uv", "pip", "install", ".", external=external)
 
+
 @contextmanager
-def cd(new_dir) -> t.Generator[None, t.Any, None]: # type: ignore
+def cd(new_dir) -> t.Generator[None, t.Any, None]:  # type: ignore
     """Context manager to change a directory before executing command."""
     prev_dir: str = os.getcwd()
     os.chdir(os.path.expanduser(new_dir))
@@ -62,7 +71,7 @@ def cd(new_dir) -> t.Generator[None, t.Any, None]: # type: ignore
         yield
     finally:
         os.chdir(prev_dir)
-        
+
 
 @nox.session(name="dev-env", tags=["setup"])
 def dev(session: nox.Session) -> None:
@@ -71,7 +80,8 @@ def dev(session: nox.Session) -> None:
     Run this on a fresh clone of the repository to automate building the project with uv.
     """
     install_uv_project(session, external=True)
-    
+
+
 @nox.session(python=[DEFAULT_PYTHON], name="ruff-lint", tags=["ruff", "clean", "lint"])
 def run_linter(session: nox.Session, lint_paths: list[str] = LINT_PATHS):
     """Nox session to run Ruff code linting."""
@@ -119,19 +129,19 @@ Double check imports in _init_.py files, ruff removes unused imports by default.
     #     f"{Path('./noxfile.py')}",
     #     "--fix",
     # )
-    
+
     ## Find stray Python files not in src/, .venv/, or .nox/
-    all_python_files = [f for f in Path("./").rglob("*.py") if ".venv" not in f.parts and ".nox" not in f.parts and "src" not in f.parts]
+    all_python_files = [
+        f
+        for f in Path("./").rglob("*.py")
+        if ".venv" not in f.parts and ".nox" not in f.parts and "src" not in f.parts
+    ]
     log.info(f"Found [{len(all_python_files)}] Python file(s) to lint")
     for py_file in all_python_files:
         log.info(f"Linting Python file: {py_file}")
-        session.run(
-            "ruff",
-            "check",
-            str(py_file),
-            "--fix"
-        )
-    
+        session.run("ruff", "check", str(py_file), "--fix")
+
+
 @nox.session(python=[DEFAULT_PYTHON], name="vulture-check", tags=["quality"])
 def run_vulture_check(session: nox.Session):
     session.install(f"vulture")
@@ -140,7 +150,7 @@ def run_vulture_check(session: nox.Session):
     for p in LINT_PATHS:
         log.info(f"Vulture scanning path: {p}")
         session.run("vulture", str(p), "--min-confidence", "100")
-    
+
 
 @nox.session(python=[DEFAULT_PYTHON], name="uv-export")
 @nox.parametrize("requirements_output_dir", REQUIREMENTS_OUTPUT_DIR)
@@ -169,6 +179,7 @@ def export_requirements(session: nox.Session, requirements_output_dir: Path):
         str(REQUIREMENTS_OUTPUT_DIR / "requirements.txt"),
     )
 
+
 ## Run pytest with xdist, allowing concurrent tests
 @nox.session(python=DEFAULT_PYTHON, name="tests")
 def run_tests(session: nox.Session):
@@ -193,16 +204,18 @@ def run_init_clone_setup(session: nox.Session):
     install_uv_project(session)
 
     copy_paths = [
+        {"src": "./config/settings.toml", "dest": "./config/settings.local.toml"},
+        {"src": "./config/.secrets.toml", "dest": "./config/.secrets.local.toml"},
         {
-            "src": "./config/settings.toml",
-            "dest": "./config/settings.local.toml"
+            "src": "./containers/envs/dev/app.env.example",
+            "dest": "./containers/envs/dev/app.env",
         },
         {
-            "src": "./config/.secrets.toml",
-            "dest": "./config/.secrets.local.toml"
-        }
+            "src": "./containers/envs/prod/app.env.example",
+            "dest": "./containers/envs/prod/app.env",
+        },
     ]
-    
+
     for p in copy_paths:
         if not Path(p["dest"]).exists():
             log.info(f"Copying {p['src']} to {p['dest']}")
@@ -211,9 +224,10 @@ def run_init_clone_setup(session: nox.Session):
         else:
             log.info(f"{p['dest']} already exists, skipping copy")
 
+
 @nox.session(name="count-loc")
 def count_lines_of_code(session: nox.Session):
     session.install("pygount")
-    
+
     log.info("Counting lines of code with pygount")
     session.run("pygount", "--format=summary", "./")
