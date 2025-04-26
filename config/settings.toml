@@ -43,6 +43,11 @@ db_echo = false
 # db_port = 3306
 # db_database = "autoxkcd_dev"
 
+[minio]
+minio_host = "<IP or FQDN"
+minio_port = 9000
+minio_access_key = "<your minio access key>"
+
 [fastapi]
 fastapi_debug = false
 fastapi_title = "Auto XKCD"
