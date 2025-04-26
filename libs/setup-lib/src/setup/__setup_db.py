@@ -7,24 +7,30 @@ from depends import db_depends
 from loguru import logger as log
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+from settings import DATABASE_SETTINGS
 
-def setup_database(sqla_base: so.DeclarativeBase = db.Base,engine: sa.Engine = db_depends.get_db_engine()) -> None:
+
+def setup_database(
+    engine: sa.Engine | None = None,
+    sqla_base: so.DeclarativeBase = db.Base,
+) -> None:
     """Setup the database tables and metadata.
-    
+
     Params:
         sqla_base (sqlalchemy.orm.DeclarativeBase): A SQLAlchemy `DeclarativeBase` object to use for creating metadata.
         engine (sqlalchemy.Engine): A SQLAlchemy `Engine` to use for database connections.
     """
-    engine: sa.Engine = engine
-    
+    if engine is None:
+        engine = db_depends.get_db_engine(echo=DATABASE_SETTINGS.get("DB_ECHO", False))
+
     ## Check if the driver is SQLite
-    if engine.dialect.name == 'sqlite':
+    if engine.dialect.name == "sqlite":
         ## Get the database file path from the engine's URL
         db_file_path = engine.url.database
-        
+
         ## Get the parent directory of the database file
         parent_dir = Path(db_file_path).parent
-        
+
         ## Check if the parent directory exists
         if not parent_dir.exists():
             ## Create the parent directory if it doesn't exist

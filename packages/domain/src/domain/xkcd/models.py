@@ -8,6 +8,7 @@ import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
 
+
 class XkcdComicModel(db_lib.Base):
     """Table model for XKCD comics.
 
@@ -45,22 +46,22 @@ class XkcdComicModel(db_lib.Base):
 
 class XkcdCurrentComicMetadataModel(db_lib.Base):
     __tablename__ = "current_comic_meta"
-    __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
+    __table_args__ = (sa.UniqueConstraint("num", name="_current_comic_num_uc"),)
 
     id: so.Mapped[db_lib.annotated.INT_PK]
 
     num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
     last_updated: so.Mapped[datetime] = so.mapped_column(sa.DateTime)
-    
-    
+
+
 class XkcdComicImageModel(db_lib.Base):
     __tablename__ = "comic_img"
-    __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
+    __table_args__ = (sa.UniqueConstraint("num", name="_comic_img_num_uc"),)
 
     id: so.Mapped[db_lib.annotated.INT_PK]
 
     num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
     img_bytes: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
-    
+
     def __repr__(self):
         return f"XkcdComicImageModel(id={self.id or None}, num={self.num})"
