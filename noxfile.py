@@ -214,6 +214,14 @@ def run_init_clone_setup(session: nox.Session):
             "src": "./containers/envs/prod/app.env.example",
             "dest": "./containers/envs/prod/app.env",
         },
+        {
+            "src": "./containers/envs/dev/messaging.env.example",
+            "dest": "./containers/envs/dev/messaging.env",
+        },
+        {
+            "src": "./containers/envs/prod/messaging.env.example",
+            "dest": "./containers/envs/prod/messaging.env",
+        },
     ]
 
     for p in copy_paths:
