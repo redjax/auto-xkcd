@@ -4,6 +4,11 @@ tz = "Etc/UTC"
 [logging]
 log_level = "INFO"
 
+[ntfy]
+ntfy_server = "https://ntfy.sh"
+ntfy_topic = "xkcd"
+ntfy_user = "xkcd_bot"
+
 [celery]
 celery_broker_host = "localhost"
 celery_broker_port = 5672

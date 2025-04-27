@@ -17,7 +17,7 @@ __all__ = ["send_message", "send_file"]
 
 def send_message(
     topic_url: str,
-    messsage: str,
+    message: str,
     headers: dict,
     title: str | None = None,
     priority: str = "default",
@@ -44,9 +44,11 @@ def send_message(
 
     log.debug(f"Headers: {headers}")
 
-    req = http_lib.build_request("POST", url=topic_url, data=messsage, headers=headers)
+    req = http_lib.build_request("POST", url=topic_url, data=message, headers=headers)
 
-    http_controller = http_lib.get_http_controller(use_cache=False, timeout=timeout)
+    http_controller: http_lib.HttpxController = http_lib.get_http_controller(
+        use_cache=False, timeout=timeout
+    )
 
     with http_controller as http_ctl:
         res = http_ctl.send_request(req)
@@ -99,7 +101,9 @@ def send_file(
         "POST", url=topic_url, headers=headers, data=file_contents
     )
 
-    http_controller = http_lib.get_http_controller(use_cache=False, timeout=timeout)
+    http_controller: http_lib.HttpxController = http_lib.get_http_controller(
+        use_cache=False, timeout=timeout
+    )
 
     log.info(f"Posting file to '{topic_url}'")
     try:
