@@ -203,7 +203,7 @@ def create_migration(
     do_upgrade: t.Annotated[
         bool,
         Parameter(
-            name="do-upgrade",
+            name="upgrade",
             show_default=True,
             help="Upgrade the database after creating the migration.",
         ),
