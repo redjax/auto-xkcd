@@ -28,7 +28,7 @@ services:
       - ../applications:/project/applications
       - ../packages:/project/packages
       - ../scripts:/project/scripts
-      - ../src:/project/src
+      # - ../src:/project/src
       - ./container_data/auto-xkcd/db:/auto-xkcd/db
     networks:
       - auto-xkcd_devnet
@@ -53,7 +53,7 @@ services:
       - ../applications:/project/applications
       - ../packages:/project/packages
       - ../scripts:/project/scripts
-      - ../src:/project/src
+      # - ../src:/project/src
       - ./container_data/auto-xkcd/celery_worker/logs:/project/logs
     networks:
       - auto-xkcd_devnet
