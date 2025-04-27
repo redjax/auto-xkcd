@@ -196,3 +196,7 @@ site/
 .direnv/.*
 .direnv/**/.*
 !.direnv/*.*example*
+
+## Minio config
+minio_conf.json
+!example.minio_conf.json

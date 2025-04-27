@@ -44,9 +44,10 @@ db_echo = false
 # db_database = "autoxkcd_dev"
 
 [minio]
-minio_host = "<IP or FQDN"
-minio_port = 9000
-minio_access_key = "<your minio access key>"
+minio_endpoint = "<ip:9000 or FQDN>"
+minio_access_key = "<your access key>"
+minio_secure = true
+minio_cert_check = false
 
 [fastapi]
 fastapi_debug = false

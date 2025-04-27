@@ -1,0 +1,6 @@
+{
+    "type": "download",
+    "bucket": "<minio bucket>",
+    "remote_path": "<minio path>",
+    "local_path": "<local path>"
+}

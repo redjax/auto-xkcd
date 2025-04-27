@@ -1,0 +1,7 @@
+{
+    "endpoint": "<ip:9000 or FQDN>",
+    "access_key": "<minio access key>",
+    "secret_key": "<minio secret key>",
+    "secure": true,
+    "cert_check": false
+}
