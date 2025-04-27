@@ -8,11 +8,10 @@ networks:
 
 services:
   celery_beat:
-    container_name: ${CELERY_BEAT_CONTAINER_NAME:-auto-xkcd_celery_beat}
+    container_name: ${CELERY_BEAT_CONTAINER_NAME:-auto-xkcd_celery_beat-dev}
     restart: unless-stopped
     build:
       context: ..
-      # dockerfile: ./containers/dockerfiles/celery.Dockerfile
       dockerfile: ./containers/dockerfiles/dev.Dockerfile
       target: celery_beat
     working_dir: /project
@@ -35,11 +34,10 @@ services:
       - auto-xkcd_devnet
 
   celery_worker:
-    container_name: ${CELERY_WORKER_CONTAINER_NAME:-auto-xkcd_celery_worker}
+    container_name: ${CELERY_WORKER_CONTAINER_NAME:-auto-xkcd_celery_worker-dev}
     restart: unless-stopped
     build:
       context: ..
-      # dockerfile: ./containers/dockerfiles/celery.Dockerfile
       dockerfile: ./containers/dockerfiles/dev.Dockerfile
       target: celery_worker
     working_dir: /project
@@ -62,7 +60,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: auto-xkcd_redis
+    container_name: auto-xkcd_redis-dev
     restart: unless-stopped
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-redis}"]
     env_file:
@@ -78,7 +76,7 @@ services:
 
   redis-commander:
     image: rediscommander/redis-commander:latest
-    container_name: auto-xkcd_redis-commander
+    container_name: auto-xkcd_redis-commander-dev
     restart: unless-stopped
     env_file:
       - ./envs/dev/messaging.env
@@ -98,7 +96,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
-    container_name: auto-xkcd_rabbitmq
+    container_name: auto-xkcd_rabbitmq-dev
     restart: unless-stopped
     env_file:
       - ./envs/dev/messaging.env
