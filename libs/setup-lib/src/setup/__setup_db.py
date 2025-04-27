@@ -5,10 +5,9 @@ from pathlib import Path
 import db_lib as db
 from depends import db_depends
 from loguru import logger as log
+from settings import DATABASE_SETTINGS
 import sqlalchemy as sa
 import sqlalchemy.orm as so
-from settings import DATABASE_SETTINGS
-
 
 def setup_database(
     engine: sa.Engine | None = None,

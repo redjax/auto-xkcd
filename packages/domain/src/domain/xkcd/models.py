@@ -8,7 +8,6 @@ import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
 
-
 class XkcdComicModel(db_lib.Base):
     """Table model for XKCD comics.
 

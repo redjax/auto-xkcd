@@ -8,7 +8,6 @@ from project_cli.main import app as cli_app
 from settings import LOGGING_SETTINGS
 import setup
 
-
 def start_cli(app: App):
     try:
         cli_app.meta()

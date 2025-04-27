@@ -4,8 +4,8 @@ from . import celeryapp
 
 from celery import Celery
 from loguru import logger as log
-import setup
 import settings
+import setup
 
 APP_SETTINGS = settings.get_namespace("app")
 CELERY_SETTINGS = settings.get_namespace("celery")

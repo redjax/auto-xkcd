@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from cyclopts import App
-from loguru import logger as log
 from project_cli.main import app as cli_app
 
+from cyclopts import App
+from loguru import logger as log
 
 def start_cli():
     try:

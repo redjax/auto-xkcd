@@ -3,9 +3,9 @@ from __future__ import annotations
 import sys
 import typing as t
 
+from ._alembic import alembic_app
 from .celery import celery_app
 from .db import db_app
-from ._alembic import alembic_app
 from .setup import setup_app
 
 # from .weather import weather_app
