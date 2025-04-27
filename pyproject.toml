@@ -13,6 +13,7 @@ dependencies = [
     "http-lib",
     "loguru>=0.7.3",
     "minio>=7.2.15",
+    "notifications",
     "project-cli",
     "scheduling",
     "settings-lib",
@@ -30,6 +31,7 @@ members = [
     "packages/domain",
     "packages/scheduling",
     "applications/project-cli",
+    "packages/notifications",
 ]
 
 [tool.uv.sources]
@@ -43,6 +45,7 @@ xkcdapi = { workspace = true }
 domain = { workspace = true }
 scheduling = { workspace = true }
 project-cli = { workspace = true }
+notifications = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
