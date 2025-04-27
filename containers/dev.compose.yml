@@ -7,6 +7,28 @@ networks:
   auto-xkcd_devnet:
 
 services:
+  alembic_migrate:
+    container_name: auto-xkcd_alembic_migrate-dev
+    restart: no
+    build:
+      context: ..
+      dockerfile: ./containers/dockerfiles/dev.Dockerfile
+      target: alembic_migrate
+    working_dir: /project
+    env_file:
+      - ./envs/dev/app.env
+    # ## Uncomment for debugging
+    # # command: ["/bin/bash"]
+    volumes:
+      - ../applications:/project/applications
+      - ../packages:/project/packages
+      - ../scripts:/project/scripts
+      - ./container_data/auto-xkccd/db:/auto-xkcd/db
+      - ../migrations:/project/migrations
+      - ../alembic.ini:/project/alembic.ini
+    networks:
+      - auto-xkcd_devnet
+
   celery_beat:
     container_name: ${CELERY_BEAT_CONTAINER_NAME:-auto-xkcd_celery_beat-dev}
     restart: unless-stopped
@@ -19,6 +41,7 @@ services:
     depends_on:
       - rabbitmq
       - redis
+      - alembic_migrate
     env_file:
       - ./envs/dev/app.env
     command: ["uv", "run", "scripts/celery/start_celery.py", "-m", "beat"]
@@ -45,6 +68,7 @@ services:
     depends_on:
       - rabbitmq
       - redis
+      - alembic_migrate
     env_file:
       - ./envs/dev/app.env
     command: ["uv", "run", "scripts/celery/start_celery.py", "-m", "worker"]

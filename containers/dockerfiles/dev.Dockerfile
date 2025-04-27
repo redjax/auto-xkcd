@@ -33,7 +33,7 @@ COPY pyproject.toml uv.lock README.md ./
 
 ## Copy monorepo domains
 COPY applications/ applications/
-# COPY migrations/ migrations/
+COPY migrations/ migrations/
 COPY libs/ libs/
 COPY packages/ packages/
 COPY scripts/ scripts/
