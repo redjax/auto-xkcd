@@ -62,6 +62,7 @@ def get_http_controller(
     cacheable_status_codes: list[int] | None = None,
     cache_allow_heuristics: bool = True,
     cache_allow_stale: bool = False,
+    timeout: int | float = 30.0,
 ) -> HttpxController:
     """Return an initialized HttpxController class object.
 
@@ -92,6 +93,7 @@ def get_http_controller(
         cache_allow_heuristics (bool): (default: True) Use heuristics to match objects in cache, improves performance &
             reliability of caching new objects.
         cache_allow_stale (bool): (default: False) When `True`, allow stale/expired responses from cache.
+        timeout (int | float): (default: 30.0) Amount of time, in seconds, to wait for a response.
 
     Returns:
         (HttpxController): Initialized HttpxController object to use for requests.
@@ -120,6 +122,7 @@ def get_http_controller(
             cacheable_status_codes=cacheable_status_codes,
             cache_allow_heuristics=cache_allow_heuristics,
             cache_allow_stale=cache_allow_stale,
+            timeout=timeout,
         )
 
         return http_ctl
@@ -196,6 +199,7 @@ class HttpxController(AbstractContextManager):
         cache_allow_heuristics (bool): (default: True) Use heuristics to match objects in cache, improves performance &
             reliability of caching new objects.
         cache_allow_stale (bool): (default: False) When `True`, allow stale/expired responses from cache.
+        timeout (int | float): (default: 30.0) Amount of time, in seconds, to wait for a response.
     """
 
     def __init__(
@@ -221,11 +225,14 @@ class HttpxController(AbstractContextManager):
         cacheable_status_codes: list[int] | None = [200, 201, 202, 301, 308],
         cache_allow_heuristics: bool = True,
         cache_allow_stale: bool = False,
+        timeout: int | float = 30.0,
     ) -> None:
         self.use_cache: bool = use_cache
         self.force_cache: bool = force_cache
         self.follow_redirects: bool = follow_redirects
-        self.cache_type: str | None = cache_type.lower() if (cache_type and isinstance(cache_type, str)) else None
+        self.cache_type: str | None = (
+            cache_type.lower() if (cache_type and isinstance(cache_type, str)) else None
+        )
         self.cache_file_dir: str | None = cache_file_dir
         self.cache_db_file: str = cache_db_file
         self.cache_ttl: int | None = cache_ttl
@@ -234,6 +241,7 @@ class HttpxController(AbstractContextManager):
         self.cacheable_status_codes: list[int] | None = cacheable_status_codes
         self.cache_allow_heuristics: bool = cache_allow_heuristics
         self.cache_allow_stale: bool = cache_allow_stale
+        self.timeout: int | float = timeout
 
         ## Placeholder for initialized httpx.Client
         self.client: httpx.Client | None = None
@@ -287,7 +295,7 @@ class HttpxController(AbstractContextManager):
         """Initialize hishel cache storage."""
         if not self.use_cache:
             return None
-        
+
         match self.cache_type:
             case None:
                 return None
@@ -308,7 +316,7 @@ class HttpxController(AbstractContextManager):
                 log.error(f"Unrecognized cache type: {self.cache_type}")
 
                 return None
-            
+
         return _cache
 
     def _get_cache_controller(self) -> hishel.Controller:
@@ -359,7 +367,9 @@ class HttpxController(AbstractContextManager):
         if self.use_cache:
             transport: hishel.CacheTransport | None = self.cache_transport
             client = httpx.Client(
-                transport=transport, follow_redirects=self.follow_redirects
+                transport=transport,
+                follow_redirects=self.follow_redirects,
+                timeout=self.timeout,
             )
 
             return client
@@ -387,7 +397,7 @@ class HttpxController(AbstractContextManager):
         """
         try:
             res: httpx.Response = self.client.send(request, stream=stream, auth=auth)
-            
+
             return res
         except Exception as exc:
             msg = f"({type(exc)}) Error sending request. Details: {exc}"
