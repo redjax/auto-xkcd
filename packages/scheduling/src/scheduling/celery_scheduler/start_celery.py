@@ -11,12 +11,15 @@ from . import (
 
 from celery import Celery
 from loguru import logger as log
-from settings.logging_settings import LOGGING_SETTINGS
+import settings
 import setup
+
+LOGGING_SETTINGS = settings.get_namespace("logging")
+
 
 def worker(app: Celery):
     """Starts the Celery worker.
-    
+
     Params:
         app (Celery): An initialized Celery app
 
@@ -27,14 +30,15 @@ def worker(app: Celery):
     except Exception as exc:
         msg = f"({type(exc)}) Error running Celery worker. Details: {exc}"
         log.error(msg)
-        
+
         raise exc
-    
+
     log.info("Celery worker stopped.")
-    
+
+
 def beat(app: Celery):
     """Starts the Celery beat schedule.
-    
+
     Params:
         app (Celery): An initialized Celery app
 
@@ -45,14 +49,15 @@ def beat(app: Celery):
     except Exception as exc:
         msg = f"({type(exc)}) Error running Celery beat. Details: {exc}"
         log.error(msg)
-        
+
         raise exc
-    
+
     log.info("Celery beat stopped.")
+
 
 def start(app: Celery, mode: str):
     """Starts the Celery worker or beat schedule.
-    
+
     Params:
         app (Celery): An initialized Celery app
         mode (str): The mode to start the Celery app in. Must be one of ['worker', 'beat']
@@ -61,7 +66,7 @@ def start(app: Celery, mode: str):
     log.info(f"Starting Celery in mode '{mode}'.")
     if mode not in ["worker", "beat"]:
         log.error(f"Unknown mode: {mode}")
-        
+
         raise ValueError(f"Invalid mode: {mode}. Must be one of ['worker', 'beat']")
 
     match mode.lower():
@@ -71,5 +76,5 @@ def start(app: Celery, mode: str):
             beat(app=app)
         case _:
             log.error(f"Unknown mode: {mode}")
-            
+
             raise ValueError(f"Invalid mode: {mode}.")

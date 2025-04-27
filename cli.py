@@ -3,8 +3,11 @@ from __future__ import annotations
 from cyclopts import App
 from loguru import logger as log
 from project_cli.main import app as cli_app
-from settings.logging_settings import LOGGING_SETTINGS
+
+# import settings
+from settings import LOGGING_SETTINGS
 import setup
+
 
 def start_cli(app: App):
     try:
@@ -12,9 +15,10 @@ def start_cli(app: App):
     except Exception as exc:
         msg = f"({type(exc)}) error"
         log.error(msg)
-        
+
         raise exc
-    
+
+
 if __name__ == "__main__":
     setup.setup_loguru_logging(log_level="ERROR", log_fmt="basic")
     start_cli(app=cli_app)

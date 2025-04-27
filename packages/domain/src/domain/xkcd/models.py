@@ -8,6 +8,7 @@ import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
 
+
 class XkcdComicModel(db_lib.Base):
     """Table model for XKCD comics.
 
@@ -30,37 +31,37 @@ class XkcdComicModel(db_lib.Base):
 
     id: so.Mapped[db_lib.annotated.INT_PK]
 
-    year: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
-    month: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
-    day: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
+    year: so.Mapped[str] = so.mapped_column(sa.TEXT)
+    month: so.Mapped[str] = so.mapped_column(sa.TEXT)
+    day: so.Mapped[str] = so.mapped_column(sa.TEXT)
     num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
-    link: so.Mapped[str | None] = so.mapped_column(sa.VARCHAR(255))
-    title: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
-    transcript: so.Mapped[str | None] = so.mapped_column(sa.VARCHAR(255))
-    alt_text: so.Mapped[str] = so.mapped_column(__name_pos=sa.VARCHAR(255))
-    img_url: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
+    link: so.Mapped[str | None] = so.mapped_column(sa.TEXT)
+    title: so.Mapped[str] = so.mapped_column(sa.TEXT)
+    transcript: so.Mapped[str | None] = so.mapped_column(sa.TEXT)
+    alt_text: so.Mapped[str] = so.mapped_column(__name_pos=sa.TEXT)
+    img_url: so.Mapped[str] = so.mapped_column(sa.TEXT)
     img_saved: so.Mapped[bool] = so.mapped_column(sa.BOOLEAN, default=False)
-    comic_num_hash: so.Mapped[str] = so.mapped_column(sa.VARCHAR(255))
+    comic_num_hash: so.Mapped[str] = so.mapped_column(sa.TEXT)
 
 
 class XkcdCurrentComicMetadataModel(db_lib.Base):
     __tablename__ = "current_comic_meta"
-    __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
+    __table_args__ = (sa.UniqueConstraint("num", name="_current_comic_num_uc"),)
 
     id: so.Mapped[db_lib.annotated.INT_PK]
 
     num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
     last_updated: so.Mapped[datetime] = so.mapped_column(sa.DateTime)
-    
-    
+
+
 class XkcdComicImageModel(db_lib.Base):
     __tablename__ = "comic_img"
-    __table_args__ = (sa.UniqueConstraint("num", name="_comic_num_uc"),)
+    __table_args__ = (sa.UniqueConstraint("num", name="_comic_img_num_uc"),)
 
     id: so.Mapped[db_lib.annotated.INT_PK]
 
     num: so.Mapped[int] = so.mapped_column(sa.INTEGER)
     img_bytes: so.Mapped[bytes] = so.mapped_column(sa.LargeBinary)
-    
+
     def __repr__(self):
         return f"XkcdComicImageModel(id={self.id or None}, num={self.num})"

@@ -1,0 +1,5 @@
+{
+    "type": "delete",
+    "bucket": "<minio bucket>",
+    "remote_path": "<minio path>"
+}

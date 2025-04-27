@@ -1,0 +1,7 @@
+{
+    "type": "copy",
+    "bucket": "<minio bucket>",
+    "remote_path": "<minio path>",
+    "remote_dest": "<minio dest path>",
+    "dest_bucket": "<minio dest bucket>"
+}
