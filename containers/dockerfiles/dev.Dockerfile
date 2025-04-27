@@ -1,5 +1,5 @@
-ARG UV_BASE=${UV_IMAGE_VER:-0.5.9}
-ARG PYTHON_BASE=${PYTHON_IMG_VER:-3.11-slim}
+ARG UV_BASE=${UV_IMAGE_VER:-0.6.17}
+ARG PYTHON_BASE=${PYTHON_IMG_VER:-3.12-slim}
 
 FROM ghcr.io/astral-sh/uv:${UV_BASE} AS uv
 FROM python:${PYTHON_BASE} AS base
@@ -22,6 +22,7 @@ RUN apt-get update -y \
 
 RUN mkdir -p /project /auto-xkcd/db /auto-xkcd/logs
 
+## Staging
 FROM base AS stage
 
 WORKDIR /project
@@ -32,10 +33,12 @@ COPY pyproject.toml uv.lock README.md ./
 
 ## Copy monorepo domains
 COPY applications/ applications/
+# COPY migrations/ migrations/
 COPY libs/ libs/
 COPY packages/ packages/
 COPY scripts/ scripts/
 
+## Build
 FROM stage AS build
 
 COPY --from=stage /project /project
@@ -48,6 +51,19 @@ WORKDIR /project
 RUN uv sync --all-extras \
     && uv build
 
+## DB migrations
+FROM build AS alembic_migrate
+
+COPY --from=build /project /project
+COPY --from=build /auto-xkcd /auto-xkcd
+COPY --from=uv /uv /usr/bin/uv
+
+WORKDIR /project
+
+RUN uv pip install alembic
+CMD ["/bin/bash", "-c", "uv run alembic stamp head ; uv run alembic upgrade head"]
+
+## Celery Beat
 FROM build AS celery_beat
 
 COPY --from=build /project /project
@@ -58,11 +74,24 @@ WORKDIR /project
 
 CMD ["uv", "run", "scripts/celery/start_celery.py", "-m", "beat"]
 
+## Celery Worker
 FROM build AS celery_worker
 
 COPY --from=build /project /project
 COPY --from=build /auto-xkcd /auto-xkcd
+COPY --from=uv /uv /usr/bin/uv
 
 WORKDIR /project
 
 CMD ["uv", "run", "scripts/celery/start_celery.py", "-m", "worker"]
+
+## Scheduled task with schedule Python library
+# FROM build AS schdule_lib
+
+# COPY --from=build /project /project
+# COPY --from=build /auto-xkcd /auto-xkcd
+# COPY --from=uv /uv /usr/bin/uv
+
+# WORKDIR /project
+
+# CMD ["uv", "run", "scripts/schedules/weatherapi/current/every_15th_minute_current_weather.py"]

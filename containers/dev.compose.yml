@@ -12,7 +12,8 @@ services:
     restart: unless-stopped
     build:
       context: ..
-      dockerfile: ./containers/dockerfiles/celery.Dockerfile
+      # dockerfile: ./containers/dockerfiles/celery.Dockerfile
+      dockerfile: ./containers/dockerfiles/dev.Dockerfile
       target: celery_beat
     working_dir: /project
     # user: appuser
@@ -38,7 +39,8 @@ services:
     restart: unless-stopped
     build:
       context: ..
-      dockerfile: ./containers/dockerfiles/celery.Dockerfile
+      # dockerfile: ./containers/dockerfiles/celery.Dockerfile
+      dockerfile: ./containers/dockerfiles/dev.Dockerfile
       target: celery_worker
     working_dir: /project
     # user: appuser
