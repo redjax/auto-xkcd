@@ -6,17 +6,17 @@ FROM python:${PYTHON_BASE} AS base
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        build-essential \
-        iputils-ping \
-        libmemcached-dev \
-        zlib1g-dev \
-        curl \
-        ca-certificates \
-        software-properties-common \
-        apt-transport-https \
-        sudo \
-        postgresql \
-        python3-psycopg2 \
+    build-essential \
+    iputils-ping \
+    libmemcached-dev \
+    zlib1g-dev \
+    curl \
+    ca-certificates \
+    software-properties-common \
+    apt-transport-https \
+    sudo \
+    postgresql \
+    python3-psycopg2 \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
@@ -35,7 +35,6 @@ COPY applications/ applications/
 COPY libs/ libs/
 COPY packages/ packages/
 COPY scripts/ scripts/
-COPY src/ src/
 
 FROM stage AS build
 
