@@ -5,8 +5,8 @@ import typing as t
 
 log = logging.getLogger(__name__)
 
-import settings
 import db_lib as db
+import settings
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 

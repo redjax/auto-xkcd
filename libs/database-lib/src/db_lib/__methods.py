@@ -10,7 +10,6 @@ import sqlalchemy.exc as sa_exc
 import sqlalchemy.orm as so
 import sqlalchemy.sql as sa_sql
 
-
 def get_db_uri(
     drivername: str,
     username: str | None,

@@ -17,7 +17,6 @@ from scheduling.celery_scheduler import (
 from settings import APP_SETTINGS, CELERY_SETTINGS, DATABASE_SETTINGS, LOGGING_SETTINGS
 import setup
 
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Start the Celery application in worker or beat mode."

@@ -9,7 +9,6 @@ import typing as t
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-
 from cyclopts import App, Group, Parameter
 from loguru import logger as log
 

@@ -5,8 +5,8 @@ import typing as t
 from cyclopts import App, Group, Parameter
 from depends import db_depends
 from loguru import logger as log
-import setup
 from settings import DATABASE_SETTINGS
+import setup
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.sql as sa_sql
