@@ -6,6 +6,7 @@ from cyclopts import App, Group, Parameter
 from depends import db_depends
 from loguru import logger as log
 import setup
+from settings import DATABASE_SETTINGS
 import sqlalchemy as sa
 import sqlalchemy.exc as sa_exc
 import sqlalchemy.sql as sa_sql
@@ -107,3 +108,26 @@ def count_db_rows(table: t.Annotated[str, Parameter(name="table", show_default=T
             log.error(f"Error querying table '{table}': {exc}")
 
         log.success(f"[{count}] row(s) in table '{table}'.")
+
+
+@db_app.command(name="test-connection")
+def test_db_connection():
+    log.info("Testing database connection")
+    log.debug(f"Database settings: {DATABASE_SETTINGS.as_dict()}")
+
+    session_pool = db_depends.get_session_pool()
+
+    try:
+        with session_pool() as session:
+            result = session.execute(sa.text("SELECT 1")).scalar()
+            if result == 1:
+                log.success(f"Database connection successful.")
+            else:
+                log.warning(
+                    "Success connecting to database, but test query returned an unexpected result."
+                )
+    except Exception as exc:
+        msg = f"({type(exc)}) Error connecting to database: {exc}"
+        log.error(msg)
+
+        return False
