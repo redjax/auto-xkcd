@@ -4,7 +4,7 @@ from dynaconf import Dynaconf
 from settings import (
     APP_SETTINGS,
     CELERY_SETTINGS,
-    DB_SETTINGS,
+    DATABASE_SETTINGS,
     FASTAPI_SETTINGS,
     LOGGING_SETTINGS,
     UVICORN_SETTINGS,
@@ -12,7 +12,7 @@ from settings import (
 
 LOOP_CONFS: list = [
     {"name": "logging", "obj": LOGGING_SETTINGS},
-    {"name": "database", "obj": DB_SETTINGS},
+    {"name": "database", "obj": DATABASE_SETTINGS},
     {"name": "app", "obj": APP_SETTINGS},
     {"name": "celery", "obj": CELERY_SETTINGS},
     {"name": "fastapi", "obj": FASTAPI_SETTINGS},
