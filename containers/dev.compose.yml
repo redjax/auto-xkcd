@@ -23,7 +23,7 @@ services:
       - ../applications:/project/applications
       - ../packages:/project/packages
       - ../scripts:/project/scripts
-      - ./container_data/auto-xkccd/db:/auto-xkcd/db
+      - ./container_data/auto-xkcd/db:/auto-xkcd/db
       - ../migrations:/project/migrations
       - ../alembic.ini:/project/alembic.ini
     networks:
